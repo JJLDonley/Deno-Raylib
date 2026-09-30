@@ -1,0 +1,20 @@
+/** Font loading, generation, validation, export, and unloading. */
+export {
+  ExportFontAsCode,
+  Font,
+  FontType,
+  GenImageFontAtlas,
+  GetFontDefault,
+  GlyphInfo,
+  Image,
+  IsFontValid,
+  LoadFont,
+  LoadFontData,
+  LoadFontEx,
+  LoadFontFromImage,
+  LoadFontFromMemory,
+  Rectangle,
+  Texture,
+  UnloadFont,
+  UnloadFontData,
+} from "../Raylib/raylib.ts";

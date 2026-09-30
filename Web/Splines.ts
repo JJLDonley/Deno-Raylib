@@ -1,0 +1,20 @@
+/** Linear, Bézier, Catmull-Rom, and basis spline drawing and evaluation. */
+export {
+  Color,
+  DrawSplineBasis,
+  DrawSplineBezierCubic,
+  DrawSplineBezierQuadratic,
+  DrawSplineCatmullRom,
+  DrawSplineLinear,
+  DrawSplineSegmentBasis,
+  DrawSplineSegmentBezierCubic,
+  DrawSplineSegmentBezierQuadratic,
+  DrawSplineSegmentCatmullRom,
+  DrawSplineSegmentLinear,
+  GetSplinePointBasis,
+  GetSplinePointBezierCubic,
+  GetSplinePointBezierQuad,
+  GetSplinePointCatmullRom,
+  GetSplinePointLinear,
+  Vector2,
+} from "./raylib.ts";

@@ -1,0 +1,9 @@
+/** Touch points, positions, and identifiers. */
+export {
+  GetTouchPointCount,
+  GetTouchPointId,
+  GetTouchPosition,
+  GetTouchX,
+  GetTouchY,
+  Vector2,
+} from "../Raylib/raylib.ts";

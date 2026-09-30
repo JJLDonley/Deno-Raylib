@@ -1,0 +1,23 @@
+/** Raw audio streams, callbacks, processors, buffering, and playback. */
+export {
+  AttachAudioMixedProcessor,
+  AttachAudioStreamProcessor,
+  AudioStream,
+  DetachAudioMixedProcessor,
+  DetachAudioStreamProcessor,
+  IsAudioStreamPlaying,
+  IsAudioStreamProcessed,
+  IsAudioStreamValid,
+  LoadAudioStream,
+  PauseAudioStream,
+  PlayAudioStream,
+  ResumeAudioStream,
+  SetAudioStreamBufferSizeDefault,
+  SetAudioStreamCallback,
+  SetAudioStreamPan,
+  SetAudioStreamPitch,
+  SetAudioStreamVolume,
+  StopAudioStream,
+  UnloadAudioStream,
+  UpdateAudioStream,
+} from "./raylib.ts";

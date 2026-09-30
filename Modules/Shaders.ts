@@ -1,0 +1,21 @@
+/** Shader loading, validation, locations, uniforms, and drawing mode. */
+export {
+  BeginShaderMode,
+  EndShaderMode,
+  GetShaderLocation,
+  GetShaderLocationAttrib,
+  IsShaderValid,
+  LoadShader,
+  LoadShaderFromMemory,
+  Matrix,
+  SetShaderValue,
+  SetShaderValueMatrix,
+  SetShaderValueTexture,
+  SetShaderValueV,
+  Shader,
+  ShaderAttributeDataType,
+  ShaderLocationIndex,
+  ShaderUniformDataType,
+  Texture,
+  UnloadShader,
+} from "../Raylib/raylib.ts";

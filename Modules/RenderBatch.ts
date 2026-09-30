@@ -1,0 +1,13 @@
+/** Low-level render-batch allocation, activation, drawing, and limits. */
+export {
+  rlCheckRenderBatchLimit,
+  rlDrawCall,
+  rlDrawRenderBatch,
+  rlDrawRenderBatchActive,
+  rlLoadRenderBatch,
+  rlRenderBatch,
+  rlSetRenderBatchActive,
+  rlSetTexture,
+  rlUnloadRenderBatch,
+  rlVertexBuffer,
+} from "../Raylib/raylib.ts";

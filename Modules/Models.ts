@@ -1,0 +1,2 @@
+/** @deprecated Prefer `Modules/Model`. */
+export * from "./Model.ts";

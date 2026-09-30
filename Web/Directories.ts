@@ -1,0 +1,16 @@
+/** Directory creation, traversal, counting, and working-directory control. */
+export {
+  ChangeDirectory,
+  DirectoryExists,
+  FilePathList,
+  GetApplicationDirectory,
+  GetDirectoryFileCount,
+  GetDirectoryFileCountEx,
+  GetDirectoryPath,
+  GetPrevDirectoryPath,
+  GetWorkingDirectory,
+  LoadDirectoryFiles,
+  LoadDirectoryFilesEx,
+  MakeDirectory,
+  UnloadDirectoryFiles,
+} from "./raylib.ts";

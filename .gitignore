@@ -1,3 +1,6 @@
 .DS_Store
 .codex
-blobs/*
+Build/
+dist/
+Lib/
+Tests/

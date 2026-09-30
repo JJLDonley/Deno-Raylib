@@ -1,0 +1,9 @@
+/** Frame timing, elapsed time, FPS, and waiting. */
+export {
+  GetFPS,
+  GetFrameTime,
+  GetTime,
+  SetTargetFPS,
+  SwapScreenBuffer,
+  WaitTime,
+} from "../Raylib/raylib.ts";

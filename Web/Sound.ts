@@ -1,0 +1,20 @@
+/** Sound loading, aliases, playback, state, and properties. */
+export {
+  IsSoundPlaying,
+  IsSoundValid,
+  LoadSound,
+  LoadSoundAlias,
+  LoadSoundFromWave,
+  PauseSound,
+  PlaySound,
+  ResumeSound,
+  SetSoundPan,
+  SetSoundPitch,
+  SetSoundVolume,
+  Sound,
+  StopSound,
+  UnloadSound,
+  UnloadSoundAlias,
+  UpdateSound,
+  Wave,
+} from "./raylib.ts";
