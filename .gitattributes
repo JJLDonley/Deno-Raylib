@@ -1,0 +1,17 @@
+# Keep formatter inputs and source files consistent across all checkout hosts.
+* text=auto eol=lf
+
+# Preserve binary assets byte-for-byte.
+*.bmp binary
+*.png binary
+*.jpg binary
+*.wav binary
+*.ogg binary
+*.wasm binary
+*.dll binary
+*.so binary
+*.dylib binary
+
+# Windows command scripts require native line endings.
+*.bat text eol=crlf
+*.cmd text eol=crlf
