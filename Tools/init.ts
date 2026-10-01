@@ -23,6 +23,112 @@ export interface InitOptions {
   template: Template;
 }
 
+interface PackageSource {
+  copyDirectory(
+    source: string,
+    destination: string,
+    excluded?: Set<string>,
+  ): Promise<void>;
+  copyFile(source: string, destination: string): Promise<void>;
+}
+
+class LocalPackageSource implements PackageSource {
+  constructor(private readonly root: string) {}
+
+  copyDirectory(
+    source: string,
+    destination: string,
+    excluded = new Set<string>(),
+  ): Promise<void> {
+    return copyRecursive(join(this.root, source), destination, excluded);
+  }
+
+  async copyFile(source: string, destination: string): Promise<void> {
+    await Deno.mkdir(join(destination, ".."), { recursive: true });
+    await Deno.copyFile(join(this.root, source), destination);
+  }
+}
+
+class JsrPackageSource implements PackageSource {
+  private manifest?: Promise<string[]>;
+
+  constructor(private readonly root: URL) {}
+
+  private packageFiles(): Promise<string[]> {
+    this.manifest ??= (async () => {
+      const metadataUrl = new URL(
+        `${this.root.href.replace(/\/$/, "")}_meta.json`,
+      );
+      const response = await fetch(metadataUrl);
+      if (!response.ok) {
+        throw new Error(
+          `Could not read the JSR package manifest: ${response.status} ${response.statusText}`,
+        );
+      }
+      const metadata = await response.json() as {
+        manifest: Record<string, unknown>;
+      };
+      return Object.keys(metadata.manifest).map((path) =>
+        path.replace(/^\//, "")
+      );
+    })();
+    return this.manifest;
+  }
+
+  async copyDirectory(
+    source: string,
+    destination: string,
+    excluded = new Set<string>(),
+  ): Promise<void> {
+    const prefix = `${source.replaceAll("\\", "/").replace(/\/$/, "")}/`;
+    const files = (await this.packageFiles()).filter((path) => {
+      if (!path.startsWith(prefix)) return false;
+      const relative = path.slice(prefix.length);
+      return !excluded.has(relative.split("/", 1)[0]);
+    });
+    if (files.length === 0) {
+      throw new Error(`The JSR package does not contain ${source}`);
+    }
+    const batchSize = 16;
+    for (let index = 0; index < files.length; index += batchSize) {
+      await Promise.all(
+        files.slice(index, index + batchSize).map(async (path) => {
+          const relative = path.slice(prefix.length);
+          await this.copyFile(path, join(destination, ...relative.split("/")));
+        }),
+      );
+    }
+  }
+
+  async copyFile(source: string, destination: string): Promise<void> {
+    const response = await fetch(
+      new URL(source.replaceAll("\\", "/"), this.root),
+    );
+    if (!response.ok) {
+      throw new Error(
+        `Could not download ${source} from JSR: ${response.status} ${response.statusText}`,
+      );
+    }
+    await Deno.mkdir(join(destination, ".."), { recursive: true });
+    await Deno.writeFile(
+      destination,
+      new Uint8Array(await response.arrayBuffer()),
+    );
+  }
+}
+
+function packageSource(moduleUrl: string): PackageSource {
+  const url = new URL(moduleUrl);
+  const root = new URL("../", url);
+  if (url.protocol === "file:") {
+    return new LocalPackageSource(fromFileUrl(root));
+  }
+  if (url.protocol === "https:" && url.hostname === "jsr.io") {
+    return new JsrPackageSource(root);
+  }
+  throw new Error(`Unsupported initializer URL: ${moduleUrl}`);
+}
+
 function usage(): never {
   console.log(`Create a Deno Raylib starter project.
 
@@ -200,13 +306,13 @@ function projectConfiguration(template: Template): Record<string, unknown> {
 }
 
 async function installLibrary(
-  packageRoot: string,
+  source: PackageSource,
   projectRoot: string,
   template: Template,
 ): Promise<void> {
   for (const directory of ["Bindings", "Raylib", "Modules", "Web"]) {
-    await copyRecursive(
-      join(packageRoot, directory),
+    await source.copyDirectory(
+      directory,
       join(projectRoot, directory),
       directory === "Bindings" ? new Set(["Generators"]) : new Set(),
     );
@@ -221,8 +327,8 @@ async function installLibrary(
   }
   await Deno.mkdir(join(projectRoot, "Scripts"), { recursive: true });
   for (const script of scripts) {
-    await Deno.copyFile(
-      join(packageRoot, "Scripts", script),
+    await source.copyFile(
+      `Scripts/${script}`,
       join(projectRoot, "Scripts", script),
     );
   }
@@ -233,7 +339,7 @@ export async function createStarterProject(
   options: InitOptions,
 ): Promise<void> {
   const projectRoot = options.directory;
-  const packageRoot = fromFileUrl(new URL("../", import.meta.url));
+  const source = packageSource(import.meta.url);
   await Deno.mkdir(projectRoot, { recursive: true });
 
   for (
@@ -260,18 +366,18 @@ export async function createStarterProject(
   console.log(
     `Creating a ${options.template} Deno Raylib project in ${projectRoot}`,
   );
-  await installLibrary(packageRoot, projectRoot, options.template);
+  await installLibrary(source, projectRoot, options.template);
 
   if (options.template !== "web") {
     await downloadNativeLibrary(projectRoot);
-    await copyRecursive(
-      join(packageRoot, "Scripts", "Desktop"),
+    await source.copyDirectory(
+      "Scripts/Desktop",
       join(projectRoot, "Source", "Desktop"),
     );
   }
   if (options.template !== "desktop") {
-    await copyRecursive(
-      join(packageRoot, "Scripts", "Web"),
+    await source.copyDirectory(
+      "Scripts/Web",
       join(projectRoot, "Source", "Web"),
     );
   }
