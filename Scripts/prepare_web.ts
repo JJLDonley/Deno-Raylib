@@ -1,10 +1,10 @@
-import { basename, join } from "path";
+import { basename, join, resolve } from "path";
 
 const VERSION = "6.0";
 const ASSET = `raylib-${VERSION}_webassembly.zip`;
 const DOWNLOAD_URL =
   `https://github.com/raysan5/raylib/releases/download/${VERSION}/${ASSET}`;
-const destination = new URL("../Lib/Web/", import.meta.url);
+const destination = resolve("Lib", "Web");
 
 async function extract(archive: string, output: string): Promise<void> {
   const command = Deno.build.os === "windows"
@@ -48,12 +48,12 @@ async function main(): Promise<void> {
     await Deno.mkdir(destination, { recursive: true });
     await Deno.copyFile(
       join(releaseRoot, "lib", "libraylib.web.a"),
-      new URL("libraylib.web.a", destination),
+      join(destination, "libraylib.web.a"),
     );
     for (const header of ["raylib.h", "raymath.h", "rlgl.h"]) {
       await Deno.copyFile(
         join(releaseRoot, "include", header),
-        new URL(header, destination),
+        join(destination, header),
       );
     }
     console.log("Prepared the exact raylib 6.0 WebAssembly static library.");

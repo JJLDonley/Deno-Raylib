@@ -48,8 +48,8 @@ deno run -A jsr:@jjld/raylib/init my-web-game --template web
 The initializer:
 
 1. Creates a desktop, web, or combined source tree.
-2. Installs `Bindings/`, `Raylib/`, `Modules/`, `Web/`, and the required project
-   `Scripts/` directly in the project.
+2. Keeps the complete library contained under the project's `Raylib/` directory
+   instead of mixing library internals into the application root.
 3. Downloads the host's official raylib 6.0 native library when desktop support
    is selected.
 4. Creates a working `deno.json` with build, run, setup, and serve tasks.
@@ -71,6 +71,20 @@ command is the project initializer; afterward, all normal work uses the
 generated tasks. From a checked-out Deno Raylib repository, the equivalent
 convenience commands are `deno task init my-game`, `deno task web:init my-game`,
 and `deno task desktop:init my-game`.
+
+To keep a Git checkout inside an application, clone it as the application's
+`Raylib/` directory and initialize the parent:
+
+```bash
+mkdir MyProject
+git clone https://github.com/JJLDonley/Deno-Raylib.git MyProject/Raylib
+cd MyProject/Raylib
+deno task init ..
+```
+
+This reuses the existing checkout in place. The generated `deno.json`,
+`Source/`, and `Lib/` belong to `MyProject/`; bindings, modules, web support,
+and build tooling remain inside `MyProject/Raylib/`.
 
 The generated example follows the original raylib programming style:
 

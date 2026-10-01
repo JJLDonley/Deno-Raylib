@@ -1,6 +1,6 @@
 {
   "name": "@jjld/raylib",
-  "version": "6.0.5",
+  "version": "6.0.6",
   "license": "MIT",
   "exports": {
     ".": "./Raylib/raylib.ts",

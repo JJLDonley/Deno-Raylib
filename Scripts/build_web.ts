@@ -1,7 +1,8 @@
 import { join, resolve } from "path";
 import { fromFileUrl } from "path/from-file-url";
 
-const root = fromFileUrl(new URL("../", import.meta.url));
+const libraryRoot = fromFileUrl(new URL("../", import.meta.url));
+const projectRoot = Deno.cwd();
 
 interface BuildOptions {
   output: string;
@@ -44,17 +45,17 @@ async function requireFile(path: string, description: string): Promise<void> {
 async function main(): Promise<void> {
   const { output, source } = parseOptions(Deno.args);
   const emcc = join(
-    root,
+    projectRoot,
     "Lib",
     "emsdk",
     "upstream",
     "emscripten",
     Deno.build.os === "windows" ? "emcc.bat" : "emcc",
   );
-  const bridge = join(root, "Web", "Bridge", "generated.c");
-  const backend = join(root, "Web", "Bridge", "backend.mjs");
-  const exportsPath = join(root, "Web", "Bridge", "exports.json");
-  const vendor = join(root, "Lib", "Web");
+  const bridge = join(libraryRoot, "Web", "Bridge", "generated.c");
+  const backend = join(libraryRoot, "Web", "Bridge", "backend.mjs");
+  const exportsPath = join(libraryRoot, "Web", "Bridge", "exports.json");
+  const vendor = join(projectRoot, "Lib", "Web");
   const library = join(vendor, "libraylib.web.a");
 
   await requireFile(
@@ -75,7 +76,7 @@ async function main(): Promise<void> {
       bridge,
       library,
       `-I${vendor}`,
-      `-I${join(root, "Bindings", "Headers")}`,
+      `-I${join(libraryRoot, "Bindings", "Headers")}`,
       "-O2",
       "--no-entry",
       "-sUSE_GLFW=3",
@@ -96,7 +97,7 @@ async function main(): Promise<void> {
   }
 
   await Deno.copyFile(backend, join(output, "backend.mjs"));
-  const structs = join(root, "Web", "structs.ts");
+  const structs = join(libraryRoot, "Web", "structs.ts");
   const bundle = await new Deno.Command(Deno.execPath(), {
     args: [
       "bundle",

@@ -24,6 +24,7 @@ export interface InitOptions {
 }
 
 interface PackageSource {
+  isRoot(directory: string): boolean;
   copyDirectory(
     source: string,
     destination: string,
@@ -34,6 +35,10 @@ interface PackageSource {
 
 class LocalPackageSource implements PackageSource {
   constructor(private readonly root: string) {}
+
+  isRoot(directory: string): boolean {
+    return resolve(this.root) === resolve(directory);
+  }
 
   copyDirectory(
     source: string,
@@ -53,6 +58,10 @@ class JsrPackageSource implements PackageSource {
   private manifest?: Promise<string[]>;
 
   constructor(private readonly root: URL) {}
+
+  isRoot(_directory: string): boolean {
+    return false;
+  }
 
   private packageFiles(): Promise<string[]> {
     this.manifest ??= (async () => {
@@ -272,15 +281,15 @@ function projectConfiguration(template: Template): Record<string, unknown> {
   if (desktop) {
     tasks["desktop:run"] = "deno run -A Source/Desktop/main.ts";
     tasks["desktop:build"] =
-      `deno run -A Scripts/build_native.ts --target ${target} --out-dir Build/Desktop Source/Desktop/main.ts`;
+      `deno run -A Raylib/Scripts/build_native.ts --target ${target} --out-dir Build/Desktop Source/Desktop/main.ts`;
     tasks["desktop:build:all"] =
-      "deno run -A Scripts/build_native.ts --target all --out-dir Build/Desktop Source/Desktop/main.ts";
+      "deno run -A Raylib/Scripts/build_native.ts --target all --out-dir Build/Desktop Source/Desktop/main.ts";
   }
   if (web) {
     tasks["web:setup"] =
-      "deno run -A Scripts/setup_emscripten.ts && deno run -A Scripts/prepare_web.ts";
+      "deno run -A Raylib/Scripts/setup_emscripten.ts && deno run -A Raylib/Scripts/prepare_web.ts";
     tasks["web:build"] =
-      "deno run -A Scripts/build_web.ts --source-dir Source/Web --out-dir Build/Web";
+      "deno run -A Raylib/Scripts/build_web.ts --source-dir Source/Web --out-dir Build/Web";
     tasks["web:serve"] =
       "deno run --allow-net --allow-read --allow-sys jsr:@std/http@1.1.4/file-server Build/Web";
     tasks["web:dev"] = "deno task web:build && deno task web:serve";
@@ -291,45 +300,31 @@ function projectConfiguration(template: Template): Record<string, unknown> {
   return {
     tasks,
     compilerOptions: {
-      types: ["./Bindings/global.d.ts"],
+      types: ["./Raylib/Bindings/global.d.ts"],
       lib: ["deno.ns", "dom", "dom.iterable", "esnext"],
     },
     imports: {
       path: "jsr:@std/path@1.1.4",
       "path/from-file-url": "jsr:@std/path@1.1.4/from-file-url",
-      raylib: "./Raylib/raylib.ts",
-      "raylib/Modules": "./Modules/mod.ts",
-      "raylib/Web": "./Web/mod.ts",
-      "raylib/": "./",
+      raylib: "./Raylib/Raylib/raylib.ts",
+      "raylib/Modules": "./Raylib/Modules/mod.ts",
+      "raylib/Web": "./Raylib/Web/mod.ts",
+      "raylib/": "./Raylib/",
     },
   };
 }
 
 async function installLibrary(
   source: PackageSource,
-  projectRoot: string,
-  template: Template,
+  libraryRoot: string,
 ): Promise<void> {
-  for (const directory of ["Bindings", "Raylib", "Modules", "Web"]) {
+  if (source.isRoot(libraryRoot)) return;
+
+  for (const directory of ["Bindings", "Raylib", "Modules", "Web", "Scripts"]) {
     await source.copyDirectory(
       directory,
-      join(projectRoot, directory),
+      join(libraryRoot, directory),
       directory === "Bindings" ? new Set(["Generators"]) : new Set(),
-    );
-  }
-
-  const scripts = new Set<string>();
-  if (template !== "web") scripts.add("build_native.ts");
-  if (template !== "desktop") {
-    scripts.add("build_web.ts");
-    scripts.add("setup_emscripten.ts");
-    scripts.add("prepare_web.ts");
-  }
-  await Deno.mkdir(join(projectRoot, "Scripts"), { recursive: true });
-  for (const script of scripts) {
-    await source.copyFile(
-      `Scripts/${script}`,
-      join(projectRoot, "Scripts", script),
     );
   }
 }
@@ -340,19 +335,18 @@ export async function createStarterProject(
 ): Promise<void> {
   const projectRoot = options.directory;
   const source = packageSource(import.meta.url);
+  const libraryRoot = join(projectRoot, "Raylib");
+  const usesExistingClone = source.isRoot(libraryRoot);
   await Deno.mkdir(projectRoot, { recursive: true });
 
   for (
     const name of [
       "deno.json",
-      "Bindings",
       "Raylib",
-      "Modules",
-      "Web",
-      "Scripts",
       "Source",
     ]
   ) {
+    if (name === "Raylib" && usesExistingClone) continue;
     try {
       await Deno.stat(join(projectRoot, name));
       throw new Error(
@@ -366,7 +360,7 @@ export async function createStarterProject(
   console.log(
     `Creating a ${options.template} Deno Raylib project in ${projectRoot}`,
   );
-  await installLibrary(source, projectRoot, options.template);
+  await installLibrary(source, libraryRoot);
 
   if (options.template !== "web") {
     await downloadNativeLibrary(projectRoot);

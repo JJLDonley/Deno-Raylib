@@ -1,9 +1,8 @@
 import { join } from "path";
-import { fromFileUrl } from "path/from-file-url";
 
 const EMSCRIPTEN_VERSION = "6.0.10";
-const root = fromFileUrl(new URL("../", import.meta.url));
-const sdk = join(root, "Lib", "emsdk");
+const projectRoot = Deno.cwd();
+const sdk = join(projectRoot, "Lib", "emsdk");
 
 async function run(command: string, args: string[]): Promise<void> {
   const result = await new Deno.Command(command, {
@@ -22,7 +21,7 @@ async function main(): Promise<void> {
     await Deno.stat(join(sdk, ".git"));
   } catch (error) {
     if (!(error instanceof Deno.errors.NotFound)) throw error;
-    await Deno.mkdir(join(root, "Lib"), { recursive: true });
+    await Deno.mkdir(join(projectRoot, "Lib"), { recursive: true });
     await run("git", [
       "clone",
       "--depth",
