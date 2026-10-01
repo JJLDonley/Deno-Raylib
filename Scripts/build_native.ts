@@ -69,10 +69,35 @@ async function run(command: string, args: string[]): Promise<void> {
 async function extract(
   archive: string,
   destination: string,
-  format: NativeTarget["archive"],
+  target: NativeTarget,
 ): Promise<void> {
-  if (format === "tar.gz") {
-    await run("tar", ["-xzf", archive, "-C", destination]);
+  if (target.archive === "tar.gz") {
+    // Official Unix archives contain symlink aliases that Windows cannot
+    // reliably create. Read only the pinned release's real library member,
+    // then write a regular file under the name expected by our loader.
+    const libraryMemberName = target.os === "darwin"
+      ? `libraylib.${RAYLIB_VERSION}.0.dylib`
+      : `libraylib.so.${RAYLIB_VERSION}.0`;
+    const listing = await new Deno.Command("tar", {
+      args: ["-tzf", archive],
+      stdout: "piped",
+      stderr: "inherit",
+    }).output();
+    if (!listing.success) throw new Error("Could not list raylib archive");
+    const members = new TextDecoder().decode(listing.stdout).split(/\r?\n/)
+      .filter((member) => member.split("/").at(-1) === libraryMemberName);
+    if (members.length !== 1) {
+      throw new Error(`Expected one ${libraryMemberName} in ${archive}`);
+    }
+    const library = await new Deno.Command("tar", {
+      args: ["-xOzf", archive, "--", members[0]],
+      stdout: "piped",
+      stderr: "inherit",
+    }).output();
+    if (!library.success || library.stdout.length === 0) {
+      throw new Error(`Could not extract ${libraryMemberName} from ${archive}`);
+    }
+    await Deno.writeFile(join(destination, target.libraryName), library.stdout);
     return;
   }
   if (Deno.build.os === "windows") {
@@ -171,7 +196,7 @@ async function main(): Promise<void> {
 
       const extracted = join(temporary, key);
       await Deno.mkdir(extracted, { recursive: true });
-      await extract(archive, extracted, target.archive);
+      await extract(archive, extracted, target);
       const library = await findLibrary(extracted, target.libraryName);
       if (!library) {
         throw new Error(`${target.libraryName} was not found in ${asset.name}`);

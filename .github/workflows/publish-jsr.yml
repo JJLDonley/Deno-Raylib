@@ -42,9 +42,9 @@ jobs:
         working-directory: ${{ runner.temp }}/raylib-starter
         run: deno task check
 
-      - name: Build native starter
+      - name: Build and package all native targets
         working-directory: ${{ runner.temp }}/raylib-starter
-        run: deno task desktop:build
+        run: deno task desktop:build:all
 
       - name: Cache Emscripten
         uses: actions/cache@v4
