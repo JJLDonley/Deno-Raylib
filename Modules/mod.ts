@@ -1,3 +1,8 @@
+/**
+ * Native separation-of-concerns modules using the original raylib API names.
+ *
+ * @module
+ */
 export * as Animation from "./Animation.ts";
 export * as Application from "./Application.ts";
 export * as Assets from "./Assets.ts";

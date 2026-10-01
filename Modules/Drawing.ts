@@ -1,3 +1,8 @@
+/**
+ * Drawing lifecycle and 2D, 3D, texture, shader, blend, scissor, and VR modes.
+ *
+ * @module
+ */
 /** Drawing lifecycle and 2D, 3D, texture, shader, blend, scissor, and VR modes. */
 export {
   BeginBlendMode,

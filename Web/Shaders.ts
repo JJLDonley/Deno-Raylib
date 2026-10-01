@@ -1,3 +1,8 @@
+/**
+ * Shader loading, validation, locations, uniforms, and drawing mode.
+ *
+ * @module
+ */
 /** Shader loading, validation, locations, uniforms, and drawing mode. */
 export {
   BeginShaderMode,

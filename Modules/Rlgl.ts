@@ -1,3 +1,8 @@
+/**
+ * Complete low-level rlgl API, constants, enums, and render structures.
+ *
+ * @module
+ */
 /** Complete low-level rlgl API, constants, enums, and render structures. */
 export {
   Matrix,

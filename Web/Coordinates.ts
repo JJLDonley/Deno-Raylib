@@ -1,3 +1,8 @@
+/**
+ * World, screen, 2D camera, and screen-ray coordinate conversion.
+ *
+ * @module
+ */
 /** World, screen, 2D camera, and screen-ray coordinate conversion. */
 export {
   Camera2D,

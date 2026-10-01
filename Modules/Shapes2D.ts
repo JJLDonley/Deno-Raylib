@@ -1,3 +1,8 @@
+/**
+ * 2D pixels, lines, circles, ellipses, rings, rectangles, triangles, polygons, and sectors.
+ *
+ * @module
+ */
 /** 2D pixels, lines, circles, ellipses, rings, rectangles, triangles, polygons, and sectors. */
 export {
   CheckCollisionCircleLine,

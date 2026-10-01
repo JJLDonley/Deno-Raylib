@@ -1,3 +1,8 @@
+/**
+ * Cursor visibility, locking, and shape controls.
+ *
+ * @module
+ */
 /** Cursor visibility, locking, and shape controls. */
 export {
   DisableCursor,

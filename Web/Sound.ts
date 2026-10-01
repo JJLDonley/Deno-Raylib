@@ -1,3 +1,8 @@
+/**
+ * Sound loading, aliases, playback, state, and properties.
+ *
+ * @module
+ */
 /** Sound loading, aliases, playback, state, and properties. */
 export {
   IsSoundPlaying,

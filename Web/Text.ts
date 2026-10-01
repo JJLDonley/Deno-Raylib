@@ -1,3 +1,8 @@
+/**
+ * Text drawing, measuring, formatting, UTF-8, codepoints, fonts, and glyphs.
+ *
+ * @module
+ */
 /** Text drawing, measuring, formatting, UTF-8, codepoints, fonts, and glyphs. */
 export {
   CodepointToUTF8,

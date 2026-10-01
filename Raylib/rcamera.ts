@@ -1,3 +1,8 @@
+/**
+ * Direct rcamera movement, rotation, and projection APIs.
+ *
+ * @module
+ */
 export {
   CameraMoveForward,
   CameraMoveRight,

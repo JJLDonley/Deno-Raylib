@@ -1,3 +1,8 @@
+/**
+ * Texture loading, updating, filtering, wrapping, mipmaps, and drawing.
+ *
+ * @module
+ */
 /** Texture loading, updating, filtering, wrapping, mipmaps, and drawing. */
 export {
   Color,

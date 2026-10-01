@@ -1,3 +1,8 @@
+/**
+ * Vector4 construction, arithmetic, interpolation, and equality.
+ *
+ * @module
+ */
 /** Vector4 construction, arithmetic, interpolation, and equality. */
 export {
   Vector4,

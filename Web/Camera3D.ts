@@ -1,3 +1,8 @@
+/**
+ * 3D camera drawing, matrices, rays, and coordinate conversion.
+ *
+ * @module
+ */
 /** 3D camera drawing, matrices, rays, and coordinate conversion. */
 export {
   BeginMode3D,

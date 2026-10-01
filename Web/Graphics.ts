@@ -1,3 +1,8 @@
+/**
+ * All drawing, shapes, textures, text, models, shaders, cameras, and low-level rendering.
+ *
+ * @module
+ */
 /** All drawing, shapes, textures, text, models, shaders, cameras, and low-level rendering. */
 export {
   BeginBlendMode,

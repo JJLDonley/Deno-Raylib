@@ -1,3 +1,8 @@
+/**
+ * Texture, source rectangle, transformed, and N-patch drawing.
+ *
+ * @module
+ */
 /** Texture, source rectangle, transformed, and N-patch drawing. */
 export {
   Color,

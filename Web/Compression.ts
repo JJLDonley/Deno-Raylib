@@ -1,3 +1,8 @@
+/**
+ * Compression, decompression, and Base64 conversion.
+ *
+ * @module
+ */
 /** Compression, decompression, and Base64 conversion. */
 export {
   CompressData,

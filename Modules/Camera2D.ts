@@ -1,3 +1,8 @@
+/**
+ * 2D camera drawing and coordinate conversion.
+ *
+ * @module
+ */
 /** 2D camera drawing and coordinate conversion. */
 export {
   BeginMode2D,

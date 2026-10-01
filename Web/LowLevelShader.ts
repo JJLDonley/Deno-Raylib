@@ -1,3 +1,8 @@
+/**
+ * Low-level shader compilation, programs, locations, uniforms, and activation.
+ *
+ * @module
+ */
 /** Low-level shader compilation, programs, locations, uniforms, and activation. */
 export {
   Matrix,

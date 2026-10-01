@@ -1,3 +1,8 @@
+/**
+ * Complete 3D models, meshes, materials, animation, drawing, and collision API.
+ *
+ * @module
+ */
 /** Complete 3D models, meshes, materials, animation, drawing, and collision API. */
 export {
   BoneInfo,

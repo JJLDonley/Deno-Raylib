@@ -1,3 +1,8 @@
+/**
+ * Low-level framebuffer allocation, binding, attachment, copy, and resize.
+ *
+ * @module
+ */
 /** Low-level framebuffer allocation, binding, attachment, copy, and resize. */
 export {
   rlActiveDrawBuffers,

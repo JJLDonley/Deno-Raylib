@@ -1,3 +1,8 @@
+/**
+ * Low-level render-batch allocation, activation, drawing, and limits.
+ *
+ * @module
+ */
 /** Low-level render-batch allocation, activation, drawing, and limits. */
 export {
   rlCheckRenderBatchLimit,

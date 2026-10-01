@@ -1,3 +1,8 @@
+/**
+ * 2D point, line, circle, rectangle, triangle, and polygon collisions.
+ *
+ * @module
+ */
 /** 2D point, line, circle, rectangle, triangle, and polygon collisions. */
 export {
   CheckCollisionCircleLine,

@@ -1,3 +1,8 @@
+/**
+ * Wave loading, validation, copying, cropping, formatting, samples, and export.
+ *
+ * @module
+ */
 /** Wave loading, validation, copying, cropping, formatting, samples, and export. */
 export {
   ExportWave,

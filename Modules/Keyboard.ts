@@ -1,3 +1,8 @@
+/**
+ * Keyboard state, queues, repetition, and exit-key control.
+ *
+ * @module
+ */
 /** Keyboard state, queues, repetition, and exit-key control. */
 export {
   GetKeyName,

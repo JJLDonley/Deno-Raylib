@@ -27,477 +27,793 @@ const readCString = (ptr: Deno.PointerValue) =>
 
 /** OpenGL version */
 export enum rlGlVersion {
+  /** RL_OPENGL_SOFTWARE member. */
   RL_OPENGL_SOFTWARE = 0,
+  /** RL_OPENGL_11 member. */
   RL_OPENGL_11 = 1,
+  /** RL_OPENGL_21 member. */
   RL_OPENGL_21 = 2,
+  /** RL_OPENGL_33 member. */
   RL_OPENGL_33 = 3,
+  /** RL_OPENGL_43 member. */
   RL_OPENGL_43 = 4,
+  /** RL_OPENGL_ES_20 member. */
   RL_OPENGL_ES_20 = 5,
+  /** RL_OPENGL_ES_30 member. */
   RL_OPENGL_ES_30 = 6,
 }
+/** RL_OPENGL_SOFTWARE exported by Deno Raylib. */
 export const RL_OPENGL_SOFTWARE = rlGlVersion.RL_OPENGL_SOFTWARE;
+/** RL_OPENGL_11 exported by Deno Raylib. */
 export const RL_OPENGL_11 = rlGlVersion.RL_OPENGL_11;
+/** RL_OPENGL_21 exported by Deno Raylib. */
 export const RL_OPENGL_21 = rlGlVersion.RL_OPENGL_21;
+/** RL_OPENGL_33 exported by Deno Raylib. */
 export const RL_OPENGL_33 = rlGlVersion.RL_OPENGL_33;
+/** RL_OPENGL_43 exported by Deno Raylib. */
 export const RL_OPENGL_43 = rlGlVersion.RL_OPENGL_43;
+/** RL_OPENGL_ES_20 exported by Deno Raylib. */
 export const RL_OPENGL_ES_20 = rlGlVersion.RL_OPENGL_ES_20;
+/** RL_OPENGL_ES_30 exported by Deno Raylib. */
 export const RL_OPENGL_ES_30 = rlGlVersion.RL_OPENGL_ES_30;
 
 /** Trace log level */
 export enum rlTraceLogLevel {
+  /** RL_LOG_ALL member. */
   RL_LOG_ALL = 0,
+  /** RL_LOG_TRACE member. */
   RL_LOG_TRACE = 1,
+  /** RL_LOG_DEBUG member. */
   RL_LOG_DEBUG = 2,
+  /** RL_LOG_INFO member. */
   RL_LOG_INFO = 3,
+  /** RL_LOG_WARNING member. */
   RL_LOG_WARNING = 4,
+  /** RL_LOG_ERROR member. */
   RL_LOG_ERROR = 5,
+  /** RL_LOG_FATAL member. */
   RL_LOG_FATAL = 6,
+  /** RL_LOG_NONE member. */
   RL_LOG_NONE = 7,
 }
+/** RL_LOG_ALL exported by Deno Raylib. */
 export const RL_LOG_ALL = rlTraceLogLevel.RL_LOG_ALL;
+/** RL_LOG_TRACE exported by Deno Raylib. */
 export const RL_LOG_TRACE = rlTraceLogLevel.RL_LOG_TRACE;
+/** RL_LOG_DEBUG exported by Deno Raylib. */
 export const RL_LOG_DEBUG = rlTraceLogLevel.RL_LOG_DEBUG;
+/** RL_LOG_INFO exported by Deno Raylib. */
 export const RL_LOG_INFO = rlTraceLogLevel.RL_LOG_INFO;
+/** RL_LOG_WARNING exported by Deno Raylib. */
 export const RL_LOG_WARNING = rlTraceLogLevel.RL_LOG_WARNING;
+/** RL_LOG_ERROR exported by Deno Raylib. */
 export const RL_LOG_ERROR = rlTraceLogLevel.RL_LOG_ERROR;
+/** RL_LOG_FATAL exported by Deno Raylib. */
 export const RL_LOG_FATAL = rlTraceLogLevel.RL_LOG_FATAL;
+/** RL_LOG_NONE exported by Deno Raylib. */
 export const RL_LOG_NONE = rlTraceLogLevel.RL_LOG_NONE;
 
 /** Texture pixel formats */
 export enum rlPixelFormat {
+  /** RL_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE member. */
   RL_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE = 1,
+  /** RL_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA member. */
   RL_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA = 2,
+  /** RL_PIXELFORMAT_UNCOMPRESSED_R5G6B5 member. */
   RL_PIXELFORMAT_UNCOMPRESSED_R5G6B5 = 3,
+  /** RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8 member. */
   RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8 = 4,
+  /** RL_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1 member. */
   RL_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1 = 5,
+  /** RL_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4 member. */
   RL_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4 = 6,
+  /** RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 member. */
   RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 = 7,
+  /** RL_PIXELFORMAT_UNCOMPRESSED_R32 member. */
   RL_PIXELFORMAT_UNCOMPRESSED_R32 = 8,
+  /** RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32 member. */
   RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32 = 9,
+  /** RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32 member. */
   RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32 = 10,
+  /** RL_PIXELFORMAT_UNCOMPRESSED_R16 member. */
   RL_PIXELFORMAT_UNCOMPRESSED_R16 = 11,
+  /** RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16 member. */
   RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16 = 12,
+  /** RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16 member. */
   RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16 = 13,
+  /** RL_PIXELFORMAT_COMPRESSED_DXT1_RGB member. */
   RL_PIXELFORMAT_COMPRESSED_DXT1_RGB = 14,
+  /** RL_PIXELFORMAT_COMPRESSED_DXT1_RGBA member. */
   RL_PIXELFORMAT_COMPRESSED_DXT1_RGBA = 15,
+  /** RL_PIXELFORMAT_COMPRESSED_DXT3_RGBA member. */
   RL_PIXELFORMAT_COMPRESSED_DXT3_RGBA = 16,
+  /** RL_PIXELFORMAT_COMPRESSED_DXT5_RGBA member. */
   RL_PIXELFORMAT_COMPRESSED_DXT5_RGBA = 17,
+  /** RL_PIXELFORMAT_COMPRESSED_ETC1_RGB member. */
   RL_PIXELFORMAT_COMPRESSED_ETC1_RGB = 18,
+  /** RL_PIXELFORMAT_COMPRESSED_ETC2_RGB member. */
   RL_PIXELFORMAT_COMPRESSED_ETC2_RGB = 19,
+  /** RL_PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA member. */
   RL_PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA = 20,
+  /** RL_PIXELFORMAT_COMPRESSED_PVRT_RGB member. */
   RL_PIXELFORMAT_COMPRESSED_PVRT_RGB = 21,
+  /** RL_PIXELFORMAT_COMPRESSED_PVRT_RGBA member. */
   RL_PIXELFORMAT_COMPRESSED_PVRT_RGBA = 22,
+  /** RL_PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA member. */
   RL_PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA = 23,
+  /** RL_PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA member. */
   RL_PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA = 24,
 }
+/** RL_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE exported by Deno Raylib. */
 export const RL_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE =
   rlPixelFormat.RL_PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
+/** RL_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA exported by Deno Raylib. */
 export const RL_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA =
   rlPixelFormat.RL_PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA;
+/** RL_PIXELFORMAT_UNCOMPRESSED_R5G6B5 exported by Deno Raylib. */
 export const RL_PIXELFORMAT_UNCOMPRESSED_R5G6B5 =
   rlPixelFormat.RL_PIXELFORMAT_UNCOMPRESSED_R5G6B5;
+/** RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8 exported by Deno Raylib. */
 export const RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8 =
   rlPixelFormat.RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8;
+/** RL_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1 exported by Deno Raylib. */
 export const RL_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1 =
   rlPixelFormat.RL_PIXELFORMAT_UNCOMPRESSED_R5G5B5A1;
+/** RL_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4 exported by Deno Raylib. */
 export const RL_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4 =
   rlPixelFormat.RL_PIXELFORMAT_UNCOMPRESSED_R4G4B4A4;
+/** RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 exported by Deno Raylib. */
 export const RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 =
   rlPixelFormat.RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+/** RL_PIXELFORMAT_UNCOMPRESSED_R32 exported by Deno Raylib. */
 export const RL_PIXELFORMAT_UNCOMPRESSED_R32 =
   rlPixelFormat.RL_PIXELFORMAT_UNCOMPRESSED_R32;
+/** RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32 exported by Deno Raylib. */
 export const RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32 =
   rlPixelFormat.RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32;
+/** RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32 exported by Deno Raylib. */
 export const RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32 =
   rlPixelFormat.RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32;
+/** RL_PIXELFORMAT_UNCOMPRESSED_R16 exported by Deno Raylib. */
 export const RL_PIXELFORMAT_UNCOMPRESSED_R16 =
   rlPixelFormat.RL_PIXELFORMAT_UNCOMPRESSED_R16;
+/** RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16 exported by Deno Raylib. */
 export const RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16 =
   rlPixelFormat.RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16;
+/** RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16 exported by Deno Raylib. */
 export const RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16 =
   rlPixelFormat.RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16A16;
+/** RL_PIXELFORMAT_COMPRESSED_DXT1_RGB exported by Deno Raylib. */
 export const RL_PIXELFORMAT_COMPRESSED_DXT1_RGB =
   rlPixelFormat.RL_PIXELFORMAT_COMPRESSED_DXT1_RGB;
+/** RL_PIXELFORMAT_COMPRESSED_DXT1_RGBA exported by Deno Raylib. */
 export const RL_PIXELFORMAT_COMPRESSED_DXT1_RGBA =
   rlPixelFormat.RL_PIXELFORMAT_COMPRESSED_DXT1_RGBA;
+/** RL_PIXELFORMAT_COMPRESSED_DXT3_RGBA exported by Deno Raylib. */
 export const RL_PIXELFORMAT_COMPRESSED_DXT3_RGBA =
   rlPixelFormat.RL_PIXELFORMAT_COMPRESSED_DXT3_RGBA;
+/** RL_PIXELFORMAT_COMPRESSED_DXT5_RGBA exported by Deno Raylib. */
 export const RL_PIXELFORMAT_COMPRESSED_DXT5_RGBA =
   rlPixelFormat.RL_PIXELFORMAT_COMPRESSED_DXT5_RGBA;
+/** RL_PIXELFORMAT_COMPRESSED_ETC1_RGB exported by Deno Raylib. */
 export const RL_PIXELFORMAT_COMPRESSED_ETC1_RGB =
   rlPixelFormat.RL_PIXELFORMAT_COMPRESSED_ETC1_RGB;
+/** RL_PIXELFORMAT_COMPRESSED_ETC2_RGB exported by Deno Raylib. */
 export const RL_PIXELFORMAT_COMPRESSED_ETC2_RGB =
   rlPixelFormat.RL_PIXELFORMAT_COMPRESSED_ETC2_RGB;
+/** RL_PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA exported by Deno Raylib. */
 export const RL_PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA =
   rlPixelFormat.RL_PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA;
+/** RL_PIXELFORMAT_COMPRESSED_PVRT_RGB exported by Deno Raylib. */
 export const RL_PIXELFORMAT_COMPRESSED_PVRT_RGB =
   rlPixelFormat.RL_PIXELFORMAT_COMPRESSED_PVRT_RGB;
+/** RL_PIXELFORMAT_COMPRESSED_PVRT_RGBA exported by Deno Raylib. */
 export const RL_PIXELFORMAT_COMPRESSED_PVRT_RGBA =
   rlPixelFormat.RL_PIXELFORMAT_COMPRESSED_PVRT_RGBA;
+/** RL_PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA exported by Deno Raylib. */
 export const RL_PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA =
   rlPixelFormat.RL_PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA;
+/** RL_PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA exported by Deno Raylib. */
 export const RL_PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA =
   rlPixelFormat.RL_PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA;
 
 /** Texture parameters: filter mode */
 export enum rlTextureFilter {
+  /** RL_TEXTURE_FILTER_POINT member. */
   RL_TEXTURE_FILTER_POINT = 0,
+  /** RL_TEXTURE_FILTER_BILINEAR member. */
   RL_TEXTURE_FILTER_BILINEAR = 1,
+  /** RL_TEXTURE_FILTER_TRILINEAR member. */
   RL_TEXTURE_FILTER_TRILINEAR = 2,
+  /** RL_TEXTURE_FILTER_ANISOTROPIC_4X member. */
   RL_TEXTURE_FILTER_ANISOTROPIC_4X = 3,
+  /** RL_TEXTURE_FILTER_ANISOTROPIC_8X member. */
   RL_TEXTURE_FILTER_ANISOTROPIC_8X = 4,
+  /** RL_TEXTURE_FILTER_ANISOTROPIC_16X member. */
   RL_TEXTURE_FILTER_ANISOTROPIC_16X = 5,
 }
+/** RL_TEXTURE_FILTER_POINT exported by Deno Raylib. */
 export const RL_TEXTURE_FILTER_POINT = rlTextureFilter.RL_TEXTURE_FILTER_POINT;
+/** RL_TEXTURE_FILTER_BILINEAR exported by Deno Raylib. */
 export const RL_TEXTURE_FILTER_BILINEAR =
   rlTextureFilter.RL_TEXTURE_FILTER_BILINEAR;
+/** RL_TEXTURE_FILTER_TRILINEAR exported by Deno Raylib. */
 export const RL_TEXTURE_FILTER_TRILINEAR =
   rlTextureFilter.RL_TEXTURE_FILTER_TRILINEAR;
+/** RL_TEXTURE_FILTER_ANISOTROPIC_4X exported by Deno Raylib. */
 export const RL_TEXTURE_FILTER_ANISOTROPIC_4X =
   rlTextureFilter.RL_TEXTURE_FILTER_ANISOTROPIC_4X;
+/** RL_TEXTURE_FILTER_ANISOTROPIC_8X exported by Deno Raylib. */
 export const RL_TEXTURE_FILTER_ANISOTROPIC_8X =
   rlTextureFilter.RL_TEXTURE_FILTER_ANISOTROPIC_8X;
+/** RL_TEXTURE_FILTER_ANISOTROPIC_16X exported by Deno Raylib. */
 export const RL_TEXTURE_FILTER_ANISOTROPIC_16X =
   rlTextureFilter.RL_TEXTURE_FILTER_ANISOTROPIC_16X;
 
 /** Color blending modes (pre-defined) */
 export enum rlBlendMode {
+  /** RL_BLEND_ALPHA member. */
   RL_BLEND_ALPHA = 0,
+  /** RL_BLEND_ADDITIVE member. */
   RL_BLEND_ADDITIVE = 1,
+  /** RL_BLEND_MULTIPLIED member. */
   RL_BLEND_MULTIPLIED = 2,
+  /** RL_BLEND_ADD_COLORS member. */
   RL_BLEND_ADD_COLORS = 3,
+  /** RL_BLEND_SUBTRACT_COLORS member. */
   RL_BLEND_SUBTRACT_COLORS = 4,
+  /** RL_BLEND_ALPHA_PREMULTIPLY member. */
   RL_BLEND_ALPHA_PREMULTIPLY = 5,
+  /** RL_BLEND_CUSTOM member. */
   RL_BLEND_CUSTOM = 6,
+  /** RL_BLEND_CUSTOM_SEPARATE member. */
   RL_BLEND_CUSTOM_SEPARATE = 7,
 }
+/** RL_BLEND_ALPHA exported by Deno Raylib. */
 export const RL_BLEND_ALPHA = rlBlendMode.RL_BLEND_ALPHA;
+/** RL_BLEND_ADDITIVE exported by Deno Raylib. */
 export const RL_BLEND_ADDITIVE = rlBlendMode.RL_BLEND_ADDITIVE;
+/** RL_BLEND_MULTIPLIED exported by Deno Raylib. */
 export const RL_BLEND_MULTIPLIED = rlBlendMode.RL_BLEND_MULTIPLIED;
+/** RL_BLEND_ADD_COLORS exported by Deno Raylib. */
 export const RL_BLEND_ADD_COLORS = rlBlendMode.RL_BLEND_ADD_COLORS;
+/** RL_BLEND_SUBTRACT_COLORS exported by Deno Raylib. */
 export const RL_BLEND_SUBTRACT_COLORS = rlBlendMode.RL_BLEND_SUBTRACT_COLORS;
+/** RL_BLEND_ALPHA_PREMULTIPLY exported by Deno Raylib. */
 export const RL_BLEND_ALPHA_PREMULTIPLY =
   rlBlendMode.RL_BLEND_ALPHA_PREMULTIPLY;
+/** RL_BLEND_CUSTOM exported by Deno Raylib. */
 export const RL_BLEND_CUSTOM = rlBlendMode.RL_BLEND_CUSTOM;
+/** RL_BLEND_CUSTOM_SEPARATE exported by Deno Raylib. */
 export const RL_BLEND_CUSTOM_SEPARATE = rlBlendMode.RL_BLEND_CUSTOM_SEPARATE;
 
 /** Shader location point type */
 export enum rlShaderLocationIndex {
+  /** RL_SHADER_LOC_VERTEX_POSITION member. */
   RL_SHADER_LOC_VERTEX_POSITION = 0,
+  /** RL_SHADER_LOC_VERTEX_TEXCOORD01 member. */
   RL_SHADER_LOC_VERTEX_TEXCOORD01 = 1,
+  /** RL_SHADER_LOC_VERTEX_TEXCOORD02 member. */
   RL_SHADER_LOC_VERTEX_TEXCOORD02 = 2,
+  /** RL_SHADER_LOC_VERTEX_NORMAL member. */
   RL_SHADER_LOC_VERTEX_NORMAL = 3,
+  /** RL_SHADER_LOC_VERTEX_TANGENT member. */
   RL_SHADER_LOC_VERTEX_TANGENT = 4,
+  /** RL_SHADER_LOC_VERTEX_COLOR member. */
   RL_SHADER_LOC_VERTEX_COLOR = 5,
+  /** RL_SHADER_LOC_MATRIX_MVP member. */
   RL_SHADER_LOC_MATRIX_MVP = 6,
+  /** RL_SHADER_LOC_MATRIX_VIEW member. */
   RL_SHADER_LOC_MATRIX_VIEW = 7,
+  /** RL_SHADER_LOC_MATRIX_PROJECTION member. */
   RL_SHADER_LOC_MATRIX_PROJECTION = 8,
+  /** RL_SHADER_LOC_MATRIX_MODEL member. */
   RL_SHADER_LOC_MATRIX_MODEL = 9,
+  /** RL_SHADER_LOC_MATRIX_NORMAL member. */
   RL_SHADER_LOC_MATRIX_NORMAL = 10,
+  /** RL_SHADER_LOC_VECTOR_VIEW member. */
   RL_SHADER_LOC_VECTOR_VIEW = 11,
+  /** RL_SHADER_LOC_COLOR_DIFFUSE member. */
   RL_SHADER_LOC_COLOR_DIFFUSE = 12,
+  /** RL_SHADER_LOC_COLOR_SPECULAR member. */
   RL_SHADER_LOC_COLOR_SPECULAR = 13,
+  /** RL_SHADER_LOC_COLOR_AMBIENT member. */
   RL_SHADER_LOC_COLOR_AMBIENT = 14,
+  /** RL_SHADER_LOC_MAP_ALBEDO member. */
   RL_SHADER_LOC_MAP_ALBEDO = 15,
+  /** RL_SHADER_LOC_MAP_METALNESS member. */
   RL_SHADER_LOC_MAP_METALNESS = 16,
+  /** RL_SHADER_LOC_MAP_NORMAL member. */
   RL_SHADER_LOC_MAP_NORMAL = 17,
+  /** RL_SHADER_LOC_MAP_ROUGHNESS member. */
   RL_SHADER_LOC_MAP_ROUGHNESS = 18,
+  /** RL_SHADER_LOC_MAP_OCCLUSION member. */
   RL_SHADER_LOC_MAP_OCCLUSION = 19,
+  /** RL_SHADER_LOC_MAP_EMISSION member. */
   RL_SHADER_LOC_MAP_EMISSION = 20,
+  /** RL_SHADER_LOC_MAP_HEIGHT member. */
   RL_SHADER_LOC_MAP_HEIGHT = 21,
+  /** RL_SHADER_LOC_MAP_CUBEMAP member. */
   RL_SHADER_LOC_MAP_CUBEMAP = 22,
+  /** RL_SHADER_LOC_MAP_IRRADIANCE member. */
   RL_SHADER_LOC_MAP_IRRADIANCE = 23,
+  /** RL_SHADER_LOC_MAP_PREFILTER member. */
   RL_SHADER_LOC_MAP_PREFILTER = 24,
+  /** RL_SHADER_LOC_MAP_BRDF member. */
   RL_SHADER_LOC_MAP_BRDF = 25,
 }
+/** RL_SHADER_LOC_VERTEX_POSITION exported by Deno Raylib. */
 export const RL_SHADER_LOC_VERTEX_POSITION =
   rlShaderLocationIndex.RL_SHADER_LOC_VERTEX_POSITION;
+/** RL_SHADER_LOC_VERTEX_TEXCOORD01 exported by Deno Raylib. */
 export const RL_SHADER_LOC_VERTEX_TEXCOORD01 =
   rlShaderLocationIndex.RL_SHADER_LOC_VERTEX_TEXCOORD01;
+/** RL_SHADER_LOC_VERTEX_TEXCOORD02 exported by Deno Raylib. */
 export const RL_SHADER_LOC_VERTEX_TEXCOORD02 =
   rlShaderLocationIndex.RL_SHADER_LOC_VERTEX_TEXCOORD02;
+/** RL_SHADER_LOC_VERTEX_NORMAL exported by Deno Raylib. */
 export const RL_SHADER_LOC_VERTEX_NORMAL =
   rlShaderLocationIndex.RL_SHADER_LOC_VERTEX_NORMAL;
+/** RL_SHADER_LOC_VERTEX_TANGENT exported by Deno Raylib. */
 export const RL_SHADER_LOC_VERTEX_TANGENT =
   rlShaderLocationIndex.RL_SHADER_LOC_VERTEX_TANGENT;
+/** RL_SHADER_LOC_VERTEX_COLOR exported by Deno Raylib. */
 export const RL_SHADER_LOC_VERTEX_COLOR =
   rlShaderLocationIndex.RL_SHADER_LOC_VERTEX_COLOR;
+/** RL_SHADER_LOC_MATRIX_MVP exported by Deno Raylib. */
 export const RL_SHADER_LOC_MATRIX_MVP =
   rlShaderLocationIndex.RL_SHADER_LOC_MATRIX_MVP;
+/** RL_SHADER_LOC_MATRIX_VIEW exported by Deno Raylib. */
 export const RL_SHADER_LOC_MATRIX_VIEW =
   rlShaderLocationIndex.RL_SHADER_LOC_MATRIX_VIEW;
+/** RL_SHADER_LOC_MATRIX_PROJECTION exported by Deno Raylib. */
 export const RL_SHADER_LOC_MATRIX_PROJECTION =
   rlShaderLocationIndex.RL_SHADER_LOC_MATRIX_PROJECTION;
+/** RL_SHADER_LOC_MATRIX_MODEL exported by Deno Raylib. */
 export const RL_SHADER_LOC_MATRIX_MODEL =
   rlShaderLocationIndex.RL_SHADER_LOC_MATRIX_MODEL;
+/** RL_SHADER_LOC_MATRIX_NORMAL exported by Deno Raylib. */
 export const RL_SHADER_LOC_MATRIX_NORMAL =
   rlShaderLocationIndex.RL_SHADER_LOC_MATRIX_NORMAL;
+/** RL_SHADER_LOC_VECTOR_VIEW exported by Deno Raylib. */
 export const RL_SHADER_LOC_VECTOR_VIEW =
   rlShaderLocationIndex.RL_SHADER_LOC_VECTOR_VIEW;
+/** RL_SHADER_LOC_COLOR_DIFFUSE exported by Deno Raylib. */
 export const RL_SHADER_LOC_COLOR_DIFFUSE =
   rlShaderLocationIndex.RL_SHADER_LOC_COLOR_DIFFUSE;
+/** RL_SHADER_LOC_COLOR_SPECULAR exported by Deno Raylib. */
 export const RL_SHADER_LOC_COLOR_SPECULAR =
   rlShaderLocationIndex.RL_SHADER_LOC_COLOR_SPECULAR;
+/** RL_SHADER_LOC_COLOR_AMBIENT exported by Deno Raylib. */
 export const RL_SHADER_LOC_COLOR_AMBIENT =
   rlShaderLocationIndex.RL_SHADER_LOC_COLOR_AMBIENT;
+/** RL_SHADER_LOC_MAP_ALBEDO exported by Deno Raylib. */
 export const RL_SHADER_LOC_MAP_ALBEDO =
   rlShaderLocationIndex.RL_SHADER_LOC_MAP_ALBEDO;
+/** RL_SHADER_LOC_MAP_METALNESS exported by Deno Raylib. */
 export const RL_SHADER_LOC_MAP_METALNESS =
   rlShaderLocationIndex.RL_SHADER_LOC_MAP_METALNESS;
+/** RL_SHADER_LOC_MAP_NORMAL exported by Deno Raylib. */
 export const RL_SHADER_LOC_MAP_NORMAL =
   rlShaderLocationIndex.RL_SHADER_LOC_MAP_NORMAL;
+/** RL_SHADER_LOC_MAP_ROUGHNESS exported by Deno Raylib. */
 export const RL_SHADER_LOC_MAP_ROUGHNESS =
   rlShaderLocationIndex.RL_SHADER_LOC_MAP_ROUGHNESS;
+/** RL_SHADER_LOC_MAP_OCCLUSION exported by Deno Raylib. */
 export const RL_SHADER_LOC_MAP_OCCLUSION =
   rlShaderLocationIndex.RL_SHADER_LOC_MAP_OCCLUSION;
+/** RL_SHADER_LOC_MAP_EMISSION exported by Deno Raylib. */
 export const RL_SHADER_LOC_MAP_EMISSION =
   rlShaderLocationIndex.RL_SHADER_LOC_MAP_EMISSION;
+/** RL_SHADER_LOC_MAP_HEIGHT exported by Deno Raylib. */
 export const RL_SHADER_LOC_MAP_HEIGHT =
   rlShaderLocationIndex.RL_SHADER_LOC_MAP_HEIGHT;
+/** RL_SHADER_LOC_MAP_CUBEMAP exported by Deno Raylib. */
 export const RL_SHADER_LOC_MAP_CUBEMAP =
   rlShaderLocationIndex.RL_SHADER_LOC_MAP_CUBEMAP;
+/** RL_SHADER_LOC_MAP_IRRADIANCE exported by Deno Raylib. */
 export const RL_SHADER_LOC_MAP_IRRADIANCE =
   rlShaderLocationIndex.RL_SHADER_LOC_MAP_IRRADIANCE;
+/** RL_SHADER_LOC_MAP_PREFILTER exported by Deno Raylib. */
 export const RL_SHADER_LOC_MAP_PREFILTER =
   rlShaderLocationIndex.RL_SHADER_LOC_MAP_PREFILTER;
+/** RL_SHADER_LOC_MAP_BRDF exported by Deno Raylib. */
 export const RL_SHADER_LOC_MAP_BRDF =
   rlShaderLocationIndex.RL_SHADER_LOC_MAP_BRDF;
 
 /** Shader uniform data type */
 export enum rlShaderUniformDataType {
+  /** RL_SHADER_UNIFORM_FLOAT member. */
   RL_SHADER_UNIFORM_FLOAT = 0,
+  /** RL_SHADER_UNIFORM_VEC2 member. */
   RL_SHADER_UNIFORM_VEC2 = 1,
+  /** RL_SHADER_UNIFORM_VEC3 member. */
   RL_SHADER_UNIFORM_VEC3 = 2,
+  /** RL_SHADER_UNIFORM_VEC4 member. */
   RL_SHADER_UNIFORM_VEC4 = 3,
+  /** RL_SHADER_UNIFORM_INT member. */
   RL_SHADER_UNIFORM_INT = 4,
+  /** RL_SHADER_UNIFORM_IVEC2 member. */
   RL_SHADER_UNIFORM_IVEC2 = 5,
+  /** RL_SHADER_UNIFORM_IVEC3 member. */
   RL_SHADER_UNIFORM_IVEC3 = 6,
+  /** RL_SHADER_UNIFORM_IVEC4 member. */
   RL_SHADER_UNIFORM_IVEC4 = 7,
+  /** RL_SHADER_UNIFORM_UINT member. */
   RL_SHADER_UNIFORM_UINT = 8,
+  /** RL_SHADER_UNIFORM_UIVEC2 member. */
   RL_SHADER_UNIFORM_UIVEC2 = 9,
+  /** RL_SHADER_UNIFORM_UIVEC3 member. */
   RL_SHADER_UNIFORM_UIVEC3 = 10,
+  /** RL_SHADER_UNIFORM_UIVEC4 member. */
   RL_SHADER_UNIFORM_UIVEC4 = 11,
+  /** RL_SHADER_UNIFORM_SAMPLER2D member. */
   RL_SHADER_UNIFORM_SAMPLER2D = 12,
 }
+/** RL_SHADER_UNIFORM_FLOAT exported by Deno Raylib. */
 export const RL_SHADER_UNIFORM_FLOAT =
   rlShaderUniformDataType.RL_SHADER_UNIFORM_FLOAT;
+/** RL_SHADER_UNIFORM_VEC2 exported by Deno Raylib. */
 export const RL_SHADER_UNIFORM_VEC2 =
   rlShaderUniformDataType.RL_SHADER_UNIFORM_VEC2;
+/** RL_SHADER_UNIFORM_VEC3 exported by Deno Raylib. */
 export const RL_SHADER_UNIFORM_VEC3 =
   rlShaderUniformDataType.RL_SHADER_UNIFORM_VEC3;
+/** RL_SHADER_UNIFORM_VEC4 exported by Deno Raylib. */
 export const RL_SHADER_UNIFORM_VEC4 =
   rlShaderUniformDataType.RL_SHADER_UNIFORM_VEC4;
+/** RL_SHADER_UNIFORM_INT exported by Deno Raylib. */
 export const RL_SHADER_UNIFORM_INT =
   rlShaderUniformDataType.RL_SHADER_UNIFORM_INT;
+/** RL_SHADER_UNIFORM_IVEC2 exported by Deno Raylib. */
 export const RL_SHADER_UNIFORM_IVEC2 =
   rlShaderUniformDataType.RL_SHADER_UNIFORM_IVEC2;
+/** RL_SHADER_UNIFORM_IVEC3 exported by Deno Raylib. */
 export const RL_SHADER_UNIFORM_IVEC3 =
   rlShaderUniformDataType.RL_SHADER_UNIFORM_IVEC3;
+/** RL_SHADER_UNIFORM_IVEC4 exported by Deno Raylib. */
 export const RL_SHADER_UNIFORM_IVEC4 =
   rlShaderUniformDataType.RL_SHADER_UNIFORM_IVEC4;
+/** RL_SHADER_UNIFORM_UINT exported by Deno Raylib. */
 export const RL_SHADER_UNIFORM_UINT =
   rlShaderUniformDataType.RL_SHADER_UNIFORM_UINT;
+/** RL_SHADER_UNIFORM_UIVEC2 exported by Deno Raylib. */
 export const RL_SHADER_UNIFORM_UIVEC2 =
   rlShaderUniformDataType.RL_SHADER_UNIFORM_UIVEC2;
+/** RL_SHADER_UNIFORM_UIVEC3 exported by Deno Raylib. */
 export const RL_SHADER_UNIFORM_UIVEC3 =
   rlShaderUniformDataType.RL_SHADER_UNIFORM_UIVEC3;
+/** RL_SHADER_UNIFORM_UIVEC4 exported by Deno Raylib. */
 export const RL_SHADER_UNIFORM_UIVEC4 =
   rlShaderUniformDataType.RL_SHADER_UNIFORM_UIVEC4;
+/** RL_SHADER_UNIFORM_SAMPLER2D exported by Deno Raylib. */
 export const RL_SHADER_UNIFORM_SAMPLER2D =
   rlShaderUniformDataType.RL_SHADER_UNIFORM_SAMPLER2D;
 
 /** Shader attribute data types */
 export enum rlShaderAttributeDataType {
+  /** RL_SHADER_ATTRIB_FLOAT member. */
   RL_SHADER_ATTRIB_FLOAT = 0,
+  /** RL_SHADER_ATTRIB_VEC2 member. */
   RL_SHADER_ATTRIB_VEC2 = 1,
+  /** RL_SHADER_ATTRIB_VEC3 member. */
   RL_SHADER_ATTRIB_VEC3 = 2,
+  /** RL_SHADER_ATTRIB_VEC4 member. */
   RL_SHADER_ATTRIB_VEC4 = 3,
 }
+/** RL_SHADER_ATTRIB_FLOAT exported by Deno Raylib. */
 export const RL_SHADER_ATTRIB_FLOAT =
   rlShaderAttributeDataType.RL_SHADER_ATTRIB_FLOAT;
+/** RL_SHADER_ATTRIB_VEC2 exported by Deno Raylib. */
 export const RL_SHADER_ATTRIB_VEC2 =
   rlShaderAttributeDataType.RL_SHADER_ATTRIB_VEC2;
+/** RL_SHADER_ATTRIB_VEC3 exported by Deno Raylib. */
 export const RL_SHADER_ATTRIB_VEC3 =
   rlShaderAttributeDataType.RL_SHADER_ATTRIB_VEC3;
+/** RL_SHADER_ATTRIB_VEC4 exported by Deno Raylib. */
 export const RL_SHADER_ATTRIB_VEC4 =
   rlShaderAttributeDataType.RL_SHADER_ATTRIB_VEC4;
 
 /** Framebuffer attachment type */
 export enum rlFramebufferAttachType {
+  /** RL_ATTACHMENT_COLOR_CHANNEL0 member. */
   RL_ATTACHMENT_COLOR_CHANNEL0 = 0,
+  /** RL_ATTACHMENT_COLOR_CHANNEL1 member. */
   RL_ATTACHMENT_COLOR_CHANNEL1 = 1,
+  /** RL_ATTACHMENT_COLOR_CHANNEL2 member. */
   RL_ATTACHMENT_COLOR_CHANNEL2 = 2,
+  /** RL_ATTACHMENT_COLOR_CHANNEL3 member. */
   RL_ATTACHMENT_COLOR_CHANNEL3 = 3,
+  /** RL_ATTACHMENT_COLOR_CHANNEL4 member. */
   RL_ATTACHMENT_COLOR_CHANNEL4 = 4,
+  /** RL_ATTACHMENT_COLOR_CHANNEL5 member. */
   RL_ATTACHMENT_COLOR_CHANNEL5 = 5,
+  /** RL_ATTACHMENT_COLOR_CHANNEL6 member. */
   RL_ATTACHMENT_COLOR_CHANNEL6 = 6,
+  /** RL_ATTACHMENT_COLOR_CHANNEL7 member. */
   RL_ATTACHMENT_COLOR_CHANNEL7 = 7,
+  /** RL_ATTACHMENT_DEPTH member. */
   RL_ATTACHMENT_DEPTH = 100,
+  /** RL_ATTACHMENT_STENCIL member. */
   RL_ATTACHMENT_STENCIL = 200,
 }
+/** RL_ATTACHMENT_COLOR_CHANNEL0 exported by Deno Raylib. */
 export const RL_ATTACHMENT_COLOR_CHANNEL0 =
   rlFramebufferAttachType.RL_ATTACHMENT_COLOR_CHANNEL0;
+/** RL_ATTACHMENT_COLOR_CHANNEL1 exported by Deno Raylib. */
 export const RL_ATTACHMENT_COLOR_CHANNEL1 =
   rlFramebufferAttachType.RL_ATTACHMENT_COLOR_CHANNEL1;
+/** RL_ATTACHMENT_COLOR_CHANNEL2 exported by Deno Raylib. */
 export const RL_ATTACHMENT_COLOR_CHANNEL2 =
   rlFramebufferAttachType.RL_ATTACHMENT_COLOR_CHANNEL2;
+/** RL_ATTACHMENT_COLOR_CHANNEL3 exported by Deno Raylib. */
 export const RL_ATTACHMENT_COLOR_CHANNEL3 =
   rlFramebufferAttachType.RL_ATTACHMENT_COLOR_CHANNEL3;
+/** RL_ATTACHMENT_COLOR_CHANNEL4 exported by Deno Raylib. */
 export const RL_ATTACHMENT_COLOR_CHANNEL4 =
   rlFramebufferAttachType.RL_ATTACHMENT_COLOR_CHANNEL4;
+/** RL_ATTACHMENT_COLOR_CHANNEL5 exported by Deno Raylib. */
 export const RL_ATTACHMENT_COLOR_CHANNEL5 =
   rlFramebufferAttachType.RL_ATTACHMENT_COLOR_CHANNEL5;
+/** RL_ATTACHMENT_COLOR_CHANNEL6 exported by Deno Raylib. */
 export const RL_ATTACHMENT_COLOR_CHANNEL6 =
   rlFramebufferAttachType.RL_ATTACHMENT_COLOR_CHANNEL6;
+/** RL_ATTACHMENT_COLOR_CHANNEL7 exported by Deno Raylib. */
 export const RL_ATTACHMENT_COLOR_CHANNEL7 =
   rlFramebufferAttachType.RL_ATTACHMENT_COLOR_CHANNEL7;
+/** RL_ATTACHMENT_DEPTH exported by Deno Raylib. */
 export const RL_ATTACHMENT_DEPTH = rlFramebufferAttachType.RL_ATTACHMENT_DEPTH;
+/** RL_ATTACHMENT_STENCIL exported by Deno Raylib. */
 export const RL_ATTACHMENT_STENCIL =
   rlFramebufferAttachType.RL_ATTACHMENT_STENCIL;
 
 /** Framebuffer texture attachment type */
 export enum rlFramebufferAttachTextureType {
+  /** RL_ATTACHMENT_CUBEMAP_POSITIVE_X member. */
   RL_ATTACHMENT_CUBEMAP_POSITIVE_X = 0,
+  /** RL_ATTACHMENT_CUBEMAP_NEGATIVE_X member. */
   RL_ATTACHMENT_CUBEMAP_NEGATIVE_X = 1,
+  /** RL_ATTACHMENT_CUBEMAP_POSITIVE_Y member. */
   RL_ATTACHMENT_CUBEMAP_POSITIVE_Y = 2,
+  /** RL_ATTACHMENT_CUBEMAP_NEGATIVE_Y member. */
   RL_ATTACHMENT_CUBEMAP_NEGATIVE_Y = 3,
+  /** RL_ATTACHMENT_CUBEMAP_POSITIVE_Z member. */
   RL_ATTACHMENT_CUBEMAP_POSITIVE_Z = 4,
+  /** RL_ATTACHMENT_CUBEMAP_NEGATIVE_Z member. */
   RL_ATTACHMENT_CUBEMAP_NEGATIVE_Z = 5,
+  /** RL_ATTACHMENT_TEXTURE2D member. */
   RL_ATTACHMENT_TEXTURE2D = 100,
+  /** RL_ATTACHMENT_RENDERBUFFER member. */
   RL_ATTACHMENT_RENDERBUFFER = 200,
 }
+/** RL_ATTACHMENT_CUBEMAP_POSITIVE_X exported by Deno Raylib. */
 export const RL_ATTACHMENT_CUBEMAP_POSITIVE_X =
   rlFramebufferAttachTextureType.RL_ATTACHMENT_CUBEMAP_POSITIVE_X;
+/** RL_ATTACHMENT_CUBEMAP_NEGATIVE_X exported by Deno Raylib. */
 export const RL_ATTACHMENT_CUBEMAP_NEGATIVE_X =
   rlFramebufferAttachTextureType.RL_ATTACHMENT_CUBEMAP_NEGATIVE_X;
+/** RL_ATTACHMENT_CUBEMAP_POSITIVE_Y exported by Deno Raylib. */
 export const RL_ATTACHMENT_CUBEMAP_POSITIVE_Y =
   rlFramebufferAttachTextureType.RL_ATTACHMENT_CUBEMAP_POSITIVE_Y;
+/** RL_ATTACHMENT_CUBEMAP_NEGATIVE_Y exported by Deno Raylib. */
 export const RL_ATTACHMENT_CUBEMAP_NEGATIVE_Y =
   rlFramebufferAttachTextureType.RL_ATTACHMENT_CUBEMAP_NEGATIVE_Y;
+/** RL_ATTACHMENT_CUBEMAP_POSITIVE_Z exported by Deno Raylib. */
 export const RL_ATTACHMENT_CUBEMAP_POSITIVE_Z =
   rlFramebufferAttachTextureType.RL_ATTACHMENT_CUBEMAP_POSITIVE_Z;
+/** RL_ATTACHMENT_CUBEMAP_NEGATIVE_Z exported by Deno Raylib. */
 export const RL_ATTACHMENT_CUBEMAP_NEGATIVE_Z =
   rlFramebufferAttachTextureType.RL_ATTACHMENT_CUBEMAP_NEGATIVE_Z;
+/** RL_ATTACHMENT_TEXTURE2D exported by Deno Raylib. */
 export const RL_ATTACHMENT_TEXTURE2D =
   rlFramebufferAttachTextureType.RL_ATTACHMENT_TEXTURE2D;
+/** RL_ATTACHMENT_RENDERBUFFER exported by Deno Raylib. */
 export const RL_ATTACHMENT_RENDERBUFFER =
   rlFramebufferAttachTextureType.RL_ATTACHMENT_RENDERBUFFER;
 
 /** Face culling mode */
 export enum rlCullMode {
+  /** RL_CULL_FACE_FRONT member. */
   RL_CULL_FACE_FRONT = 0,
+  /** RL_CULL_FACE_BACK member. */
   RL_CULL_FACE_BACK = 1,
 }
+/** RL_CULL_FACE_FRONT exported by Deno Raylib. */
 export const RL_CULL_FACE_FRONT = rlCullMode.RL_CULL_FACE_FRONT;
+/** RL_CULL_FACE_BACK exported by Deno Raylib. */
 export const RL_CULL_FACE_BACK = rlCullMode.RL_CULL_FACE_BACK;
 
+/** RL_DEFAULT_BATCH_BUFFER_ELEMENTS from the raylib 6.0 API. */
 export const RL_DEFAULT_BATCH_BUFFER_ELEMENTS = 8192;
+/** Default number of batch buffers (multi-buffering) */
 export const RL_DEFAULT_BATCH_BUFFERS = 1;
+/** Default number of batch draw calls (by state changes: mode, texture) */
 export const RL_DEFAULT_BATCH_DRAWCALLS = 256;
+/** Maximum number of textures units that can be activated on batch drawing (SetShaderValueTexture()) */
 export const RL_DEFAULT_BATCH_MAX_TEXTURE_UNITS = 4;
+/** Maximum size of Matrix stack */
 export const RL_MAX_MATRIX_STACK_SIZE = 32;
+/** Maximum number of shader locations supported */
 export const RL_MAX_SHADER_LOCATIONS = 32;
+/** Default near cull distance */
 export const RL_CULL_DISTANCE_NEAR = 0.05;
+/** Default far cull distance */
 export const RL_CULL_DISTANCE_FAR = 4000;
+/** GL_TEXTURE_WRAP_S */
 export const RL_TEXTURE_WRAP_S = 10242;
+/** GL_TEXTURE_WRAP_T */
 export const RL_TEXTURE_WRAP_T = 10243;
+/** GL_TEXTURE_MAG_FILTER */
 export const RL_TEXTURE_MAG_FILTER = 10240;
+/** GL_TEXTURE_MIN_FILTER */
 export const RL_TEXTURE_MIN_FILTER = 10241;
+/** GL_NEAREST */
 export const RL_TEXTURE_FILTER_NEAREST = 9728;
+/** GL_LINEAR */
 export const RL_TEXTURE_FILTER_LINEAR = 9729;
+/** GL_NEAREST_MIPMAP_NEAREST */
 export const RL_TEXTURE_FILTER_MIP_NEAREST = 9984;
+/** GL_NEAREST_MIPMAP_LINEAR */
 export const RL_TEXTURE_FILTER_NEAREST_MIP_LINEAR = 9986;
+/** GL_LINEAR_MIPMAP_NEAREST */
 export const RL_TEXTURE_FILTER_LINEAR_MIP_NEAREST = 9985;
+/** GL_LINEAR_MIPMAP_LINEAR */
 export const RL_TEXTURE_FILTER_MIP_LINEAR = 9987;
+/** Anisotropic filter (custom identifier) */
 export const RL_TEXTURE_FILTER_ANISOTROPIC = 12288;
+/** Texture mipmap bias, percentage ratio (custom identifier) */
 export const RL_TEXTURE_MIPMAP_BIAS_RATIO = 16384;
+/** GL_REPEAT */
 export const RL_TEXTURE_WRAP_REPEAT = 10497;
+/** GL_CLAMP_TO_EDGE */
 export const RL_TEXTURE_WRAP_CLAMP = 33071;
+/** GL_MIRRORED_REPEAT */
 export const RL_TEXTURE_WRAP_MIRROR_REPEAT = 33648;
+/** GL_MIRROR_CLAMP_EXT */
 export const RL_TEXTURE_WRAP_MIRROR_CLAMP = 34626;
+/** GL_MODELVIEW */
 export const RL_MODELVIEW = 5888;
+/** GL_PROJECTION */
 export const RL_PROJECTION = 5889;
+/** GL_TEXTURE */
 export const RL_TEXTURE = 5890;
+/** GL_LINES */
 export const RL_LINES = 1;
+/** GL_TRIANGLES */
 export const RL_TRIANGLES = 4;
+/** GL_QUADS */
 export const RL_QUADS = 7;
+/** GL_UNSIGNED_BYTE */
 export const RL_UNSIGNED_BYTE = 5121;
+/** GL_FLOAT */
 export const RL_FLOAT = 5126;
+/** GL_STREAM_DRAW */
 export const RL_STREAM_DRAW = 35040;
+/** GL_STREAM_READ */
 export const RL_STREAM_READ = 35041;
+/** GL_STREAM_COPY */
 export const RL_STREAM_COPY = 35042;
+/** GL_STATIC_DRAW */
 export const RL_STATIC_DRAW = 35044;
+/** GL_STATIC_READ */
 export const RL_STATIC_READ = 35045;
+/** GL_STATIC_COPY */
 export const RL_STATIC_COPY = 35046;
+/** GL_DYNAMIC_DRAW */
 export const RL_DYNAMIC_DRAW = 35048;
+/** GL_DYNAMIC_READ */
 export const RL_DYNAMIC_READ = 35049;
+/** GL_DYNAMIC_COPY */
 export const RL_DYNAMIC_COPY = 35050;
+/** GL_FRAGMENT_SHADER */
 export const RL_FRAGMENT_SHADER = 35632;
+/** GL_VERTEX_SHADER */
 export const RL_VERTEX_SHADER = 35633;
+/** GL_COMPUTE_SHADER */
 export const RL_COMPUTE_SHADER = 37305;
+/** GL_ZERO */
 export const RL_ZERO = 0;
+/** GL_ONE */
 export const RL_ONE = 1;
+/** GL_SRC_COLOR */
 export const RL_SRC_COLOR = 768;
+/** GL_ONE_MINUS_SRC_COLOR */
 export const RL_ONE_MINUS_SRC_COLOR = 769;
+/** GL_SRC_ALPHA */
 export const RL_SRC_ALPHA = 770;
+/** GL_ONE_MINUS_SRC_ALPHA */
 export const RL_ONE_MINUS_SRC_ALPHA = 771;
+/** GL_DST_ALPHA */
 export const RL_DST_ALPHA = 772;
+/** GL_ONE_MINUS_DST_ALPHA */
 export const RL_ONE_MINUS_DST_ALPHA = 773;
+/** GL_DST_COLOR */
 export const RL_DST_COLOR = 774;
+/** GL_ONE_MINUS_DST_COLOR */
 export const RL_ONE_MINUS_DST_COLOR = 775;
+/** GL_SRC_ALPHA_SATURATE */
 export const RL_SRC_ALPHA_SATURATE = 776;
+/** GL_CONSTANT_COLOR */
 export const RL_CONSTANT_COLOR = 32769;
+/** GL_ONE_MINUS_CONSTANT_COLOR */
 export const RL_ONE_MINUS_CONSTANT_COLOR = 32770;
+/** GL_CONSTANT_ALPHA */
 export const RL_CONSTANT_ALPHA = 32771;
+/** GL_ONE_MINUS_CONSTANT_ALPHA */
 export const RL_ONE_MINUS_CONSTANT_ALPHA = 32772;
+/** GL_FUNC_ADD */
 export const RL_FUNC_ADD = 32774;
+/** GL_MIN */
 export const RL_MIN = 32775;
+/** GL_MAX */
 export const RL_MAX = 32776;
+/** GL_FUNC_SUBTRACT */
 export const RL_FUNC_SUBTRACT = 32778;
+/** GL_FUNC_REVERSE_SUBTRACT */
 export const RL_FUNC_REVERSE_SUBTRACT = 32779;
+/** GL_BLEND_EQUATION */
 export const RL_BLEND_EQUATION = 32777;
+/** GL_BLEND_EQUATION_RGB   // (Same as BLEND_EQUATION) */
 export const RL_BLEND_EQUATION_RGB = 32777;
+/** GL_BLEND_EQUATION_ALPHA */
 export const RL_BLEND_EQUATION_ALPHA = 34877;
+/** GL_BLEND_DST_RGB */
 export const RL_BLEND_DST_RGB = 32968;
+/** GL_BLEND_SRC_RGB */
 export const RL_BLEND_SRC_RGB = 32969;
+/** GL_BLEND_DST_ALPHA */
 export const RL_BLEND_DST_ALPHA = 32970;
+/** GL_BLEND_SRC_ALPHA */
 export const RL_BLEND_SRC_ALPHA = 32971;
+/** GL_BLEND_COLOR */
 export const RL_BLEND_COLOR = 32773;
+/** GL_READ_FRAMEBUFFER */
 export const RL_READ_FRAMEBUFFER = 36008;
+/** GL_DRAW_FRAMEBUFFER */
 export const RL_DRAW_FRAMEBUFFER = 36009;
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION from the raylib 6.0 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION = 0;
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD from the raylib 6.0 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD = 1;
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL from the raylib 6.0 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL = 2;
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR from the raylib 6.0 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR = 3;
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT from the raylib 6.0 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT = 4;
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2 from the raylib 6.0 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2 = 5;
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_INDICES from the raylib 6.0 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_INDICES = 6;
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEINDICES from the raylib 6.0 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEINDICES = 7;
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS from the raylib 6.0 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS = 8;
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_INSTANCETRANSFORM from the raylib 6.0 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_INSTANCETRANSFORM = 9;
 
-/**  */
+/** GetCameraForward from the raylib 6.0 API. */
 export function GetCameraForward(camera: Camera3D | null): Vector3 {
   return new Vector3(
     lib.GetCameraForward(camera?.buffer ?? null) as Uint8Array<ArrayBuffer>,
   );
 }
 
-/**  */
+/** GetCameraUp from the raylib 6.0 API. */
 export function GetCameraUp(camera: Camera3D | null): Vector3 {
   return new Vector3(
     lib.GetCameraUp(camera?.buffer ?? null) as Uint8Array<ArrayBuffer>,
   );
 }
 
-/**  */
+/** GetCameraRight from the raylib 6.0 API. */
 export function GetCameraRight(camera: Camera3D | null): Vector3 {
   return new Vector3(
     lib.GetCameraRight(camera?.buffer ?? null) as Uint8Array<ArrayBuffer>,
   );
 }
 
-/**  */
+/** CameraMoveForward from the raylib 6.0 API. */
 export function CameraMoveForward(
   camera: Camera3D | null,
   distance: number,
@@ -510,12 +826,12 @@ export function CameraMoveForward(
   );
 }
 
-/**  */
+/** CameraMoveUp from the raylib 6.0 API. */
 export function CameraMoveUp(camera: Camera3D | null, distance: number): void {
   lib.CameraMoveUp(camera?.buffer ?? null, distance);
 }
 
-/**  */
+/** CameraMoveRight from the raylib 6.0 API. */
 export function CameraMoveRight(
   camera: Camera3D | null,
   distance: number,
@@ -528,7 +844,7 @@ export function CameraMoveRight(
   );
 }
 
-/**  */
+/** CameraMoveToTarget from the raylib 6.0 API. */
 export function CameraMoveToTarget(
   camera: Camera3D | null,
   delta: number,
@@ -536,7 +852,7 @@ export function CameraMoveToTarget(
   lib.CameraMoveToTarget(camera?.buffer ?? null, delta);
 }
 
-/**  */
+/** CameraYaw from the raylib 6.0 API. */
 export function CameraYaw(
   camera: Camera3D | null,
   angle: number,
@@ -545,7 +861,7 @@ export function CameraYaw(
   lib.CameraYaw(camera?.buffer ?? null, angle, rotateAroundTarget ? 1 : 0);
 }
 
-/**  */
+/** CameraPitch from the raylib 6.0 API. */
 export function CameraPitch(
   camera: Camera3D | null,
   angle: number,
@@ -562,19 +878,19 @@ export function CameraPitch(
   );
 }
 
-/**  */
+/** CameraRoll from the raylib 6.0 API. */
 export function CameraRoll(camera: Camera3D | null, angle: number): void {
   lib.CameraRoll(camera?.buffer ?? null, angle);
 }
 
-/**  */
+/** GetCameraViewMatrix from the raylib 6.0 API. */
 export function GetCameraViewMatrix(camera: Camera3D | null): Matrix {
   return new Matrix(
     lib.GetCameraViewMatrix(camera?.buffer ?? null) as Uint8Array<ArrayBuffer>,
   );
 }
 
-/**  */
+/** GetCameraProjectionMatrix from the raylib 6.0 API. */
 export function GetCameraProjectionMatrix(
   camera: Camera3D | null,
   aspect: number,
@@ -631,7 +947,7 @@ export function rlMultMatrixf(matf: Deno.PointerValue): void {
   lib.rlMultMatrixf(matf);
 }
 
-/**  */
+/** rlFrustum from the raylib 6.0 API. */
 export function rlFrustum(
   left: number,
   right: number,
@@ -643,7 +959,7 @@ export function rlFrustum(
   lib.rlFrustum(left, right, bottom, top, znear, zfar);
 }
 
-/**  */
+/** rlOrtho from the raylib 6.0 API. */
 export function rlOrtho(
   left: number,
   right: number,

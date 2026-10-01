@@ -1,3 +1,8 @@
+/**
+ * Cubemap loading and layout handling.
+ *
+ * @module
+ */
 /** Cubemap loading and layout handling. */
 export {
   CubemapLayout,

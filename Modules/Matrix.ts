@@ -1,3 +1,8 @@
+/**
+ * Matrix construction, arithmetic, transforms, projection, composition, and decomposition.
+ *
+ * @module
+ */
 /** Matrix construction, arithmetic, transforms, projection, composition, and decomposition. */
 export {
   Matrix,

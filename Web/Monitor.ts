@@ -1,3 +1,8 @@
+/**
+ * Monitor discovery, dimensions, refresh rate, and DPI.
+ *
+ * @module
+ */
 /** Monitor discovery, dimensions, refresh rate, and DPI. */
 export {
   GetCurrentMonitor,

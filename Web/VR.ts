@@ -1,3 +1,8 @@
+/**
+ * VR stereo configuration and rendering.
+ *
+ * @module
+ */
 /** VR stereo configuration and rendering. */
 export {
   BeginVrStereoMode,

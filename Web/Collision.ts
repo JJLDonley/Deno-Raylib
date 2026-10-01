@@ -1,3 +1,8 @@
+/**
+ * All 2D and 3D collision APIs.
+ *
+ * @module
+ */
 /** All 2D and 3D collision APIs. */
 export {
   CheckCollisionBoxes,

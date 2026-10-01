@@ -1,3 +1,8 @@
+/**
+ * Glyph lookup, atlases, codepoints, and UTF-8 conversion.
+ *
+ * @module
+ */
 /** Glyph lookup, atlases, codepoints, and UTF-8 conversion. */
 export {
   CodepointToUTF8,

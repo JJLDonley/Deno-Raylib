@@ -1,3 +1,8 @@
+/**
+ * Gesture enabling, recognition, vectors, angles, and duration.
+ *
+ * @module
+ */
 /** Gesture enabling, recognition, vectors, angles, and duration. */
 export {
   Gesture,

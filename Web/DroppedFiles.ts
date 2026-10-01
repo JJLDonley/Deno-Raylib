@@ -1,3 +1,8 @@
+/**
+ * Drag-and-drop file handling.
+ *
+ * @module
+ */
 /** Drag-and-drop file handling. */
 export {
   FilePathList,

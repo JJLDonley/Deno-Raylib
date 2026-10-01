@@ -1,3 +1,8 @@
+/**
+ * Mesh generation, upload, update, drawing, export, tangents, and bounds.
+ *
+ * @module
+ */
 /** Mesh generation, upload, update, drawing, export, tangents, and bounds. */
 export {
   BoundingBox,

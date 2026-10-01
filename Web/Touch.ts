@@ -1,3 +1,8 @@
+/**
+ * Touch points, positions, and identifiers.
+ *
+ * @module
+ */
 /** Touch points, positions, and identifiers. */
 export {
   GetTouchPointCount,

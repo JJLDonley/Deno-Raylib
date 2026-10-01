@@ -1,3 +1,8 @@
+/**
+ * Image, texture, font, model, material, animation, wave, sound, and music asset APIs.
+ *
+ * @module
+ */
 /** Image, texture, font, model, material, animation, wave, sound, and music asset APIs. */
 export {
   CodepointToUTF8,

@@ -1,3 +1,8 @@
+/**
+ * Low-level textures, shaders, blending, depth, culling, scissor, wireframe, line, point, and stereo state.
+ *
+ * @module
+ */
 /** Low-level textures, shaders, blending, depth, culling, scissor, wireframe, line, point, and stereo state. */
 export {
   rlActiveDrawBuffers,

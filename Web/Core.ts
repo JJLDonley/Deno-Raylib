@@ -1,3 +1,8 @@
+/**
+ * Core application, platform, timing, input, files, and automation APIs.
+ *
+ * @module
+ */
 /** Core application, platform, timing, input, files, and automation APIs. */
 export {
   BeginBlendMode,

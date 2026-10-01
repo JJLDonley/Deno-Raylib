@@ -1,3 +1,8 @@
+/**
+ * Low-level matrix stack and immediate-mode vertex drawing.
+ *
+ * @module
+ */
 /** Low-level matrix stack and immediate-mode vertex drawing. */
 export {
   Matrix,

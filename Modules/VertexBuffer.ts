@@ -1,3 +1,8 @@
+/**
+ * VAOs, VBOs, vertex attributes, vertex arrays, and instanced drawing.
+ *
+ * @module
+ */
 /** VAOs, VBOs, vertex attributes, vertex arrays, and instanced drawing. */
 export {
   rlDisableVertexArray,

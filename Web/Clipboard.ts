@@ -1,3 +1,8 @@
+/**
+ * Clipboard text and image access.
+ *
+ * @module
+ */
 /** Clipboard text and image access. */
 export {
   GetClipboardImage,

@@ -1,3 +1,8 @@
+/**
+ * Quaternion construction, arithmetic, interpolation, and conversion.
+ *
+ * @module
+ */
 /** Quaternion construction, arithmetic, interpolation, and conversion. */
 export {
   Matrix,

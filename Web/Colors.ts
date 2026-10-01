@@ -1,3 +1,8 @@
+/**
+ * Color conversion, normalization, tinting, fading, blending, and constants.
+ *
+ * @module
+ */
 /** Color conversion, normalization, tinting, fading, blending, and constants. */
 export {
   Color,

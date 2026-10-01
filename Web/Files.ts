@@ -1,3 +1,8 @@
+/**
+ * Binary and text file loading, saving, copying, moving, and inspection.
+ *
+ * @module
+ */
 /** Binary and text file loading, saving, copying, moving, and inspection. */
 export {
   FileCopy,

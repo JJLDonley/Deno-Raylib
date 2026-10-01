@@ -1,6 +1,6 @@
 {
   "name": "@jjld/raylib",
-  "version": "6.0.2",
+  "version": "6.0.3",
   "license": "MIT",
   "exports": {
     ".": "./Raylib/raylib.ts",
@@ -191,7 +191,9 @@
     "build:web": "deno run -A Scripts/build_web.ts",
     "check:targets": "deno run --allow-read --allow-write --allow-run Tests/check_targets.ts",
     "build:native": "deno run -A Scripts/build_native.ts",
-    "generate": "deno run --allow-read --allow-write Bindings/Generators/generate_layouts.ts && deno run --allow-read --allow-write Bindings/Generators/generate_layouts.ts --web && deno run --allow-read --allow-write Bindings/Generators/generate_ffi_structs.ts && deno run --allow-read --allow-write Bindings/Generators/generate_structs.ts && deno run --allow-read --allow-write Bindings/Generators/generate_structs.ts --web && deno run --allow-read --allow-write Bindings/Generators/generator.ts && deno run --allow-read --allow-write Bindings/Generators/generate_rlgl.ts && deno run --allow-read --allow-write Bindings/Generators/generate_modules.ts && deno run --allow-read --allow-write Bindings/Generators/generate_webapp.ts && deno run --allow-read --allow-write Bindings/Generators/generate_wasm_bridge.ts && deno fmt deno.json Bindings Raylib Modules Web",
+    "example": "deno run --allow-ffi --allow-read",
+    "examples:check": "deno check Examples/*/*.ts",
+    "generate": "deno run --allow-read --allow-write Bindings/Generators/generate_layouts.ts && deno run --allow-read --allow-write Bindings/Generators/generate_layouts.ts --web && deno run --allow-read --allow-write Bindings/Generators/generate_ffi_structs.ts && deno run --allow-read --allow-write Bindings/Generators/generate_structs.ts && deno run --allow-read --allow-write Bindings/Generators/generate_structs.ts --web && deno run --allow-read --allow-write Bindings/Generators/generator.ts && deno run --allow-read --allow-write Bindings/Generators/generate_rlgl.ts && deno run --allow-read --allow-write Bindings/Generators/generate_modules.ts && deno run --allow-read --allow-write Bindings/Generators/generate_webapp.ts && deno run --allow-read --allow-write Bindings/Generators/generate_wasm_bridge.ts && deno run --allow-read --allow-write Bindings/Generators/generate_docs.ts && deno fmt deno.json Bindings Raylib Modules Web Scripts Tools",
     "test": "deno test --allow-read --allow-write --allow-ffi --allow-run Tests/"
   },
   "compilerOptions": {

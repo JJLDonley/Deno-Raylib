@@ -1,3 +1,8 @@
+/**
+ * Mouse buttons, position, motion, wheel, and cursor selection.
+ *
+ * @module
+ */
 /** Mouse buttons, position, motion, wheel, and cursor selection. */
 export {
   DisableCursor,

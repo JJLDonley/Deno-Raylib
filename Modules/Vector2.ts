@@ -1,3 +1,8 @@
+/**
+ * Vector2 construction, arithmetic, geometry, interpolation, and transformation.
+ *
+ * @module
+ */
 /** Vector2 construction, arithmetic, geometry, interpolation, and transformation. */
 export {
   Matrix,

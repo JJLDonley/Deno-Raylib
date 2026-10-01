@@ -1,3 +1,8 @@
+/**
+ * Linear, Bézier, Catmull-Rom, and basis spline drawing and evaluation.
+ *
+ * @module
+ */
 /** Linear, Bézier, Catmull-Rom, and basis spline drawing and evaluation. */
 export {
   Color,

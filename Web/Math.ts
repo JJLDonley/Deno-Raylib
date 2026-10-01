@@ -1,3 +1,8 @@
+/**
+ * Complete raymath scalar, vector, matrix, and quaternion API.
+ *
+ * @module
+ */
 /** Complete raymath scalar, vector, matrix, and quaternion API. */
 export {
   Clamp,

@@ -1,3 +1,8 @@
+/**
+ * Screen and render dimensions, screenshots, and screen-space helpers.
+ *
+ * @module
+ */
 /** Screen and render dimensions, screenshots, and screen-space helpers. */
 export {
   Camera2D,

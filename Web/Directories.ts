@@ -1,3 +1,8 @@
+/**
+ * Directory creation, traversal, counting, and working-directory control.
+ *
+ * @module
+ */
 /** Directory creation, traversal, counting, and working-directory control. */
 export {
   ChangeDirectory,

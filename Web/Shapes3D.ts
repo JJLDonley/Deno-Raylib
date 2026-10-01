@@ -1,3 +1,8 @@
+/**
+ * 3D lines, points, triangles, cubes, spheres, cylinders, capsules, planes, rays, and grids.
+ *
+ * @module
+ */
 /** 3D lines, points, triangles, cubes, spheres, cylinders, capsules, planes, rays, and grids. */
 export {
   Camera3D,

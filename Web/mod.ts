@@ -1,3 +1,8 @@
+/**
+ * Browser modules matching the native Deno Raylib module names.
+ *
+ * @module
+ */
 export * as Animation from "./Animation.ts";
 export * as Application from "./Application.ts";
 export * as Assets from "./Assets.ts";

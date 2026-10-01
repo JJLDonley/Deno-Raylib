@@ -1,3 +1,8 @@
+/**
+ * Raw audio streams, callbacks, processors, buffering, and playback.
+ *
+ * @module
+ */
 /** Raw audio streams, callbacks, processors, buffering, and playback. */
 export {
   AttachAudioMixedProcessor,

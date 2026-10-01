@@ -1,3 +1,8 @@
+/**
+ * 3D boxes, spheres, rays, meshes, and triangle collisions.
+ *
+ * @module
+ */
 /** 3D boxes, spheres, rays, meshes, and triangle collisions. */
 export {
   BoundingBox,

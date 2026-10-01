@@ -1,3 +1,8 @@
+/**
+ * Window lifecycle, state, sizing, position, title, and icons.
+ *
+ * @module
+ */
 /** Window lifecycle, state, sizing, position, title, and icons. */
 export {
   ClearWindowState,

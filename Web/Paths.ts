@@ -1,3 +1,8 @@
+/**
+ * Path and filename inspection.
+ *
+ * @module
+ */
 /** Path and filename inspection. */
 export {
   GetDirectoryPath,

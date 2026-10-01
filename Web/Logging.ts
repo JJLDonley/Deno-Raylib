@@ -1,3 +1,8 @@
+/**
+ * Trace logging levels and callbacks.
+ *
+ * @module
+ */
 /** Trace logging levels and callbacks. */
 export {
   SetTraceLogCallback,

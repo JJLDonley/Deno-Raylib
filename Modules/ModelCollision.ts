@@ -1,3 +1,8 @@
+/**
+ * Model, mesh, bounding-box, and ray collision queries.
+ *
+ * @module
+ */
 /** Model, mesh, bounding-box, and ray collision queries. */
 export {
   BoundingBox,

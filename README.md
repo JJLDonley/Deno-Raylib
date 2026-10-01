@@ -378,12 +378,22 @@ Modules/            # native separation-of-concerns API
 Web/                # matching browser API
 Tools/              # repository maintenance and initializer
 Scripts/            # files copied into starter projects
+Examples/           # runnable ports of the official raylib 6.0 examples
 Lib/                # downloaded native/WebAssembly dependencies (ignored)
 Tests/              # local tests and probes (ignored)
 ```
 
 `Lib/` contains native libraries, the local Emscripten SDK, and downloaded web
 archives. `Lib/` and `Tests/` are excluded from Git and JSR publication.
+
+Run one of the ports from the repository root:
+
+```bash
+deno task example Examples/Core/core_basic_window.ts
+```
+
+See [`Examples/README.md`](Examples/README.md) for the current category totals
+and porting conventions.
 
 Refresh the pinned official headers and regenerate the bindings:
 
@@ -401,6 +411,10 @@ deno task test
 deno task check:targets
 deno publish --dry-run --allow-dirty
 ```
+
+JSR releases are published with provenance by the GitHub Actions workflow when a
+version tag such as `v6.0.3` is pushed. The tag must match the version in
+`deno.json`.
 
 The generated source covers `raylib.h`, `raymath.h`, `rcamera.h`, `rlgl.h`, and
 `rgestures.h`. Do not edit generated bindings or module files directly; update

@@ -1,3 +1,8 @@
+/**
+ * Streamed music loading, playback, seeking, state, and timing.
+ *
+ * @module
+ */
 /** Streamed music loading, playback, seeking, state, and timing. */
 export {
   GetMusicTimeLength,

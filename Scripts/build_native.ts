@@ -1,3 +1,8 @@
+/**
+ * Cross-platform native Deno Raylib executable builder.
+ *
+ * @module
+ */
 import { basename, extname, join, resolve } from "path";
 import {
   NATIVE_TARGETS,

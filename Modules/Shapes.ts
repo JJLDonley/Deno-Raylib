@@ -1,3 +1,8 @@
+/**
+ * Complete 2D and 3D shape drawing, splines, and shape collisions.
+ *
+ * @module
+ */
 /** Complete 2D and 3D shape drawing, splines, and shape collisions. */
 export {
   BoundingBox,

@@ -1,3 +1,8 @@
+/**
+ * Automation event recording, playback, loading, and export.
+ *
+ * @module
+ */
 /** Automation event recording, playback, loading, and export. */
 export {
   AutomationEvent,

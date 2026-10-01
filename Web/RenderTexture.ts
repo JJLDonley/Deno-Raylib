@@ -1,3 +1,8 @@
+/**
+ * Render-target texture lifecycle and drawing mode.
+ *
+ * @module
+ */
 /** Render-target texture lifecycle and drawing mode. */
 export {
   BeginTextureMode,

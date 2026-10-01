@@ -1,3 +1,8 @@
+/**
+ * Gamepad discovery, buttons, axes, vibration, and mappings.
+ *
+ * @module
+ */
 /** Gamepad discovery, buttons, axes, vibration, and mappings. */
 export {
   GamepadAxis,

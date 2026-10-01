@@ -1,3 +1,8 @@
+/**
+ * Complete audio device, wave, sound, music, and stream API.
+ *
+ * @module
+ */
 /** Complete audio device, wave, sound, music, and stream API. */
 export {
   AttachAudioMixedProcessor,

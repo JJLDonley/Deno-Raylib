@@ -1,3 +1,8 @@
+/**
+ * Image loading, generation, manipulation, drawing, colors, palettes, and export.
+ *
+ * @module
+ */
 /** Image loading, generation, manipulation, drawing, colors, palettes, and export. */
 export {
   Color,

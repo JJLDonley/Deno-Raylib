@@ -1,3 +1,8 @@
+/**
+ * Low-level texture allocation, formats, upload, download, mipmaps, and deletion.
+ *
+ * @module
+ */
 /** Low-level texture allocation, formats, upload, download, mipmaps, and deletion. */
 export {
   rlActiveTextureSlot,

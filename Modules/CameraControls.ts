@@ -1,3 +1,8 @@
+/**
+ * rcamera movement, rotation, direction, view, and projection controls.
+ *
+ * @module
+ */
 /** rcamera movement, rotation, direction, view, and projection controls. */
 export {
   Camera3D,

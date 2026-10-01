@@ -1,3 +1,8 @@
+/**
+ * Direct rgestures detection and gesture-state APIs.
+ *
+ * @module
+ */
 export {
   Gesture,
   GetGestureDetected,

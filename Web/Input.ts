@@ -1,3 +1,8 @@
+/**
+ * All keyboard, mouse, cursor, gamepad, touch, and gesture APIs.
+ *
+ * @module
+ */
 /** All keyboard, mouse, cursor, gamepad, touch, and gesture APIs. */
 export {
   DisableCursor,

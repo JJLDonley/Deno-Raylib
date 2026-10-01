@@ -1,3 +1,8 @@
+/**
+ * Font loading, generation, validation, export, and unloading.
+ *
+ * @module
+ */
 /** Font loading, generation, validation, export, and unloading. */
 export {
   ExportFontAsCode,

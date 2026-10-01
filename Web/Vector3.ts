@@ -1,3 +1,8 @@
+/**
+ * Vector3 construction, arithmetic, geometry, projection, and transformation.
+ *
+ * @module
+ */
 /** Vector3 construction, arithmetic, geometry, projection, and transformation. */
 export {
   Matrix,

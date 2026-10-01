@@ -1,3 +1,8 @@
+/**
+ * Deno Raylib desktop and web project initializer.
+ *
+ * @module
+ */
 import { join, resolve } from "path";
 import { fromFileUrl } from "path/from-file-url";
 import {
@@ -7,10 +12,14 @@ import {
 
 const VERSION = "6.0";
 const TEMPLATES = ["desktop", "web", "both"] as const;
-export type Template = (typeof TEMPLATES)[number];
+/** Template exported by Deno Raylib. */
+export type Template = "desktop" | "web" | "both";
 
+/** InitOptions exported by Deno Raylib. */
 export interface InitOptions {
+  /** directory member. */
   directory: string;
+  /** template member. */
   template: Template;
 }
 
@@ -23,6 +32,7 @@ Usage:
   Deno.exit(0);
 }
 
+/** parseInitOptions exported by Deno Raylib. */
 export function parseInitOptions(args: string[]): InitOptions {
   let directory = ".";
   let template: Template = "both";
@@ -218,6 +228,7 @@ async function installLibrary(
   }
 }
 
+/** createStarterProject exported by Deno Raylib. */
 export async function createStarterProject(
   options: InitOptions,
 ): Promise<void> {

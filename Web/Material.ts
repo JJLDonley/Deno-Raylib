@@ -1,3 +1,8 @@
+/**
+ * Material loading, maps, textures, shaders, and assignment.
+ *
+ * @module
+ */
 /** Material loading, maps, textures, shaders, and assignment. */
 export {
   Color,

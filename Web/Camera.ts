@@ -1,3 +1,8 @@
+/**
+ * Complete 2D, 3D, coordinate conversion, and rcamera controls.
+ *
+ * @module
+ */
 /** Complete 2D, 3D, coordinate conversion, and rcamera controls. */
 export {
   BeginMode2D,
