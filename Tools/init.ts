@@ -12,6 +12,61 @@ import {
 
 const VERSION = "6.0";
 const TEMPLATES = ["desktop", "web", "both"] as const;
+const DESKTOP_STARTER = `import * as raylib from "raylib";
+
+raylib.InitWindow(800, 450, "Deno Raylib Desktop");
+raylib.SetTargetFPS(60);
+
+while (!raylib.WindowShouldClose()) {
+  raylib.BeginDrawing();
+  raylib.ClearBackground(raylib.RayWhite);
+  raylib.DrawText("Hello from Deno Raylib!", 24, 24, 28, raylib.Black);
+  raylib.DrawCircle(400, 240, 64, raylib.Red);
+  raylib.EndDrawing();
+}
+
+raylib.CloseWindow();
+`;
+const WEB_STARTER =
+  `import { Application, Drawing, Shapes, Text, Timing, Window } from "raylib/Web";
+
+const canvas = document.querySelector<HTMLCanvasElement>("#canvas")!;
+
+await Application.Init({
+  canvas,
+  moduleUrl: new URL("./backend.mjs", import.meta.url),
+});
+
+Window.InitWindow(800, 450, "Deno Raylib Web");
+Timing.SetTargetFPS(60);
+
+const background = new Drawing.Color(245, 245, 245, 255);
+const accent = new Drawing.Color(230, 41, 55, 255);
+const foreground = new Drawing.Color(30, 30, 30, 255);
+
+await Application.Run({
+  draw() {
+    Drawing.BeginDrawing();
+    Drawing.ClearBackground(background);
+    Text.DrawText("Hello from Deno Raylib!", 24, 24, 28, foreground);
+    Shapes.DrawCircle(400, 240, 64, accent);
+    Drawing.EndDrawing();
+  },
+});
+`;
+const WEB_HTML = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Deno Raylib Web</title>
+  </head>
+  <body>
+    <canvas id="canvas" width="800" height="450"></canvas>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
+`;
 /** Template exported by Deno Raylib. */
 export type Template = "desktop" | "web" | "both";
 
@@ -321,11 +376,34 @@ async function installLibrary(
   if (source.isRoot(libraryRoot)) return;
 
   for (const directory of ["Bindings", "Raylib", "Modules", "Web", "Scripts"]) {
+    const excluded = directory === "Bindings"
+      ? new Set(["Generators"])
+      : directory === "Scripts"
+      ? new Set(["Desktop", "Web"])
+      : new Set<string>();
     await source.copyDirectory(
       directory,
       join(libraryRoot, directory),
-      directory === "Bindings" ? new Set(["Generators"]) : new Set(),
+      excluded,
     );
+  }
+  await source.copyFile("LICENSE", join(libraryRoot, "LICENSE"));
+}
+
+async function writeStarterSources(
+  projectRoot: string,
+  template: Template,
+): Promise<void> {
+  if (template !== "web") {
+    const desktop = join(projectRoot, "Source", "Desktop");
+    await Deno.mkdir(desktop, { recursive: true });
+    await Deno.writeTextFile(join(desktop, "main.ts"), DESKTOP_STARTER);
+  }
+  if (template !== "desktop") {
+    const web = join(projectRoot, "Source", "Web");
+    await Deno.mkdir(web, { recursive: true });
+    await Deno.writeTextFile(join(web, "main.ts"), WEB_STARTER);
+    await Deno.writeTextFile(join(web, "index.html"), WEB_HTML);
   }
 }
 
@@ -364,26 +442,32 @@ export async function createStarterProject(
 
   if (options.template !== "web") {
     await downloadNativeLibrary(projectRoot);
-    await source.copyDirectory(
-      "Scripts/Desktop",
-      join(projectRoot, "Source", "Desktop"),
-    );
   }
-  if (options.template !== "desktop") {
-    await source.copyDirectory(
-      "Scripts/Web",
-      join(projectRoot, "Source", "Web"),
-    );
-  }
+  await writeStarterSources(projectRoot, options.template);
 
   await Deno.writeTextFile(
     join(projectRoot, "deno.json"),
     `${JSON.stringify(projectConfiguration(options.template), null, 2)}\n`,
   );
-  await Deno.writeTextFile(
-    join(projectRoot, ".gitignore"),
-    "Build/\nLib/\nTests/\n",
+  const ignorePath = join(projectRoot, ".gitignore");
+  let existingIgnore = "";
+  try {
+    existingIgnore = await Deno.readTextFile(ignorePath);
+  } catch (error) {
+    if (!(error instanceof Deno.errors.NotFound)) throw error;
+  }
+  const ignoreEntries = new Set(existingIgnore.split(/\r?\n/));
+  const additions = ["/Build/", "/Lib/"].filter((entry) =>
+    !ignoreEntries.has(entry)
   );
+  if (additions.length) {
+    await Deno.writeTextFile(
+      ignorePath,
+      existingIgnore +
+        (existingIgnore && !existingIgnore.endsWith("\n") ? "\n" : "") +
+        `${additions.join("\n")}\n`,
+    );
+  }
 
   console.log("\nProject created.");
   if (options.template !== "web") {

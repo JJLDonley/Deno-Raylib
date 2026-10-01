@@ -165,7 +165,7 @@ for (const value of entrypoints) {
 for (
   const relativePath of [
     "Bindings/Structs/structs.ts",
-    "Bindings/rlgl.ts",
+    "Raylib/rlgl.ts",
     "Web/structs.ts",
     "Web/functions.ts",
     "Web/constants.ts",

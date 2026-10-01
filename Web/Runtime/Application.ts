@@ -59,7 +59,7 @@ export async function Init(options: InitOptions = {}): Promise<void> {
   if (!factory) {
     const moduleUrl = options.moduleUrl
       ? asUrl(options.moduleUrl)
-      : new URL("../generated/raylib_web.mjs", import.meta.url);
+      : new URL("./backend.mjs", browser.location?.href ?? import.meta.url);
     let module: { default?: WebBackendFactory };
     try {
       module = await import(moduleUrl.href);

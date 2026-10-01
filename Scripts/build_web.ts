@@ -42,26 +42,40 @@ async function requireFile(path: string, description: string): Promise<void> {
   }
 }
 
-async function main(): Promise<void> {
-  const { output, source } = parseOptions(Deno.args);
-  const emcc = join(
+async function findEmscriptenCompiler(): Promise<string> {
+  const directory = join(
     projectRoot,
     "Lib",
     "emsdk",
     "upstream",
     "emscripten",
-    Deno.build.os === "windows" ? "emcc.bat" : "emcc",
   );
+  const candidates = Deno.build.os === "windows"
+    ? ["emcc.exe", "emcc.bat"]
+    : ["emcc"];
+  for (const candidate of candidates) {
+    const path = join(directory, candidate);
+    try {
+      await Deno.stat(path);
+      return path;
+    } catch (error) {
+      if (!(error instanceof Deno.errors.NotFound)) throw error;
+    }
+  }
+  throw new Error(
+    `Emscripten (run web setup to install it under Lib/emsdk) was not found in ${directory}`,
+  );
+}
+
+async function main(): Promise<void> {
+  const { output, source } = parseOptions(Deno.args);
+  const emcc = await findEmscriptenCompiler();
   const bridge = join(libraryRoot, "Web", "Bridge", "generated.c");
   const backend = join(libraryRoot, "Web", "Bridge", "backend.mjs");
   const exportsPath = join(libraryRoot, "Web", "Bridge", "exports.json");
   const vendor = join(projectRoot, "Lib", "Web");
   const library = join(vendor, "libraylib.web.a");
 
-  await requireFile(
-    emcc,
-    "Emscripten (run web setup to install it under Lib/emsdk)",
-  );
   await requireFile(library, "The prepared raylib web archive");
   await requireFile(bridge, "The generated WebAssembly bridge");
   await Deno.mkdir(output, { recursive: true });

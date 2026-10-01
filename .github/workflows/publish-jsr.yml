@@ -11,8 +11,12 @@ permissions:
   id-token: write
 
 jobs:
-  publish:
-    runs-on: ubuntu-latest
+  verify-starters:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -30,6 +34,45 @@ jobs:
 
       - name: Check examples
         run: deno task examples:check
+
+      - name: Create contained desktop and Web starter
+        run: deno task init "${{ runner.temp }}/raylib-starter"
+
+      - name: Check generated starter
+        working-directory: ${{ runner.temp }}/raylib-starter
+        run: deno task check
+
+      - name: Build native starter
+        working-directory: ${{ runner.temp }}/raylib-starter
+        run: deno task desktop:build
+
+      - name: Cache Emscripten
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/raylib-starter/Lib/emsdk
+          key: emsdk-${{ runner.os }}-6.0.10
+
+      - name: Set up Web toolchain
+        working-directory: ${{ runner.temp }}/raylib-starter
+        run: |
+          deno run -A Raylib/Scripts/setup_emscripten.ts --yes
+          deno run -A Raylib/Scripts/prepare_web.ts
+
+      - name: Build Web starter
+        working-directory: ${{ runner.temp }}/raylib-starter
+        run: deno task web:build
+
+  publish:
+    needs: verify-starters
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
 
       - name: Publish package
         run: deno publish
