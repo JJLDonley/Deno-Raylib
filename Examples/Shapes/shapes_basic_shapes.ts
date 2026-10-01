@@ -1,5 +1,5 @@
 // Port of raylib 6.0: examples/shapes/shapes_basic_shapes.c
-import * as raylib from "../../Raylib/raylib.ts";
+import * as raylib from "raylib";
 
 raylib.InitWindow(800, 450, "raylib [shapes] example - basic shapes drawing");
 raylib.SetTargetFPS(60);

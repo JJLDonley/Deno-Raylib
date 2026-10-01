@@ -413,7 +413,7 @@ deno publish --dry-run --allow-dirty
 ```
 
 JSR releases are published with provenance by the GitHub Actions workflow when a
-version tag such as `v6.0.3` is pushed. The tag must match the version in
+version tag such as `v6.0.4` is pushed. The tag must match the version in
 `deno.json`.
 
 The generated source covers `raylib.h`, `raymath.h`, `rcamera.h`, `rlgl.h`, and

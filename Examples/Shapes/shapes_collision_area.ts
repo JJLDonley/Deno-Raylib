@@ -1,5 +1,5 @@
 // Port of raylib 6.0: examples/shapes/shapes_collision_area.c
-import * as raylib from "../../Raylib/raylib.ts";
+import * as raylib from "raylib";
 
 const screenWidth = 800;
 const screenHeight = 450;

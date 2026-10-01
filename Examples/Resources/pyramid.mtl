@@ -1,0 +1,6 @@
+# Original CC0 Deno Raylib example asset
+newmtl PyramidMaterial
+Ka 0.15 0.12 0.05
+Kd 0.95 0.55 0.15
+Ks 0.25 0.25 0.25
+Ns 24.0

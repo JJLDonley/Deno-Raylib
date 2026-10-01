@@ -1,5 +1,5 @@
 // Port of raylib 6.0: examples/core/core_input_mouse.c
-import * as raylib from "../../Raylib/raylib.ts";
+import * as raylib from "raylib";
 
 raylib.InitWindow(800, 450, "raylib [core] example - mouse input");
 raylib.SetTargetFPS(60);

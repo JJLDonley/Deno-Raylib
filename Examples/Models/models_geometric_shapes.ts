@@ -1,5 +1,5 @@
 // Port of raylib 6.0: examples/models/models_geometric_shapes.c
-import * as raylib from "../../Raylib/raylib.ts";
+import * as raylib from "raylib";
 
 const camera = new raylib.Camera3D({
   position: new raylib.Vector3(0, 10, 10),

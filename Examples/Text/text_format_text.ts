@@ -1,5 +1,5 @@
 // Port inspired by raylib's text formatting examples.
-import * as raylib from "../../Raylib/raylib.ts";
+import * as raylib from "raylib";
 
 raylib.InitWindow(800, 450, "raylib [text] example - text formatting");
 raylib.SetTargetFPS(60);

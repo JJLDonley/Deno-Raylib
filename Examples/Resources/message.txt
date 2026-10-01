@@ -1,0 +1,3 @@
+Deno Raylib loaded this text from a CC0 example asset.
+
+The example resources are deliberately small, original, and redistribution-safe.
