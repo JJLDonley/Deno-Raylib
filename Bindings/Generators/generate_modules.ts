@@ -736,6 +736,27 @@ for (const [name, module] of modules) {
   );
 }
 
+// Keep the header-oriented raymath entrypoint limited to raymath.h. It mirrors
+// the Math module's generated function and type list without depending on the
+// separation-of-concerns layer.
+const raymathModule = modules.get("Math")!;
+const raymathExports = [
+  ...new Set([
+    ...raymathModule.functions,
+    ...(raymathModule.include ?? []),
+  ]),
+].sort();
+await Deno.writeTextFile(
+  new URL("../../Raylib/raymath.ts", import.meta.url),
+  [
+    "/** Direct raymath scalar, vector, matrix, and quaternion API. */",
+    "export {",
+    ...raymathExports.map((value) => `  ${value},`),
+    '} from "./raylib.ts";',
+    "",
+  ].join("\n"),
+);
+
 // Compatibility aliases retained from earlier releases.
 await Deno.writeTextFile(
   new URL("../../Modules/Models.ts", import.meta.url),
