@@ -17,17 +17,23 @@ const readCString = (ptr: Deno.PointerValue) =>
   ptr === null ? "" : Deno.UnsafePointerView.getCString(ptr);
 
 /** Update camera position for selected mode */
-export function UpdateCamera(camera: Camera3D | null, mode: number): void {
+export function UpdateCamera(camera: Camera3D, mode: number): void {
+  if (camera == null) {
+    throw new TypeError("UpdateCamera: camera must not be null");
+  }
   lib.UpdateCamera(camera?.buffer ?? null, mode);
 }
 
 /** Update camera movement/rotation */
 export function UpdateCameraPro(
-  camera: Camera3D | null,
+  camera: Camera3D,
   movement: Vector3,
   rotation: Vector3,
   zoom: number,
 ): void {
+  if (camera == null) {
+    throw new TypeError("UpdateCameraPro: camera must not be null");
+  }
   lib.UpdateCameraPro(
     camera?.buffer ?? null,
     movement.buffer,
@@ -36,33 +42,45 @@ export function UpdateCameraPro(
   );
 }
 
-/** GetCameraForward from the raylib 6.0 API. */
-export function GetCameraForward(camera: Camera3D | null): Vector3 {
+/** GetCameraForward from the raylib 6.2 API. */
+export function GetCameraForward(camera: Camera3D): Vector3 {
+  if (camera == null) {
+    throw new TypeError("GetCameraForward: camera must not be null");
+  }
   return new Vector3(
     lib.GetCameraForward(camera?.buffer ?? null) as Uint8Array<ArrayBuffer>,
   );
 }
 
-/** GetCameraUp from the raylib 6.0 API. */
-export function GetCameraUp(camera: Camera3D | null): Vector3 {
+/** GetCameraUp from the raylib 6.2 API. */
+export function GetCameraUp(camera: Camera3D): Vector3 {
+  if (camera == null) {
+    throw new TypeError("GetCameraUp: camera must not be null");
+  }
   return new Vector3(
     lib.GetCameraUp(camera?.buffer ?? null) as Uint8Array<ArrayBuffer>,
   );
 }
 
-/** GetCameraRight from the raylib 6.0 API. */
-export function GetCameraRight(camera: Camera3D | null): Vector3 {
+/** GetCameraRight from the raylib 6.2 API. */
+export function GetCameraRight(camera: Camera3D): Vector3 {
+  if (camera == null) {
+    throw new TypeError("GetCameraRight: camera must not be null");
+  }
   return new Vector3(
     lib.GetCameraRight(camera?.buffer ?? null) as Uint8Array<ArrayBuffer>,
   );
 }
 
-/** CameraMoveForward from the raylib 6.0 API. */
+/** CameraMoveForward from the raylib 6.2 API. */
 export function CameraMoveForward(
-  camera: Camera3D | null,
+  camera: Camera3D,
   distance: number,
   moveInWorldPlane: boolean,
 ): void {
+  if (camera == null) {
+    throw new TypeError("CameraMoveForward: camera must not be null");
+  }
   lib.CameraMoveForward(
     camera?.buffer ?? null,
     distance,
@@ -70,17 +88,23 @@ export function CameraMoveForward(
   );
 }
 
-/** CameraMoveUp from the raylib 6.0 API. */
-export function CameraMoveUp(camera: Camera3D | null, distance: number): void {
+/** CameraMoveUp from the raylib 6.2 API. */
+export function CameraMoveUp(camera: Camera3D, distance: number): void {
+  if (camera == null) {
+    throw new TypeError("CameraMoveUp: camera must not be null");
+  }
   lib.CameraMoveUp(camera?.buffer ?? null, distance);
 }
 
-/** CameraMoveRight from the raylib 6.0 API. */
+/** CameraMoveRight from the raylib 6.2 API. */
 export function CameraMoveRight(
-  camera: Camera3D | null,
+  camera: Camera3D,
   distance: number,
   moveInWorldPlane: boolean,
 ): void {
+  if (camera == null) {
+    throw new TypeError("CameraMoveRight: camera must not be null");
+  }
   lib.CameraMoveRight(
     camera?.buffer ?? null,
     distance,
@@ -88,31 +112,35 @@ export function CameraMoveRight(
   );
 }
 
-/** CameraMoveToTarget from the raylib 6.0 API. */
-export function CameraMoveToTarget(
-  camera: Camera3D | null,
-  delta: number,
-): void {
+/** CameraMoveToTarget from the raylib 6.2 API. */
+export function CameraMoveToTarget(camera: Camera3D, delta: number): void {
+  if (camera == null) {
+    throw new TypeError("CameraMoveToTarget: camera must not be null");
+  }
   lib.CameraMoveToTarget(camera?.buffer ?? null, delta);
 }
 
-/** CameraYaw from the raylib 6.0 API. */
+/** CameraYaw from the raylib 6.2 API. */
 export function CameraYaw(
-  camera: Camera3D | null,
+  camera: Camera3D,
   angle: number,
   rotateAroundTarget: boolean,
 ): void {
+  if (camera == null) throw new TypeError("CameraYaw: camera must not be null");
   lib.CameraYaw(camera?.buffer ?? null, angle, rotateAroundTarget ? 1 : 0);
 }
 
-/** CameraPitch from the raylib 6.0 API. */
+/** CameraPitch from the raylib 6.2 API. */
 export function CameraPitch(
-  camera: Camera3D | null,
+  camera: Camera3D,
   angle: number,
   lockView: boolean,
   rotateAroundTarget: boolean,
   rotateUp: boolean,
 ): void {
+  if (camera == null) {
+    throw new TypeError("CameraPitch: camera must not be null");
+  }
   lib.CameraPitch(
     camera?.buffer ?? null,
     angle,
@@ -122,23 +150,32 @@ export function CameraPitch(
   );
 }
 
-/** CameraRoll from the raylib 6.0 API. */
-export function CameraRoll(camera: Camera3D | null, angle: number): void {
+/** CameraRoll from the raylib 6.2 API. */
+export function CameraRoll(camera: Camera3D, angle: number): void {
+  if (camera == null) {
+    throw new TypeError("CameraRoll: camera must not be null");
+  }
   lib.CameraRoll(camera?.buffer ?? null, angle);
 }
 
-/** GetCameraViewMatrix from the raylib 6.0 API. */
-export function GetCameraViewMatrix(camera: Camera3D | null): Matrix {
+/** GetCameraViewMatrix from the raylib 6.2 API. */
+export function GetCameraViewMatrix(camera: Camera3D): Matrix {
+  if (camera == null) {
+    throw new TypeError("GetCameraViewMatrix: camera must not be null");
+  }
   return new Matrix(
     lib.GetCameraViewMatrix(camera?.buffer ?? null) as Uint8Array<ArrayBuffer>,
   );
 }
 
-/** GetCameraProjectionMatrix from the raylib 6.0 API. */
+/** GetCameraProjectionMatrix from the raylib 6.2 API. */
 export function GetCameraProjectionMatrix(
-  camera: Camera3D | null,
+  camera: Camera3D,
   aspect: number,
 ): Matrix {
+  if (camera == null) {
+    throw new TypeError("GetCameraProjectionMatrix: camera must not be null");
+  }
   return new Matrix(
     lib.GetCameraProjectionMatrix(camera?.buffer ?? null, aspect) as Uint8Array<
       ArrayBuffer

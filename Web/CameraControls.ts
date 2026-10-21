@@ -1,16 +1,18 @@
 /**
- * rcamera movement, rotation, direction, view, and projection controls.
+ * Camera update, movement, rotation, direction, view, and projection controls.
  *
  * @module
  */
-/** rcamera movement, rotation, direction, view, and projection controls. */
+/** Camera update, movement, rotation, direction, view, and projection controls. */
 export {
   Camera3D,
+  CameraMode,
   CameraMoveForward,
   CameraMoveRight,
   CameraMoveToTarget,
   CameraMoveUp,
   CameraPitch,
+  CameraProjection,
   CameraRoll,
   CameraYaw,
   GetCameraForward,
@@ -19,5 +21,7 @@ export {
   GetCameraUp,
   GetCameraViewMatrix,
   Matrix,
+  UpdateCamera,
+  UpdateCameraPro,
   Vector3,
 } from "./raylib.ts";

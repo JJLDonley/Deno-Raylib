@@ -33,7 +33,9 @@ function parseOptions(args: string[]): BuildOptions {
 
 async function requireFile(path: string, description: string): Promise<void> {
   try {
-    await Deno.stat(path);
+    if (!(await Deno.stat(path)).isFile) {
+      throw new Error(`${description} is not a file: ${path}`);
+    }
   } catch (error) {
     if (error instanceof Deno.errors.NotFound) {
       throw new Error(`${description} was not found at ${path}`);
@@ -69,6 +71,19 @@ async function findEmscriptenCompiler(): Promise<string> {
 
 async function main(): Promise<void> {
   const { output, source } = parseOptions(Deno.args);
+  if (source) {
+    if (output === source) {
+      throw new Error("Web source and output directories must be different.");
+    }
+    await requireFile(
+      join(source, "index.html"),
+      "The web application HTML entrypoint",
+    );
+    await requireFile(
+      join(source, "main.ts"),
+      "The web application TypeScript entrypoint",
+    );
+  }
   const emcc = await findEmscriptenCompiler();
   const bridge = join(libraryRoot, "Web", "Bridge", "generated.c");
   const backend = join(libraryRoot, "Web", "Bridge", "backend.mjs");

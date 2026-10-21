@@ -43,12 +43,12 @@ function pointerBase(type: string): string {
   return resolve(strip(type).replace(/\*/g, "").trim());
 }
 
-function tsType(type: string, isReturn = false): string {
+function tsType(type: string, isReturn = false, nullable = false): string {
   const value = strip(type);
   if (value.includes("*")) {
     const base = pointerBase(value);
     if (isReturn && base === "char") return "string";
-    if (structs.has(base)) return `${base} | null`;
+    if (structs.has(base)) return nullable ? `${base} | null` : base;
     return "Deno.PointerValue";
   }
   const resolved = resolve(value);
@@ -116,6 +116,9 @@ for (const header of ["rlgl", "rcamera"] as const) {
   output +=
     "// deno-lint-ignore-file verbatim-module-syntax no-unused-vars\n\n";
   output += 'import { lib as DLL } from "../Bindings/bindings.ts";\n';
+  if (header === "rlgl") {
+    output += 'import { retained } from "../Bindings/retained.ts";\n';
+  }
   output += `import { ${
     [...usedStructs].sort().join(", ")
   } } from "../Bindings/Structs/structs.ts";\n`;
@@ -156,9 +159,12 @@ for (const header of ["rlgl", "rcamera"] as const) {
   output += "\n";
 
   for (const fn of functions) {
+    const nullable = fn.name === "rlSetRenderBatchActive";
     const params = (fn.params ?? []).map((param: any) =>
       `${param.name}: ${
-        pointerBase(param.type) === "char" ? "string" : tsType(param.type)
+        pointerBase(param.type) === "char"
+          ? "string"
+          : tsType(param.type, false, nullable)
       }`
     );
     const args = (fn.params ?? []).map(argument);
@@ -167,7 +173,26 @@ for (const header of ["rlgl", "rcamera"] as const) {
     output += `export function ${fn.name}(${params.join(", ")}): ${
       tsType(fn.returnType, true)
     } {\n`;
+    for (const param of fn.params ?? []) {
+      if (
+        !nullable && param.type.includes("*") &&
+        structs.has(pointerBase(param.type))
+      ) {
+        output +=
+          `  if (${param.name} == null) throw new TypeError("${fn.name}: ${param.name} must not be null");\n`;
+      }
+    }
+    if (fn.name === "rlUnloadRenderBatch") {
+      output +=
+        "  if (retained.renderBatch?.vertexBufferPtr === batch.vertexBufferPtr) rlSetRenderBatchActive(null);\n";
+    }
+    if (fn.name === "rlglClose") {
+      output += "  if (retained.renderBatch) rlSetRenderBatchActive(null);\n";
+    }
     output += `  ${returnExpression(fn, call)}\n`;
+    if (fn.name === "rlSetRenderBatchActive") {
+      output += "  retained.renderBatch = batch;\n";
+    }
     output += "}\n\n";
   }
 

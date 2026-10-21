@@ -9,6 +9,7 @@ export {
   EndTextureMode,
   IsRenderTextureValid,
   LoadRenderTexture,
+  LoadRenderTextureEx,
   RenderTexture,
   Texture,
   UnloadRenderTexture,

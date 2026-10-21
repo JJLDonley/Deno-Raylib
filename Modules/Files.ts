@@ -5,6 +5,7 @@
  */
 /** Binary and text file loading, saving, copying, moving, and inspection. */
 export {
+  ExportDataAsCode,
   FileCopy,
   FileExists,
   FileMove,
@@ -22,6 +23,7 @@ export {
   GetFileNameWithoutExt,
   IsFileDropped,
   IsFileExtension,
+  IsFileHidden,
   IsFileNameValid,
   IsPathFile,
   LoadDirectoryFiles,

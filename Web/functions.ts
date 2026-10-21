@@ -195,19 +195,19 @@ export const EnableEventWaiting: WebFunction<"EnableEventWaiting"> = delegate(
 export const DisableEventWaiting: WebFunction<"DisableEventWaiting"> = delegate(
   "DisableEventWaiting",
 );
-/** Shows cursor */
+/** Show cursor */
 export const ShowCursor: WebFunction<"ShowCursor"> = delegate("ShowCursor");
-/** Hides cursor */
+/** Hide cursor */
 export const HideCursor: WebFunction<"HideCursor"> = delegate("HideCursor");
 /** Check if cursor is not visible */
 export const IsCursorHidden: WebFunction<"IsCursorHidden"> = delegate(
   "IsCursorHidden",
 );
-/** Enables cursor (unlock cursor) */
+/** Enable cursor (unlock cursor) */
 export const EnableCursor: WebFunction<"EnableCursor"> = delegate(
   "EnableCursor",
 );
-/** Disables cursor (lock cursor) */
+/** Disable cursor (lock cursor) */
 export const DisableCursor: WebFunction<"DisableCursor"> = delegate(
   "DisableCursor",
 );
@@ -215,29 +215,29 @@ export const DisableCursor: WebFunction<"DisableCursor"> = delegate(
 export const IsCursorOnScreen: WebFunction<"IsCursorOnScreen"> = delegate(
   "IsCursorOnScreen",
 );
-/** Set background color (framebuffer clear color) */
+/** Clear background (framebuffer) to color */
 export const ClearBackground: WebFunction<"ClearBackground"> = delegate(
   "ClearBackground",
 );
-/** Setup canvas (framebuffer) to start drawing */
+/** Begin canvas (framebuffer) drawing */
 export const BeginDrawing: WebFunction<"BeginDrawing"> = delegate(
   "BeginDrawing",
 );
-/** End canvas drawing and swap buffers (double buffering) */
+/** End canvas (framebuffer) drawing and swap buffers (double buffering) */
 export const EndDrawing: WebFunction<"EndDrawing"> = delegate("EndDrawing");
 /** Begin 2D mode with custom camera (2D) */
 export const BeginMode2D: WebFunction<"BeginMode2D"> = delegate("BeginMode2D");
-/** Ends 2D mode with custom camera */
+/** End 2D mode with custom camera */
 export const EndMode2D: WebFunction<"EndMode2D"> = delegate("EndMode2D");
 /** Begin 3D mode with custom camera (3D) */
 export const BeginMode3D: WebFunction<"BeginMode3D"> = delegate("BeginMode3D");
-/** Ends 3D mode and returns to default 2D orthographic mode */
+/** End 3D mode and returns to default 2D orthographic mode */
 export const EndMode3D: WebFunction<"EndMode3D"> = delegate("EndMode3D");
 /** Begin drawing to render texture */
 export const BeginTextureMode: WebFunction<"BeginTextureMode"> = delegate(
   "BeginTextureMode",
 );
-/** Ends drawing to render texture */
+/** End drawing to render texture */
 export const EndTextureMode: WebFunction<"EndTextureMode"> = delegate(
   "EndTextureMode",
 );
@@ -285,7 +285,7 @@ export const LoadShader: WebFunction<"LoadShader"> = delegate("LoadShader");
 /** Load shader from code strings and bind default locations */
 export const LoadShaderFromMemory: WebFunction<"LoadShaderFromMemory"> =
   delegate("LoadShaderFromMemory");
-/** Check if a shader is valid (loaded on GPU) */
+/** Check if shader is valid (loaded on GPU) */
 export const IsShaderValid: WebFunction<"IsShaderValid"> = delegate(
   "IsShaderValid",
 );
@@ -321,19 +321,19 @@ export const GetScreenToWorldRay: WebFunction<"GetScreenToWorldRay"> = delegate(
 /** Get a ray trace from screen position (i.e mouse) in a viewport */
 export const GetScreenToWorldRayEx: WebFunction<"GetScreenToWorldRayEx"> =
   delegate("GetScreenToWorldRayEx");
-/** Get the screen space position for a 3d world space position */
+/** Get screen space position for a 3d world space position */
 export const GetWorldToScreen: WebFunction<"GetWorldToScreen"> = delegate(
   "GetWorldToScreen",
 );
-/** Get size position for a 3d world space position */
+/** Get sized screen space position for a 3d world space position */
 export const GetWorldToScreenEx: WebFunction<"GetWorldToScreenEx"> = delegate(
   "GetWorldToScreenEx",
 );
-/** Get the screen space position for a 2d camera world space position */
+/** Get screen space position for a 2d camera world space position */
 export const GetWorldToScreen2D: WebFunction<"GetWorldToScreen2D"> = delegate(
   "GetWorldToScreen2D",
 );
-/** Get the world space position for a 2d camera screen space position */
+/** Get world space position for a 2d camera screen space position */
 export const GetScreenToWorld2D: WebFunction<"GetScreenToWorld2D"> = delegate(
   "GetScreenToWorld2D",
 );
@@ -386,7 +386,7 @@ export const UnloadRandomSequence: WebFunction<"UnloadRandomSequence"> =
 export const TakeScreenshot: WebFunction<"TakeScreenshot"> = delegate(
   "TakeScreenshot",
 );
-/** Setup init configuration flags (view FLAGS) */
+/** Set init configuration flags (view FLAGS) */
 export const SetConfigFlags: WebFunction<"SetConfigFlags"> = delegate(
   "SetConfigFlags",
 );
@@ -448,31 +448,35 @@ export const SetLoadFileTextCallback: WebFunction<"SetLoadFileTextCallback"> =
 /** Set custom file text data saver */
 export const SetSaveFileTextCallback: WebFunction<"SetSaveFileTextCallback"> =
   delegate("SetSaveFileTextCallback");
-/** Rename file (if exists) */
+/** Rename file (if exists), returns 0 on success */
 export const FileRename: WebFunction<"FileRename"> = delegate("FileRename");
-/** Remove file (if exists) */
+/** Remove file (if exists), returns 0 on success */
 export const FileRemove: WebFunction<"FileRemove"> = delegate("FileRemove");
-/** Copy file from one path to another, dstPath created if it doesn't exist */
+/** Copy file from one path to another, dstPath created if it doesn't exist, returns 0 on success */
 export const FileCopy: WebFunction<"FileCopy"> = delegate("FileCopy");
-/** Move file from one directory to another, dstPath created if it doesn't exist */
+/** Move file from one directory to another, dstPath created if it doesn't exist, returns 0 on success */
 export const FileMove: WebFunction<"FileMove"> = delegate("FileMove");
-/** Replace text in an existing file */
+/** Replace text in an existing file, returns 0 on success */
 export const FileTextReplace: WebFunction<"FileTextReplace"> = delegate(
   "FileTextReplace",
 );
-/** Find text in existing file */
+/** Find text in existing file, returns -1 if index not found or index otherwise */
 export const FileTextFindIndex: WebFunction<"FileTextFindIndex"> = delegate(
   "FileTextFindIndex",
 );
 /** Check if file exists */
 export const FileExists: WebFunction<"FileExists"> = delegate("FileExists");
-/** Check if a directory path exists */
+/** Check if directory path exists */
 export const DirectoryExists: WebFunction<"DirectoryExists"> = delegate(
   "DirectoryExists",
 );
 /** Check file extension (recommended include point: .png, .wav) */
 export const IsFileExtension: WebFunction<"IsFileExtension"> = delegate(
   "IsFileExtension",
+);
+/** Check if file path (file or directory) is hidden by OS */
+export const IsFileHidden: WebFunction<"IsFileHidden"> = delegate(
+  "IsFileHidden",
 );
 /** Get file length in bytes (NOTE: GetFileSize() conflicts with windows.h) */
 export const GetFileLength: WebFunction<"GetFileLength"> = delegate(
@@ -491,11 +495,11 @@ export const GetFileName: WebFunction<"GetFileName"> = delegate("GetFileName");
 /** Get filename string without extension (uses static string) */
 export const GetFileNameWithoutExt: WebFunction<"GetFileNameWithoutExt"> =
   delegate("GetFileNameWithoutExt");
-/** Get full path for a given fileName with path (uses static string) */
+/** Get full path for a provided fileName with path (uses static string) */
 export const GetDirectoryPath: WebFunction<"GetDirectoryPath"> = delegate(
   "GetDirectoryPath",
 );
-/** Get previous directory path for a given path (uses static string) */
+/** Get previous directory path for a provided path (uses static string) */
 export const GetPrevDirectoryPath: WebFunction<"GetPrevDirectoryPath"> =
   delegate("GetPrevDirectoryPath");
 /** Get current working directory (uses static string) */
@@ -509,12 +513,20 @@ export const GetApplicationDirectory: WebFunction<"GetApplicationDirectory"> =
 export const MakeDirectory: WebFunction<"MakeDirectory"> = delegate(
   "MakeDirectory",
 );
-/** Change working directory, return true on success */
+/** Change working directory, returns 0 on success */
 export const ChangeDirectory: WebFunction<"ChangeDirectory"> = delegate(
   "ChangeDirectory",
 );
-/** Check if a given path is a file or a directory */
+/** Check if provided path points to a file */
 export const IsPathFile: WebFunction<"IsPathFile"> = delegate("IsPathFile");
+/** Check if provided path points to a directory */
+export const IsPathDirectory: WebFunction<"IsPathDirectory"> = delegate(
+  "IsPathDirectory",
+);
+/** Check if provided path is an absolute path */
+export const IsPathAbsolute: WebFunction<"IsPathAbsolute"> = delegate(
+  "IsPathAbsolute",
+);
 /** Check if fileName is valid for the platform/OS */
 export const IsFileNameValid: WebFunction<"IsFileNameValid"> = delegate(
   "IsFileNameValid",
@@ -523,13 +535,13 @@ export const IsFileNameValid: WebFunction<"IsFileNameValid"> = delegate(
 export const LoadDirectoryFiles: WebFunction<"LoadDirectoryFiles"> = delegate(
   "LoadDirectoryFiles",
 );
-/** Load directory filepaths with extension filtering and subdir scan; some filters available: "*.*", "FILES*", "DIRS*" */
+/** Load directory filepaths with extension filtering and subdir scan; some filters available: '*.*','FILES*','DIRS*' */
 export const LoadDirectoryFilesEx: WebFunction<"LoadDirectoryFilesEx"> =
   delegate("LoadDirectoryFilesEx");
 /** Unload filepaths */
 export const UnloadDirectoryFiles: WebFunction<"UnloadDirectoryFiles"> =
   delegate("UnloadDirectoryFiles");
-/** Check if a file has been dropped into window */
+/** Check if file has been dropped into window */
 export const IsFileDropped: WebFunction<"IsFileDropped"> = delegate(
   "IsFileDropped",
 );
@@ -605,21 +617,21 @@ export const StopAutomationEventRecording: WebFunction<
 export const PlayAutomationEvent: WebFunction<"PlayAutomationEvent"> = delegate(
   "PlayAutomationEvent",
 );
-/** Check if a key has been pressed once */
+/** Check if key has been pressed once */
 export const IsKeyPressed: WebFunction<"IsKeyPressed"> = delegate(
   "IsKeyPressed",
 );
-/** Check if a key has been pressed again */
+/** Check if key has been pressed again */
 export const IsKeyPressedRepeat: WebFunction<"IsKeyPressedRepeat"> = delegate(
   "IsKeyPressedRepeat",
 );
-/** Check if a key is being pressed */
+/** Check if key is being pressed */
 export const IsKeyDown: WebFunction<"IsKeyDown"> = delegate("IsKeyDown");
-/** Check if a key has been released once */
+/** Check if key has been released once */
 export const IsKeyReleased: WebFunction<"IsKeyReleased"> = delegate(
   "IsKeyReleased",
 );
-/** Check if a key is NOT being pressed */
+/** Check if key is NOT being pressed */
 export const IsKeyUp: WebFunction<"IsKeyUp"> = delegate("IsKeyUp");
 /** Get key pressed (keycode), call it multiple times for keys queued, returns 0 when the queue is empty */
 export const GetKeyPressed: WebFunction<"GetKeyPressed"> = delegate(
@@ -633,7 +645,7 @@ export const GetCharPressed: WebFunction<"GetCharPressed"> = delegate(
 export const GetKeyName: WebFunction<"GetKeyName"> = delegate("GetKeyName");
 /** Set a custom key to exit program (default is ESC) */
 export const SetExitKey: WebFunction<"SetExitKey"> = delegate("SetExitKey");
-/** Check if a gamepad is available */
+/** Check if gamepad is available */
 export const IsGamepadAvailable: WebFunction<"IsGamepadAvailable"> = delegate(
   "IsGamepadAvailable",
 );
@@ -641,17 +653,17 @@ export const IsGamepadAvailable: WebFunction<"IsGamepadAvailable"> = delegate(
 export const GetGamepadName: WebFunction<"GetGamepadName"> = delegate(
   "GetGamepadName",
 );
-/** Check if a gamepad button has been pressed once */
+/** Check if gamepad button has been pressed once */
 export const IsGamepadButtonPressed: WebFunction<"IsGamepadButtonPressed"> =
   delegate("IsGamepadButtonPressed");
-/** Check if a gamepad button is being pressed */
+/** Check if gamepad button is being pressed */
 export const IsGamepadButtonDown: WebFunction<"IsGamepadButtonDown"> = delegate(
   "IsGamepadButtonDown",
 );
-/** Check if a gamepad button has been released once */
+/** Check if gamepad button has been released once */
 export const IsGamepadButtonReleased: WebFunction<"IsGamepadButtonReleased"> =
   delegate("IsGamepadButtonReleased");
-/** Check if a gamepad button is NOT being pressed */
+/** Check if gamepad button is NOT being pressed */
 export const IsGamepadButtonUp: WebFunction<"IsGamepadButtonUp"> = delegate(
   "IsGamepadButtonUp",
 );
@@ -673,17 +685,17 @@ export const SetGamepadMappings: WebFunction<"SetGamepadMappings"> = delegate(
 export const SetGamepadVibration: WebFunction<"SetGamepadVibration"> = delegate(
   "SetGamepadVibration",
 );
-/** Check if a mouse button has been pressed once */
+/** Check if mouse button has been pressed once */
 export const IsMouseButtonPressed: WebFunction<"IsMouseButtonPressed"> =
   delegate("IsMouseButtonPressed");
-/** Check if a mouse button is being pressed */
+/** Check if mouse button is being pressed */
 export const IsMouseButtonDown: WebFunction<"IsMouseButtonDown"> = delegate(
   "IsMouseButtonDown",
 );
-/** Check if a mouse button has been released once */
+/** Check if mouse button has been released once */
 export const IsMouseButtonReleased: WebFunction<"IsMouseButtonReleased"> =
   delegate("IsMouseButtonReleased");
-/** Check if a mouse button is NOT being pressed */
+/** Check if mouse button is NOT being pressed */
 export const IsMouseButtonUp: WebFunction<"IsMouseButtonUp"> = delegate(
   "IsMouseButtonUp",
 );
@@ -731,7 +743,7 @@ export const GetTouchY: WebFunction<"GetTouchY"> = delegate("GetTouchY");
 export const GetTouchPosition: WebFunction<"GetTouchPosition"> = delegate(
   "GetTouchPosition",
 );
-/** Get touch point identifier for given index */
+/** Get touch point identifier for provided index */
 export const GetTouchPointId: WebFunction<"GetTouchPointId"> = delegate(
   "GetTouchPointId",
 );
@@ -743,7 +755,7 @@ export const GetTouchPointCount: WebFunction<"GetTouchPointCount"> = delegate(
 export const SetGesturesEnabled: WebFunction<"SetGesturesEnabled"> = delegate(
   "SetGesturesEnabled",
 );
-/** Check if a gesture have been detected */
+/** Check if gesture has been detected */
 export const IsGestureDetected: WebFunction<"IsGestureDetected"> = delegate(
   "IsGestureDetected",
 );
@@ -809,48 +821,28 @@ export const DrawLineBezier: WebFunction<"DrawLineBezier"> = delegate(
 export const DrawLineDashed: WebFunction<"DrawLineDashed"> = delegate(
   "DrawLineDashed",
 );
-/** Draw a color-filled circle */
-export const DrawCircle: WebFunction<"DrawCircle"> = delegate("DrawCircle");
-/** Draw a color-filled circle (Vector version) */
-export const DrawCircleV: WebFunction<"DrawCircleV"> = delegate("DrawCircleV");
-/** Draw a gradient-filled circle */
-export const DrawCircleGradient: WebFunction<"DrawCircleGradient"> = delegate(
-  "DrawCircleGradient",
+/** Draw a color-filled triangle, counter-clockwise vertex order */
+export const DrawTriangle: WebFunction<"DrawTriangle"> = delegate(
+  "DrawTriangle",
 );
-/** Draw a piece of a circle */
-export const DrawCircleSector: WebFunction<"DrawCircleSector"> = delegate(
-  "DrawCircleSector",
+/** Draw triangle with interpolated colors, counter-clockwise vertex/color order */
+export const DrawTriangleGradient: WebFunction<"DrawTriangleGradient"> =
+  delegate("DrawTriangleGradient");
+/** Draw triangle outline, counter-clockwise vertex order */
+export const DrawTriangleLines: WebFunction<"DrawTriangleLines"> = delegate(
+  "DrawTriangleLines",
 );
-/** Draw circle sector outline */
-export const DrawCircleSectorLines: WebFunction<"DrawCircleSectorLines"> =
-  delegate("DrawCircleSectorLines");
-/** Draw circle outline */
-export const DrawCircleLines: WebFunction<"DrawCircleLines"> = delegate(
-  "DrawCircleLines",
+/** Draw triangle outline with line thickness, counter-clockwise vertex order */
+export const DrawTriangleLinesEx: WebFunction<"DrawTriangleLinesEx"> = delegate(
+  "DrawTriangleLinesEx",
 );
-/** Draw circle outline (Vector version) */
-export const DrawCircleLinesV: WebFunction<"DrawCircleLinesV"> = delegate(
-  "DrawCircleLinesV",
+/** Draw a triangle fan defined by points (first vertex is the center) */
+export const DrawTriangleFan: WebFunction<"DrawTriangleFan"> = delegate(
+  "DrawTriangleFan",
 );
-/** Draw ellipse */
-export const DrawEllipse: WebFunction<"DrawEllipse"> = delegate("DrawEllipse");
-/** Draw ellipse (Vector version) */
-export const DrawEllipseV: WebFunction<"DrawEllipseV"> = delegate(
-  "DrawEllipseV",
-);
-/** Draw ellipse outline */
-export const DrawEllipseLines: WebFunction<"DrawEllipseLines"> = delegate(
-  "DrawEllipseLines",
-);
-/** Draw ellipse outline (Vector version) */
-export const DrawEllipseLinesV: WebFunction<"DrawEllipseLinesV"> = delegate(
-  "DrawEllipseLinesV",
-);
-/** Draw ring */
-export const DrawRing: WebFunction<"DrawRing"> = delegate("DrawRing");
-/** Draw ring outline */
-export const DrawRingLines: WebFunction<"DrawRingLines"> = delegate(
-  "DrawRingLines",
+/** Draw a triangle strip defined by points */
+export const DrawTriangleStrip: WebFunction<"DrawTriangleStrip"> = delegate(
+  "DrawTriangleStrip",
 );
 /** Draw a color-filled rectangle */
 export const DrawRectangle: WebFunction<"DrawRectangle"> = delegate(
@@ -874,14 +866,14 @@ export const DrawRectangleGradientV: WebFunction<"DrawRectangleGradientV"> =
 /** Draw a horizontal-gradient-filled rectangle */
 export const DrawRectangleGradientH: WebFunction<"DrawRectangleGradientH"> =
   delegate("DrawRectangleGradientH");
-/** Draw a gradient-filled rectangle with custom vertex colors */
+/** Draw a gradient-filled rectangle with custom vertex colors, counter-clockwise color order */
 export const DrawRectangleGradientEx: WebFunction<"DrawRectangleGradientEx"> =
   delegate("DrawRectangleGradientEx");
 /** Draw rectangle outline */
 export const DrawRectangleLines: WebFunction<"DrawRectangleLines"> = delegate(
   "DrawRectangleLines",
 );
-/** Draw rectangle outline with extended parameters */
+/** Draw rectangle outline with line thickness */
 export const DrawRectangleLinesEx: WebFunction<"DrawRectangleLinesEx"> =
   delegate("DrawRectangleLinesEx");
 /** Draw rectangle with rounded edges */
@@ -891,35 +883,77 @@ export const DrawRectangleRounded: WebFunction<"DrawRectangleRounded"> =
 export const DrawRectangleRoundedLines: WebFunction<
   "DrawRectangleRoundedLines"
 > = delegate("DrawRectangleRoundedLines");
-/** Draw rectangle with rounded edges outline */
+/** Draw rectangle lines with rounded edges outline and line thickness */
 export const DrawRectangleRoundedLinesEx: WebFunction<
   "DrawRectangleRoundedLinesEx"
 > = delegate("DrawRectangleRoundedLinesEx");
-/** Draw a color-filled triangle (vertex in counter-clockwise order!) */
-export const DrawTriangle: WebFunction<"DrawTriangle"> = delegate(
-  "DrawTriangle",
-);
-/** Draw triangle outline (vertex in counter-clockwise order!) */
-export const DrawTriangleLines: WebFunction<"DrawTriangleLines"> = delegate(
-  "DrawTriangleLines",
-);
-/** Draw a triangle fan defined by points (first vertex is the center) */
-export const DrawTriangleFan: WebFunction<"DrawTriangleFan"> = delegate(
-  "DrawTriangleFan",
-);
-/** Draw a triangle strip defined by points */
-export const DrawTriangleStrip: WebFunction<"DrawTriangleStrip"> = delegate(
-  "DrawTriangleStrip",
-);
-/** Draw a regular polygon (Vector version) */
+/** Draw a polygon of n sides */
 export const DrawPoly: WebFunction<"DrawPoly"> = delegate("DrawPoly");
 /** Draw a polygon outline of n sides */
 export const DrawPolyLines: WebFunction<"DrawPolyLines"> = delegate(
   "DrawPolyLines",
 );
-/** Draw a polygon outline of n sides with extended parameters */
+/** Draw a polygon outline of n sides with line thickness */
 export const DrawPolyLinesEx: WebFunction<"DrawPolyLinesEx"> = delegate(
   "DrawPolyLinesEx",
+);
+/** Draw a color-filled circle */
+export const DrawCircle: WebFunction<"DrawCircle"> = delegate("DrawCircle");
+/** Draw a color-filled circle (Vector version) */
+export const DrawCircleV: WebFunction<"DrawCircleV"> = delegate("DrawCircleV");
+/** Draw a gradient-filled circle */
+export const DrawCircleGradient: WebFunction<"DrawCircleGradient"> = delegate(
+  "DrawCircleGradient",
+);
+/** Draw a piece of a circle */
+export const DrawCircleSector: WebFunction<"DrawCircleSector"> = delegate(
+  "DrawCircleSector",
+);
+/** Draw circle sector outline */
+export const DrawCircleSectorLines: WebFunction<"DrawCircleSectorLines"> =
+  delegate("DrawCircleSectorLines");
+/** Draw circle sector outline with thickness */
+export const DrawCircleSectorLinesEx: WebFunction<"DrawCircleSectorLinesEx"> =
+  delegate("DrawCircleSectorLinesEx");
+/** Draw circle outline */
+export const DrawCircleLines: WebFunction<"DrawCircleLines"> = delegate(
+  "DrawCircleLines",
+);
+/** Draw circle outline (Vector version) */
+export const DrawCircleLinesV: WebFunction<"DrawCircleLinesV"> = delegate(
+  "DrawCircleLinesV",
+);
+/** Draw circle outline with line thickness */
+export const DrawCircleLinesEx: WebFunction<"DrawCircleLinesEx"> = delegate(
+  "DrawCircleLinesEx",
+);
+/** Draw ellipse */
+export const DrawEllipse: WebFunction<"DrawEllipse"> = delegate("DrawEllipse");
+/** Draw ellipse (Vector version) */
+export const DrawEllipseV: WebFunction<"DrawEllipseV"> = delegate(
+  "DrawEllipseV",
+);
+/** Draw ellipse outline */
+export const DrawEllipseLines: WebFunction<"DrawEllipseLines"> = delegate(
+  "DrawEllipseLines",
+);
+/** Draw ellipse outline (Vector version) */
+export const DrawEllipseLinesV: WebFunction<"DrawEllipseLinesV"> = delegate(
+  "DrawEllipseLinesV",
+);
+/** Draw ellipse outline with line thickness */
+export const DrawEllipseLinesEx: WebFunction<"DrawEllipseLinesEx"> = delegate(
+  "DrawEllipseLinesEx",
+);
+/** Draw ring */
+export const DrawRing: WebFunction<"DrawRing"> = delegate("DrawRing");
+/** Draw ring outline */
+export const DrawRingLines: WebFunction<"DrawRingLines"> = delegate(
+  "DrawRingLines",
+);
+/** Draw ring outline with line thickness */
+export const DrawRingLinesEx: WebFunction<"DrawRingLinesEx"> = delegate(
+  "DrawRingLinesEx",
 );
 /** Draw spline: Linear, minimum 2 points */
 export const DrawSplineLinear: WebFunction<"DrawSplineLinear"> = delegate(
@@ -968,8 +1002,9 @@ export const GetSplinePointBasis: WebFunction<"GetSplinePointBasis"> = delegate(
 export const GetSplinePointCatmullRom: WebFunction<"GetSplinePointCatmullRom"> =
   delegate("GetSplinePointCatmullRom");
 /** Get (evaluate) spline point: Quadratic Bezier */
-export const GetSplinePointBezierQuad: WebFunction<"GetSplinePointBezierQuad"> =
-  delegate("GetSplinePointBezierQuad");
+export const GetSplinePointBezierQuadratic: WebFunction<
+  "GetSplinePointBezierQuadratic"
+> = delegate("GetSplinePointBezierQuadratic");
 /** Get (evaluate) spline point: Cubic Bezier */
 export const GetSplinePointBezierCubic: WebFunction<
   "GetSplinePointBezierCubic"
@@ -984,7 +1019,7 @@ export const CheckCollisionCircles: WebFunction<"CheckCollisionCircles"> =
 /** Check collision between circle and rectangle */
 export const CheckCollisionCircleRec: WebFunction<"CheckCollisionCircleRec"> =
   delegate("CheckCollisionCircleRec");
-/** Check if circle collides with a line created betweeen two points [p1] and [p2] */
+/** Check if circle collides with a line created between two points [p1] and [p2] */
 export const CheckCollisionCircleLine: WebFunction<"CheckCollisionCircleLine"> =
   delegate("CheckCollisionCircleLine");
 /** Check if point is inside rectangle */
@@ -1032,7 +1067,7 @@ export const LoadImageFromMemory: WebFunction<"LoadImageFromMemory"> = delegate(
 /** Load image from GPU texture data */
 export const LoadImageFromTexture: WebFunction<"LoadImageFromTexture"> =
   delegate("LoadImageFromTexture");
-/** Load image from screen buffer and (screenshot) */
+/** Load image from screen buffer (screenshot) */
 export const LoadImageFromScreen: WebFunction<"LoadImageFromScreen"> = delegate(
   "LoadImageFromScreen",
 );
@@ -1208,7 +1243,7 @@ export const GetImageAlphaBorder: WebFunction<"GetImageAlphaBorder"> = delegate(
 export const GetImageColor: WebFunction<"GetImageColor"> = delegate(
   "GetImageColor",
 );
-/** Clear image background with given color */
+/** Clear image background with provided color */
 export const ImageClearBackground: WebFunction<"ImageClearBackground"> =
   delegate("ImageClearBackground");
 /** Draw pixel within an image */
@@ -1231,6 +1266,52 @@ export const ImageDrawLineV: WebFunction<"ImageDrawLineV"> = delegate(
 export const ImageDrawLineEx: WebFunction<"ImageDrawLineEx"> = delegate(
   "ImageDrawLineEx",
 );
+/** Draw a lines sequence within an image */
+export const ImageDrawLineStrip: WebFunction<"ImageDrawLineStrip"> = delegate(
+  "ImageDrawLineStrip",
+);
+/** Draw triangle within an image */
+export const ImageDrawTriangle: WebFunction<"ImageDrawTriangle"> = delegate(
+  "ImageDrawTriangle",
+);
+/** Draw triangle with interpolated colors within an image */
+export const ImageDrawTriangleGradient: WebFunction<
+  "ImageDrawTriangleGradient"
+> = delegate("ImageDrawTriangleGradient");
+/** Draw triangle outline within an image */
+export const ImageDrawTriangleLines: WebFunction<"ImageDrawTriangleLines"> =
+  delegate("ImageDrawTriangleLines");
+/** Draw a triangle fan defined by points within an image (first vertex is the center) */
+export const ImageDrawTriangleFan: WebFunction<"ImageDrawTriangleFan"> =
+  delegate("ImageDrawTriangleFan");
+/** Draw a triangle strip defined by points within an image */
+export const ImageDrawTriangleStrip: WebFunction<"ImageDrawTriangleStrip"> =
+  delegate("ImageDrawTriangleStrip");
+/** Draw rectangle within an image */
+export const ImageDrawRectangle: WebFunction<"ImageDrawRectangle"> = delegate(
+  "ImageDrawRectangle",
+);
+/** Draw rectangle within an image (Vector version) */
+export const ImageDrawRectangleV: WebFunction<"ImageDrawRectangleV"> = delegate(
+  "ImageDrawRectangleV",
+);
+/** Draw rectangle within an image */
+export const ImageDrawRectangleRec: WebFunction<"ImageDrawRectangleRec"> =
+  delegate("ImageDrawRectangleRec");
+/** Draw a color-filled rectangle with pro parameters within and image */
+export const ImageDrawRectanglePro: WebFunction<"ImageDrawRectanglePro"> =
+  delegate("ImageDrawRectanglePro");
+/** Draw rectangle lines within an image */
+export const ImageDrawRectangleLines: WebFunction<"ImageDrawRectangleLines"> =
+  delegate("ImageDrawRectangleLines");
+/** Draw rectangle lines within an image with line thickness */
+export const ImageDrawRectangleLinesEx: WebFunction<
+  "ImageDrawRectangleLinesEx"
+> = delegate("ImageDrawRectangleLinesEx");
+/** Draw rectangle with gradient colors within an image, counter-clockwise color order */
+export const ImageDrawRectangleGradientEx: WebFunction<
+  "ImageDrawRectangleGradientEx"
+> = delegate("ImageDrawRectangleGradientEx");
 /** Draw a filled circle within an image */
 export const ImageDrawCircle: WebFunction<"ImageDrawCircle"> = delegate(
   "ImageDrawCircle",
@@ -1245,39 +1326,25 @@ export const ImageDrawCircleLines: WebFunction<"ImageDrawCircleLines"> =
 /** Draw circle outline within an image (Vector version) */
 export const ImageDrawCircleLinesV: WebFunction<"ImageDrawCircleLinesV"> =
   delegate("ImageDrawCircleLinesV");
-/** Draw rectangle within an image */
-export const ImageDrawRectangle: WebFunction<"ImageDrawRectangle"> = delegate(
-  "ImageDrawRectangle",
+/** Draw a gradient-filled circle within an image */
+export const ImageDrawCircleGradient: WebFunction<"ImageDrawCircleGradient"> =
+  delegate("ImageDrawCircleGradient");
+/** Draw an image within an image */
+export const ImageDrawImage: WebFunction<"ImageDrawImage"> = delegate(
+  "ImageDrawImage",
 );
-/** Draw rectangle within an image (Vector version) */
-export const ImageDrawRectangleV: WebFunction<"ImageDrawRectangleV"> = delegate(
-  "ImageDrawRectangleV",
+/** Draw an image with scaling and rotation within an image */
+export const ImageDrawImageEx: WebFunction<"ImageDrawImageEx"> = delegate(
+  "ImageDrawImageEx",
 );
-/** Draw rectangle within an image */
-export const ImageDrawRectangleRec: WebFunction<"ImageDrawRectangleRec"> =
-  delegate("ImageDrawRectangleRec");
-/** Draw rectangle lines within an image */
-export const ImageDrawRectangleLines: WebFunction<"ImageDrawRectangleLines"> =
-  delegate("ImageDrawRectangleLines");
-/** Draw triangle within an image */
-export const ImageDrawTriangle: WebFunction<"ImageDrawTriangle"> = delegate(
-  "ImageDrawTriangle",
+/** Draw a part of an image defined by a rectangle within an image */
+export const ImageDrawImageRec: WebFunction<"ImageDrawImageRec"> = delegate(
+  "ImageDrawImageRec",
 );
-/** Draw triangle with interpolated colors within an image */
-export const ImageDrawTriangleEx: WebFunction<"ImageDrawTriangleEx"> = delegate(
-  "ImageDrawTriangleEx",
+/** Draw a part of an image defined by a rectangle into destination rectangle, with scaling and rotation, within an image */
+export const ImageDrawImagePro: WebFunction<"ImageDrawImagePro"> = delegate(
+  "ImageDrawImagePro",
 );
-/** Draw triangle outline within an image */
-export const ImageDrawTriangleLines: WebFunction<"ImageDrawTriangleLines"> =
-  delegate("ImageDrawTriangleLines");
-/** Draw a triangle fan defined by points within an image (first vertex is the center) */
-export const ImageDrawTriangleFan: WebFunction<"ImageDrawTriangleFan"> =
-  delegate("ImageDrawTriangleFan");
-/** Draw a triangle strip defined by points within an image */
-export const ImageDrawTriangleStrip: WebFunction<"ImageDrawTriangleStrip"> =
-  delegate("ImageDrawTriangleStrip");
-/** Draw a source image within a destination image (tint applied to source) */
-export const ImageDraw: WebFunction<"ImageDraw"> = delegate("ImageDraw");
 /** Draw text (using default font) within an image (destination) */
 export const ImageDrawText: WebFunction<"ImageDrawText"> = delegate(
   "ImageDrawText",
@@ -1285,6 +1352,10 @@ export const ImageDrawText: WebFunction<"ImageDrawText"> = delegate(
 /** Draw text (custom sprite font) within an image (destination) */
 export const ImageDrawTextEx: WebFunction<"ImageDrawTextEx"> = delegate(
   "ImageDrawTextEx",
+);
+/** Draw text using Font and pro parameters (rotation) */
+export const ImageDrawTextPro: WebFunction<"ImageDrawTextPro"> = delegate(
+  "ImageDrawTextPro",
 );
 /** Load texture from file into GPU memory (VRAM) */
 export const LoadTexture: WebFunction<"LoadTexture"> = delegate("LoadTexture");
@@ -1299,7 +1370,11 @@ export const LoadTextureCubemap: WebFunction<"LoadTextureCubemap"> = delegate(
 export const LoadRenderTexture: WebFunction<"LoadRenderTexture"> = delegate(
   "LoadRenderTexture",
 );
-/** Check if a texture is valid (loaded in GPU) */
+/** Load texture for rendering (framebuffer), with specific format */
+export const LoadRenderTextureEx: WebFunction<"LoadRenderTextureEx"> = delegate(
+  "LoadRenderTextureEx",
+);
+/** Check if texture is valid (loaded in GPU) */
 export const IsTextureValid: WebFunction<"IsTextureValid"> = delegate(
   "IsTextureValid",
 );
@@ -1307,7 +1382,7 @@ export const IsTextureValid: WebFunction<"IsTextureValid"> = delegate(
 export const UnloadTexture: WebFunction<"UnloadTexture"> = delegate(
   "UnloadTexture",
 );
-/** Check if a render texture is valid (loaded in GPU) */
+/** Check if render texture is valid (loaded in GPU) */
 export const IsRenderTextureValid: WebFunction<"IsRenderTextureValid"> =
   delegate("IsRenderTextureValid");
 /** Unload render texture from GPU memory (VRAM) */
@@ -1340,7 +1415,7 @@ export const DrawTexture: WebFunction<"DrawTexture"> = delegate("DrawTexture");
 export const DrawTextureV: WebFunction<"DrawTextureV"> = delegate(
   "DrawTextureV",
 );
-/** Draw a Texture2D with extended parameters */
+/** Draw a Texture2D with rotation and scale */
 export const DrawTextureEx: WebFunction<"DrawTextureEx"> = delegate(
   "DrawTextureEx",
 );
@@ -1348,11 +1423,11 @@ export const DrawTextureEx: WebFunction<"DrawTextureEx"> = delegate(
 export const DrawTextureRec: WebFunction<"DrawTextureRec"> = delegate(
   "DrawTextureRec",
 );
-/** Draw a part of a texture defined by a rectangle with 'pro' parameters */
+/** Draw a part of a texture defined by a source rectangle to destination rectangle, with scaling and rotation */
 export const DrawTexturePro: WebFunction<"DrawTexturePro"> = delegate(
   "DrawTexturePro",
 );
-/** Draws a texture (or part of it) that stretches or shrinks nicely */
+/** Draw a texture (or part of it) that stretches or shrinks nicely */
 export const DrawTextureNPatch: WebFunction<"DrawTextureNPatch"> = delegate(
   "DrawTextureNPatch",
 );
@@ -1416,7 +1491,7 @@ export const GetFontDefault: WebFunction<"GetFontDefault"> = delegate(
 );
 /** Load font from file into GPU memory (VRAM) */
 export const LoadFont: WebFunction<"LoadFont"> = delegate("LoadFont");
-/** Load font from file with extended parameters, use NULL for codepoints and 0 for codepointCount to load the default character set, font size is provided in pixels height */
+/** Load font from file with defined codepoints and generation size, use NULL for codepoints and 0 for codepointCount to load the default character set, font size is provided in pixels height */
 export const LoadFontEx: WebFunction<"LoadFontEx"> = delegate("LoadFontEx");
 /** Load font from Image (XNA style) */
 export const LoadFontFromImage: WebFunction<"LoadFontFromImage"> = delegate(
@@ -1426,7 +1501,7 @@ export const LoadFontFromImage: WebFunction<"LoadFontFromImage"> = delegate(
 export const LoadFontFromMemory: WebFunction<"LoadFontFromMemory"> = delegate(
   "LoadFontFromMemory",
 );
-/** Check if a font is valid (font data loaded, WARNING: GPU texture not checked) */
+/** Check if font is valid (font data loaded, WARNING: GPU texture not checked) */
 export const IsFontValid: WebFunction<"IsFontValid"> = delegate("IsFontValid");
 /** Load font data for further use */
 export const LoadFontData: WebFunction<"LoadFontData"> = delegate(
@@ -1458,7 +1533,7 @@ export const DrawTextPro: WebFunction<"DrawTextPro"> = delegate("DrawTextPro");
 export const DrawTextCodepoint: WebFunction<"DrawTextCodepoint"> = delegate(
   "DrawTextCodepoint",
 );
-/** Draw multiple character (codepoint) */
+/** Draw multiple characters (codepoint) */
 export const DrawTextCodepoints: WebFunction<"DrawTextCodepoints"> = delegate(
   "DrawTextCodepoints",
 );
@@ -1528,7 +1603,7 @@ export const UnloadTextLines: WebFunction<"UnloadTextLines"> = delegate(
 );
 /** Copy one string to another, returns bytes copied */
 export const TextCopy: WebFunction<"TextCopy"> = delegate("TextCopy");
-/** Check if two text string are equal */
+/** Check if two text strings are equal */
 export const TextIsEqual: WebFunction<"TextIsEqual"> = delegate("TextIsEqual");
 /** Get text length, checks for '\0' ending */
 export const TextLength: WebFunction<"TextLength"> = delegate("TextLength");
@@ -1599,7 +1674,7 @@ export const DrawPoint3D: WebFunction<"DrawPoint3D"> = delegate("DrawPoint3D");
 export const DrawCircle3D: WebFunction<"DrawCircle3D"> = delegate(
   "DrawCircle3D",
 );
-/** Draw a color-filled triangle (vertex in counter-clockwise order!) */
+/** Draw a color-filled triangle, counter-clockwise vertex order */
 export const DrawTriangle3D: WebFunction<"DrawTriangle3D"> = delegate(
   "DrawTriangle3D",
 );
@@ -1621,7 +1696,7 @@ export const DrawCubeWiresV: WebFunction<"DrawCubeWiresV"> = delegate(
 );
 /** Draw sphere */
 export const DrawSphere: WebFunction<"DrawSphere"> = delegate("DrawSphere");
-/** Draw sphere with extended parameters */
+/** Draw sphere with defined rings and slices */
 export const DrawSphereEx: WebFunction<"DrawSphereEx"> = delegate(
   "DrawSphereEx",
 );
@@ -1663,7 +1738,7 @@ export const LoadModel: WebFunction<"LoadModel"> = delegate("LoadModel");
 export const LoadModelFromMesh: WebFunction<"LoadModelFromMesh"> = delegate(
   "LoadModelFromMesh",
 );
-/** Check if a model is valid (loaded in GPU, VAO/VBOs) */
+/** Check if model is valid (loaded in GPU, VAO/VBOs) */
 export const IsModelValid: WebFunction<"IsModelValid"> = delegate(
   "IsModelValid",
 );
@@ -1675,13 +1750,13 @@ export const GetModelBoundingBox: WebFunction<"GetModelBoundingBox"> = delegate(
 );
 /** Draw a model (with texture if set) */
 export const DrawModel: WebFunction<"DrawModel"> = delegate("DrawModel");
-/** Draw a model with extended parameters */
+/** Draw a model with custom transform */
 export const DrawModelEx: WebFunction<"DrawModelEx"> = delegate("DrawModelEx");
 /** Draw a model wires (with texture if set) */
 export const DrawModelWires: WebFunction<"DrawModelWires"> = delegate(
   "DrawModelWires",
 );
-/** Draw a model wires (with texture if set) with extended parameters */
+/** Draw a model wires with custom transform */
 export const DrawModelWiresEx: WebFunction<"DrawModelWiresEx"> = delegate(
   "DrawModelWiresEx",
 );
@@ -1693,11 +1768,11 @@ export const DrawBoundingBox: WebFunction<"DrawBoundingBox"> = delegate(
 export const DrawBillboard: WebFunction<"DrawBillboard"> = delegate(
   "DrawBillboard",
 );
-/** Draw a billboard texture defined by source */
+/** Draw a billboard texture defined by rectangle */
 export const DrawBillboardRec: WebFunction<"DrawBillboardRec"> = delegate(
   "DrawBillboardRec",
 );
-/** Draw a billboard texture defined by source and rotation */
+/** Draw a billboard texture defined by source rectangle with scaling and rotation */
 export const DrawBillboardPro: WebFunction<"DrawBillboardPro"> = delegate(
   "DrawBillboardPro",
 );
@@ -1773,7 +1848,7 @@ export const LoadMaterials: WebFunction<"LoadMaterials"> = delegate(
 export const LoadMaterialDefault: WebFunction<"LoadMaterialDefault"> = delegate(
   "LoadMaterialDefault",
 );
-/** Check if a material is valid (shader assigned, map textures loaded in GPU) */
+/** Check if material is valid (shader assigned, map textures loaded in GPU) */
 export const IsMaterialValid: WebFunction<"IsMaterialValid"> = delegate(
   "IsMaterialValid",
 );
@@ -1858,7 +1933,7 @@ export const LoadWave: WebFunction<"LoadWave"> = delegate("LoadWave");
 export const LoadWaveFromMemory: WebFunction<"LoadWaveFromMemory"> = delegate(
   "LoadWaveFromMemory",
 );
-/** Checks if wave data is valid (data loaded and parameters) */
+/** Check if wave data is valid (data loaded and parameters) */
 export const IsWaveValid: WebFunction<"IsWaveValid"> = delegate("IsWaveValid");
 /** Load sound from file */
 export const LoadSound: WebFunction<"LoadSound"> = delegate("LoadSound");
@@ -1866,11 +1941,11 @@ export const LoadSound: WebFunction<"LoadSound"> = delegate("LoadSound");
 export const LoadSoundFromWave: WebFunction<"LoadSoundFromWave"> = delegate(
   "LoadSoundFromWave",
 );
-/** Create a new sound that shares the same sample data as the source sound, does not own the sound data */
+/** Load sound alias, new sound that shares the same sample data as the source sound, does not own the sound data */
 export const LoadSoundAlias: WebFunction<"LoadSoundAlias"> = delegate(
   "LoadSoundAlias",
 );
-/** Checks if a sound is valid (data loaded and buffers initialized) */
+/** Check if sound is valid (data loaded and buffers initialized) */
 export const IsSoundValid: WebFunction<"IsSoundValid"> = delegate(
   "IsSoundValid",
 );
@@ -1880,7 +1955,7 @@ export const UpdateSound: WebFunction<"UpdateSound"> = delegate("UpdateSound");
 export const UnloadWave: WebFunction<"UnloadWave"> = delegate("UnloadWave");
 /** Unload sound */
 export const UnloadSound: WebFunction<"UnloadSound"> = delegate("UnloadSound");
-/** Unload a sound alias (does not deallocate sample data) */
+/** Unload sound alias (does not deallocate sample data) */
 export const UnloadSoundAlias: WebFunction<"UnloadSoundAlias"> = delegate(
   "UnloadSoundAlias",
 );
@@ -1898,7 +1973,7 @@ export const StopSound: WebFunction<"StopSound"> = delegate("StopSound");
 export const PauseSound: WebFunction<"PauseSound"> = delegate("PauseSound");
 /** Resume a paused sound */
 export const ResumeSound: WebFunction<"ResumeSound"> = delegate("ResumeSound");
-/** Check if a sound is currently playing */
+/** Check if sound is currently playing */
 export const IsSoundPlaying: WebFunction<"IsSoundPlaying"> = delegate(
   "IsSoundPlaying",
 );
@@ -1934,7 +2009,7 @@ export const LoadMusicStream: WebFunction<"LoadMusicStream"> = delegate(
 export const LoadMusicStreamFromMemory: WebFunction<
   "LoadMusicStreamFromMemory"
 > = delegate("LoadMusicStreamFromMemory");
-/** Checks if a music stream is valid (context and buffers initialized) */
+/** Check if music stream is valid (context and buffers initialized) */
 export const IsMusicValid: WebFunction<"IsMusicValid"> = delegate(
   "IsMusicValid",
 );
@@ -1949,7 +2024,7 @@ export const PlayMusicStream: WebFunction<"PlayMusicStream"> = delegate(
 /** Check if music is playing */
 export const IsMusicStreamPlaying: WebFunction<"IsMusicStreamPlaying"> =
   delegate("IsMusicStreamPlaying");
-/** Updates buffers for music streaming */
+/** Update buffers for music streaming */
 export const UpdateMusicStream: WebFunction<"UpdateMusicStream"> = delegate(
   "UpdateMusicStream",
 );
@@ -1973,11 +2048,11 @@ export const SeekMusicStream: WebFunction<"SeekMusicStream"> = delegate(
 export const SetMusicVolume: WebFunction<"SetMusicVolume"> = delegate(
   "SetMusicVolume",
 );
-/** Set pitch for a music (1.0 is base level) */
+/** Set pitch for music (1.0 is base level) */
 export const SetMusicPitch: WebFunction<"SetMusicPitch"> = delegate(
   "SetMusicPitch",
 );
-/** Set pan for a music (-1.0 left, 0.0 center, 1.0 right) */
+/** Set pan for music (-1.0 left, 0.0 center, 1.0 right) */
 export const SetMusicPan: WebFunction<"SetMusicPan"> = delegate("SetMusicPan");
 /** Get music time length (in seconds) */
 export const GetMusicTimeLength: WebFunction<"GetMusicTimeLength"> = delegate(
@@ -1991,7 +2066,7 @@ export const GetMusicTimePlayed: WebFunction<"GetMusicTimePlayed"> = delegate(
 export const LoadAudioStream: WebFunction<"LoadAudioStream"> = delegate(
   "LoadAudioStream",
 );
-/** Checks if an audio stream is valid (buffers initialized) */
+/** Check if an audio stream is valid (buffers initialized) */
 export const IsAudioStreamValid: WebFunction<"IsAudioStreamValid"> = delegate(
   "IsAudioStreamValid",
 );
@@ -2032,7 +2107,7 @@ export const SetAudioStreamVolume: WebFunction<"SetAudioStreamVolume"> =
 export const SetAudioStreamPitch: WebFunction<"SetAudioStreamPitch"> = delegate(
   "SetAudioStreamPitch",
 );
-/** Set pan for audio stream (-1.0 to 1.0 range, 0.0 is centered) */
+/** Set pan for audio stream (-1.0 left, 0.0 center, 1.0 right) */
 export const SetAudioStreamPan: WebFunction<"SetAudioStreamPan"> = delegate(
   "SetAudioStreamPan",
 );
@@ -2059,561 +2134,561 @@ export const AttachAudioMixedProcessor: WebFunction<
 export const DetachAudioMixedProcessor: WebFunction<
   "DetachAudioMixedProcessor"
 > = delegate("DetachAudioMixedProcessor");
-/** Clamp from the raylib 6.0 API. */
+/** Clamp from the raylib 6.2 API. */
 export const Clamp: WebFunction<"Clamp"> = delegate("Clamp");
-/** Lerp from the raylib 6.0 API. */
+/** Lerp from the raylib 6.2 API. */
 export const Lerp: WebFunction<"Lerp"> = delegate("Lerp");
-/** Normalize from the raylib 6.0 API. */
+/** Normalize from the raylib 6.2 API. */
 export const Normalize: WebFunction<"Normalize"> = delegate("Normalize");
-/** Remap from the raylib 6.0 API. */
+/** Remap from the raylib 6.2 API. */
 export const Remap: WebFunction<"Remap"> = delegate("Remap");
-/** Wrap from the raylib 6.0 API. */
+/** Wrap from the raylib 6.2 API. */
 export const Wrap: WebFunction<"Wrap"> = delegate("Wrap");
-/** FloatEquals from the raylib 6.0 API. */
+/** FloatEquals from the raylib 6.2 API. */
 export const FloatEquals: WebFunction<"FloatEquals"> = delegate("FloatEquals");
-/** Vector2Zero from the raylib 6.0 API. */
+/** Vector2Zero from the raylib 6.2 API. */
 export const Vector2Zero: WebFunction<"Vector2Zero"> = delegate("Vector2Zero");
-/** Vector2One from the raylib 6.0 API. */
+/** Vector2One from the raylib 6.2 API. */
 export const Vector2One: WebFunction<"Vector2One"> = delegate("Vector2One");
-/** Vector2Add from the raylib 6.0 API. */
+/** Vector2Add from the raylib 6.2 API. */
 export const Vector2Add: WebFunction<"Vector2Add"> = delegate("Vector2Add");
-/** Vector2AddValue from the raylib 6.0 API. */
+/** Vector2AddValue from the raylib 6.2 API. */
 export const Vector2AddValue: WebFunction<"Vector2AddValue"> = delegate(
   "Vector2AddValue",
 );
-/** Vector2Subtract from the raylib 6.0 API. */
+/** Vector2Subtract from the raylib 6.2 API. */
 export const Vector2Subtract: WebFunction<"Vector2Subtract"> = delegate(
   "Vector2Subtract",
 );
-/** Vector2SubtractValue from the raylib 6.0 API. */
+/** Vector2SubtractValue from the raylib 6.2 API. */
 export const Vector2SubtractValue: WebFunction<"Vector2SubtractValue"> =
   delegate("Vector2SubtractValue");
-/** Vector2Length from the raylib 6.0 API. */
+/** Vector2Length from the raylib 6.2 API. */
 export const Vector2Length: WebFunction<"Vector2Length"> = delegate(
   "Vector2Length",
 );
-/** Vector2LengthSqr from the raylib 6.0 API. */
+/** Vector2LengthSqr from the raylib 6.2 API. */
 export const Vector2LengthSqr: WebFunction<"Vector2LengthSqr"> = delegate(
   "Vector2LengthSqr",
 );
-/** Vector2DotProduct from the raylib 6.0 API. */
+/** Vector2DotProduct from the raylib 6.2 API. */
 export const Vector2DotProduct: WebFunction<"Vector2DotProduct"> = delegate(
   "Vector2DotProduct",
 );
-/** Vector2CrossProduct from the raylib 6.0 API. */
+/** Vector2CrossProduct from the raylib 6.2 API. */
 export const Vector2CrossProduct: WebFunction<"Vector2CrossProduct"> = delegate(
   "Vector2CrossProduct",
 );
-/** Vector2Distance from the raylib 6.0 API. */
+/** Vector2Distance from the raylib 6.2 API. */
 export const Vector2Distance: WebFunction<"Vector2Distance"> = delegate(
   "Vector2Distance",
 );
-/** Vector2DistanceSqr from the raylib 6.0 API. */
+/** Vector2DistanceSqr from the raylib 6.2 API. */
 export const Vector2DistanceSqr: WebFunction<"Vector2DistanceSqr"> = delegate(
   "Vector2DistanceSqr",
 );
-/** Vector2Angle from the raylib 6.0 API. */
+/** Vector2Angle from the raylib 6.2 API. */
 export const Vector2Angle: WebFunction<"Vector2Angle"> = delegate(
   "Vector2Angle",
 );
-/** Vector2LineAngle from the raylib 6.0 API. */
+/** Vector2LineAngle from the raylib 6.2 API. */
 export const Vector2LineAngle: WebFunction<"Vector2LineAngle"> = delegate(
   "Vector2LineAngle",
 );
-/** Vector2Scale from the raylib 6.0 API. */
+/** Vector2Scale from the raylib 6.2 API. */
 export const Vector2Scale: WebFunction<"Vector2Scale"> = delegate(
   "Vector2Scale",
 );
-/** Vector2Multiply from the raylib 6.0 API. */
+/** Vector2Multiply from the raylib 6.2 API. */
 export const Vector2Multiply: WebFunction<"Vector2Multiply"> = delegate(
   "Vector2Multiply",
 );
-/** Vector2Negate from the raylib 6.0 API. */
+/** Vector2Negate from the raylib 6.2 API. */
 export const Vector2Negate: WebFunction<"Vector2Negate"> = delegate(
   "Vector2Negate",
 );
-/** Vector2Divide from the raylib 6.0 API. */
+/** Vector2Divide from the raylib 6.2 API. */
 export const Vector2Divide: WebFunction<"Vector2Divide"> = delegate(
   "Vector2Divide",
 );
-/** Vector2Normalize from the raylib 6.0 API. */
+/** Vector2Normalize from the raylib 6.2 API. */
 export const Vector2Normalize: WebFunction<"Vector2Normalize"> = delegate(
   "Vector2Normalize",
 );
-/** Vector2Transform from the raylib 6.0 API. */
+/** Vector2Transform from the raylib 6.2 API. */
 export const Vector2Transform: WebFunction<"Vector2Transform"> = delegate(
   "Vector2Transform",
 );
-/** Vector2Lerp from the raylib 6.0 API. */
+/** Vector2Lerp from the raylib 6.2 API. */
 export const Vector2Lerp: WebFunction<"Vector2Lerp"> = delegate("Vector2Lerp");
-/** Vector2Reflect from the raylib 6.0 API. */
+/** Vector2Reflect from the raylib 6.2 API. */
 export const Vector2Reflect: WebFunction<"Vector2Reflect"> = delegate(
   "Vector2Reflect",
 );
-/** Vector2Min from the raylib 6.0 API. */
+/** Vector2Min from the raylib 6.2 API. */
 export const Vector2Min: WebFunction<"Vector2Min"> = delegate("Vector2Min");
-/** Vector2Max from the raylib 6.0 API. */
+/** Vector2Max from the raylib 6.2 API. */
 export const Vector2Max: WebFunction<"Vector2Max"> = delegate("Vector2Max");
-/** Vector2Rotate from the raylib 6.0 API. */
+/** Vector2Rotate from the raylib 6.2 API. */
 export const Vector2Rotate: WebFunction<"Vector2Rotate"> = delegate(
   "Vector2Rotate",
 );
-/** Vector2MoveTowards from the raylib 6.0 API. */
+/** Vector2MoveTowards from the raylib 6.2 API. */
 export const Vector2MoveTowards: WebFunction<"Vector2MoveTowards"> = delegate(
   "Vector2MoveTowards",
 );
-/** Vector2Invert from the raylib 6.0 API. */
+/** Vector2Invert from the raylib 6.2 API. */
 export const Vector2Invert: WebFunction<"Vector2Invert"> = delegate(
   "Vector2Invert",
 );
-/** Vector2Clamp from the raylib 6.0 API. */
+/** Vector2Clamp from the raylib 6.2 API. */
 export const Vector2Clamp: WebFunction<"Vector2Clamp"> = delegate(
   "Vector2Clamp",
 );
-/** Vector2ClampValue from the raylib 6.0 API. */
+/** Vector2ClampValue from the raylib 6.2 API. */
 export const Vector2ClampValue: WebFunction<"Vector2ClampValue"> = delegate(
   "Vector2ClampValue",
 );
-/** Vector2Equals from the raylib 6.0 API. */
+/** Vector2Equals from the raylib 6.2 API. */
 export const Vector2Equals: WebFunction<"Vector2Equals"> = delegate(
   "Vector2Equals",
 );
-/** Vector2Refract from the raylib 6.0 API. */
+/** Vector2Refract from the raylib 6.2 API. */
 export const Vector2Refract: WebFunction<"Vector2Refract"> = delegate(
   "Vector2Refract",
 );
-/** Vector3Zero from the raylib 6.0 API. */
+/** Vector3Zero from the raylib 6.2 API. */
 export const Vector3Zero: WebFunction<"Vector3Zero"> = delegate("Vector3Zero");
-/** Vector3One from the raylib 6.0 API. */
+/** Vector3One from the raylib 6.2 API. */
 export const Vector3One: WebFunction<"Vector3One"> = delegate("Vector3One");
-/** Vector3Add from the raylib 6.0 API. */
+/** Vector3Add from the raylib 6.2 API. */
 export const Vector3Add: WebFunction<"Vector3Add"> = delegate("Vector3Add");
-/** Vector3AddValue from the raylib 6.0 API. */
+/** Vector3AddValue from the raylib 6.2 API. */
 export const Vector3AddValue: WebFunction<"Vector3AddValue"> = delegate(
   "Vector3AddValue",
 );
-/** Vector3Subtract from the raylib 6.0 API. */
+/** Vector3Subtract from the raylib 6.2 API. */
 export const Vector3Subtract: WebFunction<"Vector3Subtract"> = delegate(
   "Vector3Subtract",
 );
-/** Vector3SubtractValue from the raylib 6.0 API. */
+/** Vector3SubtractValue from the raylib 6.2 API. */
 export const Vector3SubtractValue: WebFunction<"Vector3SubtractValue"> =
   delegate("Vector3SubtractValue");
-/** Vector3Scale from the raylib 6.0 API. */
+/** Vector3Scale from the raylib 6.2 API. */
 export const Vector3Scale: WebFunction<"Vector3Scale"> = delegate(
   "Vector3Scale",
 );
-/** Vector3Multiply from the raylib 6.0 API. */
+/** Vector3Multiply from the raylib 6.2 API. */
 export const Vector3Multiply: WebFunction<"Vector3Multiply"> = delegate(
   "Vector3Multiply",
 );
-/** Vector3CrossProduct from the raylib 6.0 API. */
+/** Vector3CrossProduct from the raylib 6.2 API. */
 export const Vector3CrossProduct: WebFunction<"Vector3CrossProduct"> = delegate(
   "Vector3CrossProduct",
 );
-/** Vector3Perpendicular from the raylib 6.0 API. */
+/** Vector3Perpendicular from the raylib 6.2 API. */
 export const Vector3Perpendicular: WebFunction<"Vector3Perpendicular"> =
   delegate("Vector3Perpendicular");
-/** Vector3Length from the raylib 6.0 API. */
+/** Vector3Length from the raylib 6.2 API. */
 export const Vector3Length: WebFunction<"Vector3Length"> = delegate(
   "Vector3Length",
 );
-/** Vector3LengthSqr from the raylib 6.0 API. */
+/** Vector3LengthSqr from the raylib 6.2 API. */
 export const Vector3LengthSqr: WebFunction<"Vector3LengthSqr"> = delegate(
   "Vector3LengthSqr",
 );
-/** Vector3DotProduct from the raylib 6.0 API. */
+/** Vector3DotProduct from the raylib 6.2 API. */
 export const Vector3DotProduct: WebFunction<"Vector3DotProduct"> = delegate(
   "Vector3DotProduct",
 );
-/** Vector3Distance from the raylib 6.0 API. */
+/** Vector3Distance from the raylib 6.2 API. */
 export const Vector3Distance: WebFunction<"Vector3Distance"> = delegate(
   "Vector3Distance",
 );
-/** Vector3DistanceSqr from the raylib 6.0 API. */
+/** Vector3DistanceSqr from the raylib 6.2 API. */
 export const Vector3DistanceSqr: WebFunction<"Vector3DistanceSqr"> = delegate(
   "Vector3DistanceSqr",
 );
-/** Vector3Angle from the raylib 6.0 API. */
+/** Vector3Angle from the raylib 6.2 API. */
 export const Vector3Angle: WebFunction<"Vector3Angle"> = delegate(
   "Vector3Angle",
 );
-/** Vector3Negate from the raylib 6.0 API. */
+/** Vector3Negate from the raylib 6.2 API. */
 export const Vector3Negate: WebFunction<"Vector3Negate"> = delegate(
   "Vector3Negate",
 );
-/** Vector3Divide from the raylib 6.0 API. */
+/** Vector3Divide from the raylib 6.2 API. */
 export const Vector3Divide: WebFunction<"Vector3Divide"> = delegate(
   "Vector3Divide",
 );
-/** Vector3Normalize from the raylib 6.0 API. */
+/** Vector3Normalize from the raylib 6.2 API. */
 export const Vector3Normalize: WebFunction<"Vector3Normalize"> = delegate(
   "Vector3Normalize",
 );
-/** Vector3Project from the raylib 6.0 API. */
+/** Vector3Project from the raylib 6.2 API. */
 export const Vector3Project: WebFunction<"Vector3Project"> = delegate(
   "Vector3Project",
 );
-/** Vector3Reject from the raylib 6.0 API. */
+/** Vector3Reject from the raylib 6.2 API. */
 export const Vector3Reject: WebFunction<"Vector3Reject"> = delegate(
   "Vector3Reject",
 );
-/** Vector3OrthoNormalize from the raylib 6.0 API. */
+/** Vector3OrthoNormalize from the raylib 6.2 API. */
 export const Vector3OrthoNormalize: WebFunction<"Vector3OrthoNormalize"> =
   delegate("Vector3OrthoNormalize");
-/** Vector3Transform from the raylib 6.0 API. */
+/** Vector3Transform from the raylib 6.2 API. */
 export const Vector3Transform: WebFunction<"Vector3Transform"> = delegate(
   "Vector3Transform",
 );
-/** Vector3RotateByQuaternion from the raylib 6.0 API. */
+/** Vector3RotateByQuaternion from the raylib 6.2 API. */
 export const Vector3RotateByQuaternion: WebFunction<
   "Vector3RotateByQuaternion"
 > = delegate("Vector3RotateByQuaternion");
-/** Vector3RotateByAxisAngle from the raylib 6.0 API. */
+/** Vector3RotateByAxisAngle from the raylib 6.2 API. */
 export const Vector3RotateByAxisAngle: WebFunction<"Vector3RotateByAxisAngle"> =
   delegate("Vector3RotateByAxisAngle");
-/** Vector3MoveTowards from the raylib 6.0 API. */
+/** Vector3MoveTowards from the raylib 6.2 API. */
 export const Vector3MoveTowards: WebFunction<"Vector3MoveTowards"> = delegate(
   "Vector3MoveTowards",
 );
-/** Vector3Lerp from the raylib 6.0 API. */
+/** Vector3Lerp from the raylib 6.2 API. */
 export const Vector3Lerp: WebFunction<"Vector3Lerp"> = delegate("Vector3Lerp");
-/** Vector3CubicHermite from the raylib 6.0 API. */
+/** Vector3CubicHermite from the raylib 6.2 API. */
 export const Vector3CubicHermite: WebFunction<"Vector3CubicHermite"> = delegate(
   "Vector3CubicHermite",
 );
-/** Vector3Reflect from the raylib 6.0 API. */
+/** Vector3Reflect from the raylib 6.2 API. */
 export const Vector3Reflect: WebFunction<"Vector3Reflect"> = delegate(
   "Vector3Reflect",
 );
-/** Vector3Min from the raylib 6.0 API. */
+/** Vector3Min from the raylib 6.2 API. */
 export const Vector3Min: WebFunction<"Vector3Min"> = delegate("Vector3Min");
-/** Vector3Max from the raylib 6.0 API. */
+/** Vector3Max from the raylib 6.2 API. */
 export const Vector3Max: WebFunction<"Vector3Max"> = delegate("Vector3Max");
-/** Vector3Barycenter from the raylib 6.0 API. */
+/** Vector3Barycenter from the raylib 6.2 API. */
 export const Vector3Barycenter: WebFunction<"Vector3Barycenter"> = delegate(
   "Vector3Barycenter",
 );
-/** Vector3Unproject from the raylib 6.0 API. */
+/** Vector3Unproject from the raylib 6.2 API. */
 export const Vector3Unproject: WebFunction<"Vector3Unproject"> = delegate(
   "Vector3Unproject",
 );
-/** Vector3ToFloatV from the raylib 6.0 API. */
+/** Vector3ToFloatV from the raylib 6.2 API. */
 export const Vector3ToFloatV: WebFunction<"Vector3ToFloatV"> = delegate(
   "Vector3ToFloatV",
 );
-/** Vector3Invert from the raylib 6.0 API. */
+/** Vector3Invert from the raylib 6.2 API. */
 export const Vector3Invert: WebFunction<"Vector3Invert"> = delegate(
   "Vector3Invert",
 );
-/** Vector3Clamp from the raylib 6.0 API. */
+/** Vector3Clamp from the raylib 6.2 API. */
 export const Vector3Clamp: WebFunction<"Vector3Clamp"> = delegate(
   "Vector3Clamp",
 );
-/** Vector3ClampValue from the raylib 6.0 API. */
+/** Vector3ClampValue from the raylib 6.2 API. */
 export const Vector3ClampValue: WebFunction<"Vector3ClampValue"> = delegate(
   "Vector3ClampValue",
 );
-/** Vector3Equals from the raylib 6.0 API. */
+/** Vector3Equals from the raylib 6.2 API. */
 export const Vector3Equals: WebFunction<"Vector3Equals"> = delegate(
   "Vector3Equals",
 );
-/** Vector3Refract from the raylib 6.0 API. */
+/** Vector3Refract from the raylib 6.2 API. */
 export const Vector3Refract: WebFunction<"Vector3Refract"> = delegate(
   "Vector3Refract",
 );
-/** Vector4Zero from the raylib 6.0 API. */
+/** Vector4Zero from the raylib 6.2 API. */
 export const Vector4Zero: WebFunction<"Vector4Zero"> = delegate("Vector4Zero");
-/** Vector4One from the raylib 6.0 API. */
+/** Vector4One from the raylib 6.2 API. */
 export const Vector4One: WebFunction<"Vector4One"> = delegate("Vector4One");
-/** Vector4Add from the raylib 6.0 API. */
+/** Vector4Add from the raylib 6.2 API. */
 export const Vector4Add: WebFunction<"Vector4Add"> = delegate("Vector4Add");
-/** Vector4AddValue from the raylib 6.0 API. */
+/** Vector4AddValue from the raylib 6.2 API. */
 export const Vector4AddValue: WebFunction<"Vector4AddValue"> = delegate(
   "Vector4AddValue",
 );
-/** Vector4Subtract from the raylib 6.0 API. */
+/** Vector4Subtract from the raylib 6.2 API. */
 export const Vector4Subtract: WebFunction<"Vector4Subtract"> = delegate(
   "Vector4Subtract",
 );
-/** Vector4SubtractValue from the raylib 6.0 API. */
+/** Vector4SubtractValue from the raylib 6.2 API. */
 export const Vector4SubtractValue: WebFunction<"Vector4SubtractValue"> =
   delegate("Vector4SubtractValue");
-/** Vector4Length from the raylib 6.0 API. */
+/** Vector4Length from the raylib 6.2 API. */
 export const Vector4Length: WebFunction<"Vector4Length"> = delegate(
   "Vector4Length",
 );
-/** Vector4LengthSqr from the raylib 6.0 API. */
+/** Vector4LengthSqr from the raylib 6.2 API. */
 export const Vector4LengthSqr: WebFunction<"Vector4LengthSqr"> = delegate(
   "Vector4LengthSqr",
 );
-/** Vector4DotProduct from the raylib 6.0 API. */
+/** Vector4DotProduct from the raylib 6.2 API. */
 export const Vector4DotProduct: WebFunction<"Vector4DotProduct"> = delegate(
   "Vector4DotProduct",
 );
-/** Vector4Distance from the raylib 6.0 API. */
+/** Vector4Distance from the raylib 6.2 API. */
 export const Vector4Distance: WebFunction<"Vector4Distance"> = delegate(
   "Vector4Distance",
 );
-/** Vector4DistanceSqr from the raylib 6.0 API. */
+/** Vector4DistanceSqr from the raylib 6.2 API. */
 export const Vector4DistanceSqr: WebFunction<"Vector4DistanceSqr"> = delegate(
   "Vector4DistanceSqr",
 );
-/** Vector4Scale from the raylib 6.0 API. */
+/** Vector4Scale from the raylib 6.2 API. */
 export const Vector4Scale: WebFunction<"Vector4Scale"> = delegate(
   "Vector4Scale",
 );
-/** Vector4Multiply from the raylib 6.0 API. */
+/** Vector4Multiply from the raylib 6.2 API. */
 export const Vector4Multiply: WebFunction<"Vector4Multiply"> = delegate(
   "Vector4Multiply",
 );
-/** Vector4Negate from the raylib 6.0 API. */
+/** Vector4Negate from the raylib 6.2 API. */
 export const Vector4Negate: WebFunction<"Vector4Negate"> = delegate(
   "Vector4Negate",
 );
-/** Vector4Divide from the raylib 6.0 API. */
+/** Vector4Divide from the raylib 6.2 API. */
 export const Vector4Divide: WebFunction<"Vector4Divide"> = delegate(
   "Vector4Divide",
 );
-/** Vector4Normalize from the raylib 6.0 API. */
+/** Vector4Normalize from the raylib 6.2 API. */
 export const Vector4Normalize: WebFunction<"Vector4Normalize"> = delegate(
   "Vector4Normalize",
 );
-/** Vector4Min from the raylib 6.0 API. */
+/** Vector4Min from the raylib 6.2 API. */
 export const Vector4Min: WebFunction<"Vector4Min"> = delegate("Vector4Min");
-/** Vector4Max from the raylib 6.0 API. */
+/** Vector4Max from the raylib 6.2 API. */
 export const Vector4Max: WebFunction<"Vector4Max"> = delegate("Vector4Max");
-/** Vector4Lerp from the raylib 6.0 API. */
+/** Vector4Lerp from the raylib 6.2 API. */
 export const Vector4Lerp: WebFunction<"Vector4Lerp"> = delegate("Vector4Lerp");
-/** Vector4MoveTowards from the raylib 6.0 API. */
+/** Vector4MoveTowards from the raylib 6.2 API. */
 export const Vector4MoveTowards: WebFunction<"Vector4MoveTowards"> = delegate(
   "Vector4MoveTowards",
 );
-/** Vector4Invert from the raylib 6.0 API. */
+/** Vector4Invert from the raylib 6.2 API. */
 export const Vector4Invert: WebFunction<"Vector4Invert"> = delegate(
   "Vector4Invert",
 );
-/** Vector4Equals from the raylib 6.0 API. */
+/** Vector4Equals from the raylib 6.2 API. */
 export const Vector4Equals: WebFunction<"Vector4Equals"> = delegate(
   "Vector4Equals",
 );
-/** MatrixDeterminant from the raylib 6.0 API. */
+/** MatrixDeterminant from the raylib 6.2 API. */
 export const MatrixDeterminant: WebFunction<"MatrixDeterminant"> = delegate(
   "MatrixDeterminant",
 );
-/** MatrixTrace from the raylib 6.0 API. */
+/** MatrixTrace from the raylib 6.2 API. */
 export const MatrixTrace: WebFunction<"MatrixTrace"> = delegate("MatrixTrace");
-/** MatrixTranspose from the raylib 6.0 API. */
+/** MatrixTranspose from the raylib 6.2 API. */
 export const MatrixTranspose: WebFunction<"MatrixTranspose"> = delegate(
   "MatrixTranspose",
 );
-/** MatrixInvert from the raylib 6.0 API. */
+/** MatrixInvert from the raylib 6.2 API. */
 export const MatrixInvert: WebFunction<"MatrixInvert"> = delegate(
   "MatrixInvert",
 );
-/** MatrixIdentity from the raylib 6.0 API. */
+/** MatrixIdentity from the raylib 6.2 API. */
 export const MatrixIdentity: WebFunction<"MatrixIdentity"> = delegate(
   "MatrixIdentity",
 );
-/** MatrixAdd from the raylib 6.0 API. */
+/** MatrixAdd from the raylib 6.2 API. */
 export const MatrixAdd: WebFunction<"MatrixAdd"> = delegate("MatrixAdd");
-/** MatrixSubtract from the raylib 6.0 API. */
+/** MatrixSubtract from the raylib 6.2 API. */
 export const MatrixSubtract: WebFunction<"MatrixSubtract"> = delegate(
   "MatrixSubtract",
 );
-/** MatrixMultiply from the raylib 6.0 API. */
+/** MatrixMultiply from the raylib 6.2 API. */
 export const MatrixMultiply: WebFunction<"MatrixMultiply"> = delegate(
   "MatrixMultiply",
 );
-/** MatrixMultiplyValue from the raylib 6.0 API. */
+/** MatrixMultiplyValue from the raylib 6.2 API. */
 export const MatrixMultiplyValue: WebFunction<"MatrixMultiplyValue"> = delegate(
   "MatrixMultiplyValue",
 );
-/** MatrixTranslate from the raylib 6.0 API. */
+/** MatrixTranslate from the raylib 6.2 API. */
 export const MatrixTranslate: WebFunction<"MatrixTranslate"> = delegate(
   "MatrixTranslate",
 );
-/** MatrixRotate from the raylib 6.0 API. */
+/** MatrixRotate from the raylib 6.2 API. */
 export const MatrixRotate: WebFunction<"MatrixRotate"> = delegate(
   "MatrixRotate",
 );
-/** MatrixRotateX from the raylib 6.0 API. */
+/** MatrixRotateX from the raylib 6.2 API. */
 export const MatrixRotateX: WebFunction<"MatrixRotateX"> = delegate(
   "MatrixRotateX",
 );
-/** MatrixRotateY from the raylib 6.0 API. */
+/** MatrixRotateY from the raylib 6.2 API. */
 export const MatrixRotateY: WebFunction<"MatrixRotateY"> = delegate(
   "MatrixRotateY",
 );
-/** MatrixRotateZ from the raylib 6.0 API. */
+/** MatrixRotateZ from the raylib 6.2 API. */
 export const MatrixRotateZ: WebFunction<"MatrixRotateZ"> = delegate(
   "MatrixRotateZ",
 );
-/** MatrixRotateXYZ from the raylib 6.0 API. */
+/** MatrixRotateXYZ from the raylib 6.2 API. */
 export const MatrixRotateXYZ: WebFunction<"MatrixRotateXYZ"> = delegate(
   "MatrixRotateXYZ",
 );
-/** MatrixRotateZYX from the raylib 6.0 API. */
+/** MatrixRotateZYX from the raylib 6.2 API. */
 export const MatrixRotateZYX: WebFunction<"MatrixRotateZYX"> = delegate(
   "MatrixRotateZYX",
 );
-/** MatrixScale from the raylib 6.0 API. */
+/** MatrixScale from the raylib 6.2 API. */
 export const MatrixScale: WebFunction<"MatrixScale"> = delegate("MatrixScale");
-/** MatrixFrustum from the raylib 6.0 API. */
+/** MatrixFrustum from the raylib 6.2 API. */
 export const MatrixFrustum: WebFunction<"MatrixFrustum"> = delegate(
   "MatrixFrustum",
 );
-/** MatrixPerspective from the raylib 6.0 API. */
+/** MatrixPerspective from the raylib 6.2 API. */
 export const MatrixPerspective: WebFunction<"MatrixPerspective"> = delegate(
   "MatrixPerspective",
 );
-/** MatrixOrtho from the raylib 6.0 API. */
+/** MatrixOrtho from the raylib 6.2 API. */
 export const MatrixOrtho: WebFunction<"MatrixOrtho"> = delegate("MatrixOrtho");
-/** MatrixLookAt from the raylib 6.0 API. */
+/** MatrixLookAt from the raylib 6.2 API. */
 export const MatrixLookAt: WebFunction<"MatrixLookAt"> = delegate(
   "MatrixLookAt",
 );
-/** MatrixToFloatV from the raylib 6.0 API. */
+/** MatrixToFloatV from the raylib 6.2 API. */
 export const MatrixToFloatV: WebFunction<"MatrixToFloatV"> = delegate(
   "MatrixToFloatV",
 );
-/** QuaternionAdd from the raylib 6.0 API. */
+/** QuaternionAdd from the raylib 6.2 API. */
 export const QuaternionAdd: WebFunction<"QuaternionAdd"> = delegate(
   "QuaternionAdd",
 );
-/** QuaternionAddValue from the raylib 6.0 API. */
+/** QuaternionAddValue from the raylib 6.2 API. */
 export const QuaternionAddValue: WebFunction<"QuaternionAddValue"> = delegate(
   "QuaternionAddValue",
 );
-/** QuaternionSubtract from the raylib 6.0 API. */
+/** QuaternionSubtract from the raylib 6.2 API. */
 export const QuaternionSubtract: WebFunction<"QuaternionSubtract"> = delegate(
   "QuaternionSubtract",
 );
-/** QuaternionSubtractValue from the raylib 6.0 API. */
+/** QuaternionSubtractValue from the raylib 6.2 API. */
 export const QuaternionSubtractValue: WebFunction<"QuaternionSubtractValue"> =
   delegate("QuaternionSubtractValue");
-/** QuaternionIdentity from the raylib 6.0 API. */
+/** QuaternionIdentity from the raylib 6.2 API. */
 export const QuaternionIdentity: WebFunction<"QuaternionIdentity"> = delegate(
   "QuaternionIdentity",
 );
-/** QuaternionLength from the raylib 6.0 API. */
+/** QuaternionLength from the raylib 6.2 API. */
 export const QuaternionLength: WebFunction<"QuaternionLength"> = delegate(
   "QuaternionLength",
 );
-/** QuaternionNormalize from the raylib 6.0 API. */
+/** QuaternionNormalize from the raylib 6.2 API. */
 export const QuaternionNormalize: WebFunction<"QuaternionNormalize"> = delegate(
   "QuaternionNormalize",
 );
-/** QuaternionInvert from the raylib 6.0 API. */
+/** QuaternionInvert from the raylib 6.2 API. */
 export const QuaternionInvert: WebFunction<"QuaternionInvert"> = delegate(
   "QuaternionInvert",
 );
-/** QuaternionMultiply from the raylib 6.0 API. */
+/** QuaternionMultiply from the raylib 6.2 API. */
 export const QuaternionMultiply: WebFunction<"QuaternionMultiply"> = delegate(
   "QuaternionMultiply",
 );
-/** QuaternionScale from the raylib 6.0 API. */
+/** QuaternionScale from the raylib 6.2 API. */
 export const QuaternionScale: WebFunction<"QuaternionScale"> = delegate(
   "QuaternionScale",
 );
-/** QuaternionDivide from the raylib 6.0 API. */
+/** QuaternionDivide from the raylib 6.2 API. */
 export const QuaternionDivide: WebFunction<"QuaternionDivide"> = delegate(
   "QuaternionDivide",
 );
-/** QuaternionLerp from the raylib 6.0 API. */
+/** QuaternionLerp from the raylib 6.2 API. */
 export const QuaternionLerp: WebFunction<"QuaternionLerp"> = delegate(
   "QuaternionLerp",
 );
-/** QuaternionNlerp from the raylib 6.0 API. */
+/** QuaternionNlerp from the raylib 6.2 API. */
 export const QuaternionNlerp: WebFunction<"QuaternionNlerp"> = delegate(
   "QuaternionNlerp",
 );
-/** QuaternionSlerp from the raylib 6.0 API. */
+/** QuaternionSlerp from the raylib 6.2 API. */
 export const QuaternionSlerp: WebFunction<"QuaternionSlerp"> = delegate(
   "QuaternionSlerp",
 );
-/** QuaternionCubicHermiteSpline from the raylib 6.0 API. */
+/** QuaternionCubicHermiteSpline from the raylib 6.2 API. */
 export const QuaternionCubicHermiteSpline: WebFunction<
   "QuaternionCubicHermiteSpline"
 > = delegate("QuaternionCubicHermiteSpline");
-/** QuaternionFromVector3ToVector3 from the raylib 6.0 API. */
+/** QuaternionFromVector3ToVector3 from the raylib 6.2 API. */
 export const QuaternionFromVector3ToVector3: WebFunction<
   "QuaternionFromVector3ToVector3"
 > = delegate("QuaternionFromVector3ToVector3");
-/** QuaternionFromMatrix from the raylib 6.0 API. */
+/** QuaternionFromMatrix from the raylib 6.2 API. */
 export const QuaternionFromMatrix: WebFunction<"QuaternionFromMatrix"> =
   delegate("QuaternionFromMatrix");
-/** QuaternionToMatrix from the raylib 6.0 API. */
+/** QuaternionToMatrix from the raylib 6.2 API. */
 export const QuaternionToMatrix: WebFunction<"QuaternionToMatrix"> = delegate(
   "QuaternionToMatrix",
 );
-/** QuaternionFromAxisAngle from the raylib 6.0 API. */
+/** QuaternionFromAxisAngle from the raylib 6.2 API. */
 export const QuaternionFromAxisAngle: WebFunction<"QuaternionFromAxisAngle"> =
   delegate("QuaternionFromAxisAngle");
-/** QuaternionToAxisAngle from the raylib 6.0 API. */
+/** QuaternionToAxisAngle from the raylib 6.2 API. */
 export const QuaternionToAxisAngle: WebFunction<"QuaternionToAxisAngle"> =
   delegate("QuaternionToAxisAngle");
-/** QuaternionFromEuler from the raylib 6.0 API. */
+/** QuaternionFromEuler from the raylib 6.2 API. */
 export const QuaternionFromEuler: WebFunction<"QuaternionFromEuler"> = delegate(
   "QuaternionFromEuler",
 );
-/** QuaternionToEuler from the raylib 6.0 API. */
+/** QuaternionToEuler from the raylib 6.2 API. */
 export const QuaternionToEuler: WebFunction<"QuaternionToEuler"> = delegate(
   "QuaternionToEuler",
 );
-/** QuaternionTransform from the raylib 6.0 API. */
+/** QuaternionTransform from the raylib 6.2 API. */
 export const QuaternionTransform: WebFunction<"QuaternionTransform"> = delegate(
   "QuaternionTransform",
 );
-/** QuaternionEquals from the raylib 6.0 API. */
+/** QuaternionEquals from the raylib 6.2 API. */
 export const QuaternionEquals: WebFunction<"QuaternionEquals"> = delegate(
   "QuaternionEquals",
 );
-/** MatrixCompose from the raylib 6.0 API. */
+/** MatrixCompose from the raylib 6.2 API. */
 export const MatrixCompose: WebFunction<"MatrixCompose"> = delegate(
   "MatrixCompose",
 );
-/** MatrixDecompose from the raylib 6.0 API. */
+/** MatrixDecompose from the raylib 6.2 API. */
 export const MatrixDecompose: WebFunction<"MatrixDecompose"> = delegate(
   "MatrixDecompose",
 );
-/** GetCameraForward from the raylib 6.0 API. */
+/** GetCameraForward from the raylib 6.2 API. */
 export const GetCameraForward: WebFunction<"GetCameraForward"> = delegate(
   "GetCameraForward",
 );
-/** GetCameraUp from the raylib 6.0 API. */
+/** GetCameraUp from the raylib 6.2 API. */
 export const GetCameraUp: WebFunction<"GetCameraUp"> = delegate("GetCameraUp");
-/** GetCameraRight from the raylib 6.0 API. */
+/** GetCameraRight from the raylib 6.2 API. */
 export const GetCameraRight: WebFunction<"GetCameraRight"> = delegate(
   "GetCameraRight",
 );
-/** CameraMoveForward from the raylib 6.0 API. */
+/** CameraMoveForward from the raylib 6.2 API. */
 export const CameraMoveForward: WebFunction<"CameraMoveForward"> = delegate(
   "CameraMoveForward",
 );
-/** CameraMoveUp from the raylib 6.0 API. */
+/** CameraMoveUp from the raylib 6.2 API. */
 export const CameraMoveUp: WebFunction<"CameraMoveUp"> = delegate(
   "CameraMoveUp",
 );
-/** CameraMoveRight from the raylib 6.0 API. */
+/** CameraMoveRight from the raylib 6.2 API. */
 export const CameraMoveRight: WebFunction<"CameraMoveRight"> = delegate(
   "CameraMoveRight",
 );
-/** CameraMoveToTarget from the raylib 6.0 API. */
+/** CameraMoveToTarget from the raylib 6.2 API. */
 export const CameraMoveToTarget: WebFunction<"CameraMoveToTarget"> = delegate(
   "CameraMoveToTarget",
 );
-/** CameraYaw from the raylib 6.0 API. */
+/** CameraYaw from the raylib 6.2 API. */
 export const CameraYaw: WebFunction<"CameraYaw"> = delegate("CameraYaw");
-/** CameraPitch from the raylib 6.0 API. */
+/** CameraPitch from the raylib 6.2 API. */
 export const CameraPitch: WebFunction<"CameraPitch"> = delegate("CameraPitch");
-/** CameraRoll from the raylib 6.0 API. */
+/** CameraRoll from the raylib 6.2 API. */
 export const CameraRoll: WebFunction<"CameraRoll"> = delegate("CameraRoll");
-/** GetCameraViewMatrix from the raylib 6.0 API. */
+/** GetCameraViewMatrix from the raylib 6.2 API. */
 export const GetCameraViewMatrix: WebFunction<"GetCameraViewMatrix"> = delegate(
   "GetCameraViewMatrix",
 );
-/** GetCameraProjectionMatrix from the raylib 6.0 API. */
+/** GetCameraProjectionMatrix from the raylib 6.2 API. */
 export const GetCameraProjectionMatrix: WebFunction<
   "GetCameraProjectionMatrix"
 > = delegate("GetCameraProjectionMatrix");
@@ -2643,9 +2718,9 @@ export const rlScalef: WebFunction<"rlScalef"> = delegate("rlScalef");
 export const rlMultMatrixf: WebFunction<"rlMultMatrixf"> = delegate(
   "rlMultMatrixf",
 );
-/** rlFrustum from the raylib 6.0 API. */
+/** rlFrustum from the raylib 6.2 API. */
 export const rlFrustum: WebFunction<"rlFrustum"> = delegate("rlFrustum");
-/** rlOrtho from the raylib 6.0 API. */
+/** rlOrtho from the raylib 6.2 API. */
 export const rlOrtho: WebFunction<"rlOrtho"> = delegate("rlOrtho");
 /** Set the viewport area */
 export const rlViewport: WebFunction<"rlViewport"> = delegate("rlViewport");
@@ -3177,4 +3252,12 @@ export const rlLoadDrawCube: WebFunction<"rlLoadDrawCube"> = delegate(
 /** Load and draw a quad */
 export const rlLoadDrawQuad: WebFunction<"rlLoadDrawQuad"> = delegate(
   "rlLoadDrawQuad",
+);
+/** Process gesture event and translate it into gestures */
+export const ProcessGestureEvent: WebFunction<"ProcessGestureEvent"> = delegate(
+  "ProcessGestureEvent",
+);
+/** Update gestures detected (must be called every frame) */
+export const UpdateGestures: WebFunction<"UpdateGestures"> = delegate(
+  "UpdateGestures",
 );

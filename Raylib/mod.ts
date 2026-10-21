@@ -1,7 +1,7 @@
 /**
- * Complete native raylib 6.0 direct API.
+ * Complete native raylib 6.2 direct API.
  *
  * @module
  */
-/** Complete raylib 6.0 API, including raymath, rcamera, and rlgl. */
+/** Complete raylib 6.2 API, including raymath, rcamera, and rlgl. */
 export * from "./raylib.ts";

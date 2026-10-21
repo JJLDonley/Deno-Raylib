@@ -1,5 +1,5 @@
 /**
- * Complete native raylib 6.0 API for Deno, including raymath, rcamera, rgestures, and rlgl.
+ * Complete native raylib 6.2 API for Deno, including raymath, rcamera, rgestures, and rlgl.
  *
  * @module
  */
@@ -7,6 +7,7 @@ import {
   audioControlLib as AUDIO_CONTROL_DLL,
   lib as DLL,
 } from "../Bindings/bindings.ts";
+import { retained } from "../Bindings/retained.ts";
 // Complete direct API: raylib, raymath, rcamera, rgestures, and rlgl.
 export * from "./rlgl.ts";
 export * from "./rcamera.ts";
@@ -111,7 +112,33 @@ export type char = string;
 
 /** Raw 1:1 Deno FFI symbols for advanced APIs that require pointer handling. */
 export const native = DLL.symbols;
-const lib = native;
+// The audio thread holds raylib's audio mutex while waiting for JS callbacks.
+// A synchronous audio call on JS's thread can therefore deadlock both threads.
+// Keep the C-style API synchronous, but reject that unsafe combination explicitly.
+const guardedAudioNames = new Set(
+  Object.keys(native).filter((name) =>
+    /AudioDevice|AudioStream|Audio.*Processor|Sound|Music|MasterVolume/.test(
+      name,
+    )
+  ),
+);
+const lib = new Proxy(native, {
+  get(target, name, receiver) {
+    const value = Reflect.get(target, name, receiver);
+    if (typeof name !== "string" || !guardedAudioNames.has(name)) return value;
+    return (...args: unknown[]) => {
+      if (
+        audioStreamCallbacks.size || audioProcessors.size ||
+        pendingAudioControls
+      ) {
+        throw new Error(
+          `${name} cannot run synchronously while audio callbacks/processors are attached or changing. Await their detachment first; start playback before attaching callbacks.`,
+        );
+      }
+      return value(...args);
+    };
+  },
+});
 const audioControl = AUDIO_CONTROL_DLL.symbols;
 /** Camera type fallback, defaults to Camera3D */
 export type Camera = Camera3D;
@@ -167,14 +194,14 @@ function readCStringArray(
   return strings;
 }
 
-/** RAYLIB_VERSION_MAJOR from the raylib 6.0 API. */
+/** RAYLIB_VERSION_MAJOR from the raylib 6.2 API. */
 export const RAYLIB_VERSION_MAJOR = 6;
-/** RAYLIB_VERSION_MINOR from the raylib 6.0 API. */
-export const RAYLIB_VERSION_MINOR = 0;
-/** RAYLIB_VERSION_PATCH from the raylib 6.0 API. */
+/** RAYLIB_VERSION_MINOR from the raylib 6.2 API. */
+export const RAYLIB_VERSION_MINOR = 2;
+/** RAYLIB_VERSION_PATCH from the raylib 6.2 API. */
 export const RAYLIB_VERSION_PATCH = 0;
-/** RAYLIB_VERSION from the raylib 6.0 API. */
-export const RAYLIB_VERSION = "6.0";
+/** RAYLIB_VERSION from the raylib 6.2 API. */
+export const RAYLIB_VERSION = "6.2";
 
 /** Whether or not this computer is little or big endian */
 export const littleEndian: bool = (() => {
@@ -859,6 +886,15 @@ export function InitWindow(width: int, height: int, title: string): void {
 
 /** Close window and unload OpenGL context */
 export function CloseWindow(): void {
+  if (retained.automation) {
+    lib.StopAutomationEventRecording();
+    lib.SetAutomationEventList(null);
+    retained.automation = null;
+  }
+  if (retained.renderBatch) {
+    lib.rlSetRenderBatchActive(null);
+    retained.renderBatch = null;
+  }
   lib.CloseWindow();
 }
 
@@ -1739,6 +1775,11 @@ export function IsFileExtension(fileName: string, ext: string): boolean {
   return !!lib.IsFileExtension(cstr(fileName), cstr(ext));
 }
 
+/** Check if file path (file or directory) is hidden by OS */
+export function IsFileHidden(filePath: string): boolean {
+  return !!lib.IsFileHidden(cstr(filePath));
+}
+
 /** Get file length in bytes (NOTE: GetFileSize() conflicts with windows.h) */
 export function GetFileLength(fileName: string): int {
   return lib.GetFileLength(cstr(fileName));
@@ -1789,14 +1830,24 @@ export function MakeDirectory(dirPath: string): int {
   return lib.MakeDirectory(cstr(dirPath));
 }
 
-/** Change working directory, return true on success */
-export function ChangeDirectory(dirPath: string): boolean {
-  return !!lib.ChangeDirectory(cstr(dirPath));
+/** Change working directory, returns 0 on success. */
+export function ChangeDirectory(dirPath: string): int {
+  return lib.ChangeDirectory(cstr(dirPath));
 }
 
 /** Check if a given path is a file or a directory */
 export function IsPathFile(path: string): boolean {
   return !!lib.IsPathFile(cstr(path));
+}
+
+/** Check if provided path points to a directory */
+export function IsPathDirectory(path: string): boolean {
+  return !!lib.IsPathDirectory(cstr(path));
+}
+
+/** Check if provided path is an absolute path */
+export function IsPathAbsolute(path: string): boolean {
+  return !!lib.IsPathAbsolute(cstr(path));
 }
 
 /** Check if fileName is valid for the platform/OS */
@@ -1919,25 +1970,22 @@ export function IsFileDropped(): boolean {
 /** Load dropped filepaths */
 export function LoadDroppedFiles(): string[] {
   const result = lib.LoadDroppedFiles();
-
-  const view = new DataView(result.buffer);
-  const length = view.getUint32(4, littleEndian);
-  const pointer = Deno.UnsafePointer.create(
-    view.getBigInt64(8, littleEndian),
-  );
-
-  const pointerView = new Deno.UnsafePointerView(pointer!);
-
-  const list: string[] = [];
-  for (let i = 0; i < length; i++) {
-    const stringPointer = pointerView.getPointer(i * 8);
-    const stringView = new Deno.UnsafePointerView(stringPointer!);
-    list.push(stringView.getCString());
+  try {
+    const files = new FilePathList(result);
+    if (!files.count) return [];
+    const pointer = Deno.UnsafePointer.create(files.pathsPtr);
+    if (pointer === null) {
+      throw new Error("LoadDroppedFiles returned a null paths array");
+    }
+    const pointerView = new Deno.UnsafePointerView(pointer);
+    const list: string[] = [];
+    for (let i = 0; i < files.count; i++) {
+      list.push(readCString(pointerView.getPointer(i * 8)));
+    }
+    return list;
+  } finally {
+    lib.UnloadDroppedFiles(result);
   }
-
-  lib.UnloadDroppedFiles(result);
-
-  return list;
 }
 
 /** Unload dropped filepaths */
@@ -1946,9 +1994,13 @@ export function UnloadDroppedFiles(files: FilePathList): void {
 }
 
 /** Load automation events list from file, NULL for empty list, capacity = MAX_AUTOMATION_EVENTS */
-export function LoadAutomationEventList(file: string): AutomationEventList {
+export function LoadAutomationEventList(
+  file: string | null,
+): AutomationEventList {
   return new AutomationEventList(
-    lib.LoadAutomationEventList(new TextEncoder().encode(file + "\0")),
+    lib.LoadAutomationEventList(
+      file === null ? null : new TextEncoder().encode(file + "\0"),
+    ),
   );
 }
 
@@ -1956,6 +2008,10 @@ export function LoadAutomationEventList(file: string): AutomationEventList {
 export function UnloadAutomationEventList(
   eventList: AutomationEventList,
 ): void {
+  if (retained.automation?.eventsPtr === eventList.eventsPtr) {
+    lib.StopAutomationEventRecording();
+    SetAutomationEventList(null);
+  }
   lib.UnloadAutomationEventList(eventList.buffer);
 }
 
@@ -1963,16 +2019,19 @@ export function UnloadAutomationEventList(
 export function ExportAutomationEventList(
   eventList: AutomationEventList,
   file: string,
-): void {
-  lib.ExportAutomationEventList(
+): boolean {
+  return !!lib.ExportAutomationEventList(
     eventList.buffer,
     new TextEncoder().encode(file + "\0"),
   );
 }
 
 /** Set automation event list to record to */
-export function SetAutomationEventList(eventList: AutomationEventList): void {
-  lib.SetAutomationEventList(eventList.buffer);
+export function SetAutomationEventList(
+  eventList: AutomationEventList | null,
+): void {
+  lib.SetAutomationEventList(eventList?.buffer ?? null);
+  retained.automation = eventList;
 }
 
 /** Set automation event internal base frame to start recording */
@@ -2026,9 +2085,8 @@ export function GetKeyPressed(): KeyboardKey {
 }
 
 /** Get char pressed (unicode), call it multiple times for chars queued, returns 0 when the queue is empty */
-export function GetCharPressed(): string {
-  const char = lib.GetCharPressed(); // returns a number
-  return String.fromCharCode(char);
+export function GetCharPressed(): int {
+  return lib.GetCharPressed();
 }
 
 /** Get name of a QWERTY key on the current keyboard layout (eg returns string 'q' for KEY_A on an AZERTY keyboard) */
@@ -2102,8 +2160,8 @@ export function GetGamepadAxisMovement(gamepad: int, axis: GamepadAxis): float {
 }
 
 /** Set internal gamepad mappings (SDL_GameControllerDB) */
-export function SetGamepadMappings(mappings: string): void {
-  lib.SetGamepadMappings(new TextEncoder().encode(mappings + "\0"));
+export function SetGamepadMappings(mappings: string): int {
+  return lib.SetGamepadMappings(new TextEncoder().encode(mappings + "\0"));
 }
 
 /** Set gamepad vibration for both motors (duration in seconds) */
@@ -2359,23 +2417,43 @@ export function DrawCircleSectorLines(
 
 /** Draw a gradient-filled circle */
 export function DrawCircleGradient(
-  centerX: int,
-  centerY: int,
-  radius: int,
-  startColor: Color,
-  endColor: Color,
+  center: Vector2,
+  radius: float,
+  inner: Color,
+  outer: Color,
 ): void {
   lib.DrawCircleGradient(
-    new Vector2(centerX, centerY).buffer,
+    center.buffer,
     radius,
-    startColor.buffer,
-    endColor.buffer,
+    inner.buffer,
+    outer.buffer,
   );
 }
 
 /** Draw a color-filled circle (Vector version) */
 export function DrawCircleV(center: Vector2, radius: int, color: Color): void {
   lib.DrawCircleV(center.buffer, radius, color.buffer);
+}
+
+/** Draw circle sector outline with thickness */
+export function DrawCircleSectorLinesEx(
+  center: Vector2,
+  radius: float,
+  startAngle: float,
+  endAngle: float,
+  segments: int,
+  thick: float,
+  color: Color,
+): void {
+  lib.DrawCircleSectorLinesEx(
+    center.buffer,
+    radius,
+    startAngle,
+    endAngle,
+    segments,
+    thick,
+    color.buffer,
+  );
 }
 
 /** Draw circle outline */
@@ -2395,6 +2473,16 @@ export function DrawCircleLinesV(
   color: Color,
 ): void {
   lib.DrawCircleLinesV(center.buffer, radius, color.buffer);
+}
+
+/** Draw circle outline with line thickness */
+export function DrawCircleLinesEx(
+  center: Vector2,
+  radius: float,
+  thick: float,
+  color: Color,
+): void {
+  lib.DrawCircleLinesEx(center.buffer, radius, thick, color.buffer);
 }
 
 /** Draw ellipse */
@@ -2437,6 +2525,17 @@ export function DrawEllipseLinesV(
   color: Color,
 ): void {
   lib.DrawEllipseLinesV(center.buffer, radiusX, radiusY, color.buffer);
+}
+
+/** Draw ellipse outline with line thickness */
+export function DrawEllipseLinesEx(
+  center: Vector2,
+  radiusH: float,
+  radiusV: float,
+  thick: float,
+  color: Color,
+): void {
+  lib.DrawEllipseLinesEx(center.buffer, radiusH, radiusV, thick, color.buffer);
 }
 
 /** Draw ring */
@@ -2648,6 +2747,25 @@ export function DrawTriangle(
   }
 }
 
+/** Draw triangle with interpolated colors, counter-clockwise vertex/color order */
+export function DrawTriangleGradient(
+  v1: Vector2,
+  v2: Vector2,
+  v3: Vector2,
+  c1: Color,
+  c2: Color,
+  c3: Color,
+): void {
+  lib.DrawTriangleGradient(
+    v1.buffer,
+    v2.buffer,
+    v3.buffer,
+    c1.buffer,
+    c2.buffer,
+    c3.buffer,
+  );
+}
+
 /** Draw triangle outline (vertex in counter-clockwise order!) */
 export function DrawTriangleLines(
   v1: Vector2,
@@ -2663,6 +2781,17 @@ export function DrawTriangleLines(
   } else {
     lib.DrawTriangleLines(v1.buffer, v2.buffer, v3.buffer, color.buffer);
   }
+}
+
+/** Draw triangle outline with line thickness, counter-clockwise vertex order */
+export function DrawTriangleLinesEx(
+  v1: Vector2,
+  v2: Vector2,
+  v3: Vector2,
+  thick: float,
+  color: Color,
+): void {
+  lib.DrawTriangleLinesEx(v1.buffer, v2.buffer, v3.buffer, thick, color.buffer);
 }
 
 /** Draw a triangle fan defined by points (first vertex is the center) */
@@ -2730,6 +2859,29 @@ export function DrawPolyLinesEx(
     radius,
     rotation,
     lineThick,
+    color.buffer,
+  );
+}
+
+/** Draw ring outline with line thickness */
+export function DrawRingLinesEx(
+  center: Vector2,
+  innerRadius: float,
+  outerRadius: float,
+  startAngle: float,
+  endAngle: float,
+  segments: int,
+  thick: float,
+  color: Color,
+): void {
+  lib.DrawRingLinesEx(
+    center.buffer,
+    innerRadius,
+    outerRadius,
+    startAngle,
+    endAngle,
+    segments,
+    thick,
     color.buffer,
   );
 }
@@ -2963,13 +3115,13 @@ export function GetSplinePointCatmullRom(
 }
 
 /** Get (evaluate) spline point: Quadratic Bezier */
-export function GetSplinePointBezierQuad(
+export function GetSplinePointBezierQuadratic(
   p1: Vector2,
   c2: Vector2,
   p3: Vector2,
   t: float,
 ): Vector2 {
-  const buf = lib.GetSplinePointBezierQuad(
+  const buf = lib.GetSplinePointBezierQuadratic(
     p1.buffer,
     c2.buffer,
     p3.buffer,
@@ -3610,7 +3762,7 @@ export function ImageKernelConvolution(
 ): void {
   lib.ImageKernelConvolution(
     image.buffer,
-    Deno.UnsafePointer.of(kernel.buffer as ArrayBuffer),
+    Deno.UnsafePointer.of(kernel),
     kernelSize,
   );
 }
@@ -3767,7 +3919,7 @@ export function ImageColorGrayscale(
 /** Modify image color: contrast (-100 to 100) */
 export function ImageColorContrast(
   image: Image,
-  contrast: float,
+  contrast: int,
 ): void {
   lib.ImageColorContrast(
     image.buffer,
@@ -3981,6 +4133,25 @@ export function ImageDrawLineEx(
   );
 }
 
+/** Draw rectangle with gradient colors within an image, counter-clockwise color order */
+export function ImageDrawRectangleGradientEx(
+  dst: Image,
+  rec: Rectangle,
+  col1: Color,
+  col2: Color,
+  col3: Color,
+  col4: Color,
+): void {
+  lib.ImageDrawRectangleGradientEx(
+    dst.buffer,
+    rec.buffer,
+    col1.buffer,
+    col2.buffer,
+    col3.buffer,
+    col4.buffer,
+  );
+}
+
 /** Draw a filled circle within an image */
 export function ImageDrawCircle(
   dst: Image,
@@ -4092,17 +4263,68 @@ export function ImageDrawRectangleRec(
   );
 }
 
+/** Draw a color-filled rectangle with pro parameters within and image */
+export function ImageDrawRectanglePro(
+  dst: Image,
+  rec: Rectangle,
+  origin: Vector2,
+  rotation: float,
+  color: Color,
+): void {
+  lib.ImageDrawRectanglePro(
+    dst.buffer,
+    rec.buffer,
+    origin.buffer,
+    rotation,
+    color.buffer,
+  );
+}
+
 /** Draw rectangle lines within an image */
 export function ImageDrawRectangleLines(
+  dst: Image,
+  posX: int,
+  posY: int,
+  width: int,
+  height: int,
+  color: Color,
+): void {
+  lib.ImageDrawRectangleLines(
+    dst.buffer,
+    posX,
+    posY,
+    width,
+    height,
+    color.buffer,
+  );
+}
+
+/** Draw rectangle lines within an image with line thickness. */
+export function ImageDrawRectangleLinesEx(
   dst: Image,
   rec: Rectangle,
   thick: int,
   color: Color,
 ): void {
-  lib.ImageDrawRectangleLines(
+  lib.ImageDrawRectangleLinesEx(
     dst.buffer,
     rec.buffer,
     thick,
+    color.buffer,
+  );
+}
+
+/** Draw a lines sequence within an image */
+export function ImageDrawLineStrip(
+  dst: Image,
+  points: Vector2[],
+  pointCount: int,
+  color: Color,
+): void {
+  lib.ImageDrawLineStrip(
+    dst.buffer,
+    concatVector2(points) as BufferSource,
+    pointCount,
     color.buffer,
   );
 }
@@ -4125,7 +4347,7 @@ export function ImageDrawTriangle(
 }
 
 /** Draw triangle with interpolated colors within an image */
-export function ImageDrawTriangleEx(
+export function ImageDrawTriangleGradient(
   dst: Image,
   v1: Vector2,
   v2: Vector2,
@@ -4134,7 +4356,7 @@ export function ImageDrawTriangleEx(
   c2: Color,
   c3: Color,
 ): void {
-  lib.ImageDrawTriangleEx(
+  lib.ImageDrawTriangleGradient(
     dst.buffer,
     v1.buffer,
     v2.buffer,
@@ -4198,19 +4420,87 @@ export function ImageDrawTriangleStrip(
   );
 }
 
-/** Draw a source image within a destination image (tint applied to source) */
-export function ImageDraw(
+/** Draw a gradient-filled circle within an image */
+export function ImageDrawCircleGradient(
+  dst: Image,
+  center: Vector2,
+  radius: float,
+  inner: Color,
+  outer: Color,
+): void {
+  lib.ImageDrawCircleGradient(
+    dst.buffer,
+    center.buffer,
+    radius,
+    inner.buffer,
+    outer.buffer,
+  );
+}
+
+/** Draw an image within an image */
+export function ImageDrawImage(
+  dst: Image,
+  src: Image,
+  posX: int,
+  posY: int,
+  tint: Color,
+): void {
+  lib.ImageDrawImage(dst.buffer, src.buffer, posX, posY, tint.buffer);
+}
+
+/** Draw an image with scaling and rotation within an image */
+export function ImageDrawImageEx(
+  dst: Image,
+  src: Image,
+  position: Vector2,
+  rotation: float,
+  scale: float,
+  tint: Color,
+): void {
+  lib.ImageDrawImageEx(
+    dst.buffer,
+    src.buffer,
+    position.buffer,
+    rotation,
+    scale,
+    tint.buffer,
+  );
+}
+
+/** Draw a part of an image defined by a rectangle within an image */
+export function ImageDrawImageRec(
+  dst: Image,
+  src: Image,
+  srcRec: Rectangle,
+  position: Vector2,
+  tint: Color,
+): void {
+  lib.ImageDrawImageRec(
+    dst.buffer,
+    src.buffer,
+    srcRec.buffer,
+    position.buffer,
+    tint.buffer,
+  );
+}
+
+/** Draw a source image region into a destination rectangle with origin, rotation, and tint. */
+export function ImageDrawImagePro(
   dst: Image,
   src: Image,
   srcRec: Rectangle,
   dstRec: Rectangle,
+  origin: Vector2,
+  rotation: float,
   tint: Color,
 ): void {
-  lib.ImageDraw(
+  lib.ImageDrawImagePro(
     dst.buffer,
     src.buffer,
     srcRec.buffer,
     dstRec.buffer,
+    origin.buffer,
+    rotation,
     tint.buffer,
   );
 }
@@ -4255,6 +4545,31 @@ export function ImageDrawTextEx(
   );
 }
 
+/** Draw text using Font and pro parameters (rotation) */
+export function ImageDrawTextPro(
+  dst: Image,
+  font: Font,
+  text: string,
+  position: Vector2,
+  origin: Vector2,
+  rotation: float,
+  fontSize: float,
+  spacing: float,
+  tint: Color,
+): void {
+  lib.ImageDrawTextPro(
+    dst.buffer,
+    font.buffer,
+    cstr(text),
+    position.buffer,
+    origin.buffer,
+    rotation,
+    fontSize,
+    spacing,
+    tint.buffer,
+  );
+}
+
 /** Load texture from file into GPU memory (VRAM) */
 export function LoadTexture(file: string): Texture2D {
   return new Texture2D(
@@ -4275,6 +4590,15 @@ export function LoadTextureCubemap(image: Image, layout: int): Texture2D {
 /** Load texture for rendering (framebuffer) */
 export function LoadRenderTexture(width: int, height: int): RenderTexture {
   return new RenderTexture(lib.LoadRenderTexture(width, height));
+}
+
+/** Load texture for rendering (framebuffer), with specific format */
+export function LoadRenderTextureEx(
+  width: int,
+  height: int,
+  format: int,
+): RenderTexture2D {
+  return new RenderTexture2D(lib.LoadRenderTextureEx(width, height, format));
 }
 
 /** Check if a texture is valid (loaded in GPU) */
@@ -4301,7 +4625,7 @@ export function UnloadRenderTexture(texture: RenderTexture): void {
 export function UpdateTexture(texture: Texture2D, pixels: Uint8Array): void {
   lib.UpdateTexture(
     texture.buffer,
-    Deno.UnsafePointer.of(pixels.buffer as BufferSource),
+    Deno.UnsafePointer.of(pixels),
   );
 }
 
@@ -4314,7 +4638,7 @@ export function UpdateTextureRec(
   lib.UpdateTextureRec(
     texture.buffer,
     rec.buffer,
-    Deno.UnsafePointer.of(pixels.buffer as BufferSource),
+    Deno.UnsafePointer.of(pixels),
   );
 }
 
@@ -4532,7 +4856,7 @@ export function GetColor(hex: int): Color {
 /** Get Color from a source pixel pointer of certain format */
 export function GetPixelColor(srcPtr: Uint8Array, format: PixelFormat): Color {
   const buf = lib.GetPixelColor(
-    Deno.UnsafePointer.of(srcPtr.buffer as BufferSource),
+    Deno.UnsafePointer.of(srcPtr),
     format,
   );
   return Color.fromBuffer(buf.buffer, buf.byteOffset);
@@ -4545,7 +4869,7 @@ export function SetPixelColor(
   format: PixelFormat,
 ): void {
   lib.SetPixelColor(
-    Deno.UnsafePointer.of(dstPtr.buffer as BufferSource),
+    Deno.UnsafePointer.of(dstPtr),
     color.buffer,
     format,
   );
@@ -4579,9 +4903,7 @@ export function LoadFontEx(
   codepoints: Int32Array | null,
   codepointCount: int,
 ): Font {
-  const cpPtr = codepoints
-    ? Deno.UnsafePointer.of(codepoints.buffer as BufferSource)
-    : null;
+  const cpPtr = codepoints ? Deno.UnsafePointer.of(codepoints) : null;
 
   return new Font(
     lib.LoadFontEx(
@@ -4612,9 +4934,7 @@ export function LoadFontFromMemory(
   codepoints: Int32Array | null,
   codepointCount: int,
 ): Font {
-  const codepointsPtr = codepoints
-    ? Deno.UnsafePointer.of(codepoints.buffer as BufferSource)
-    : null;
+  const codepointsPtr = codepoints ? Deno.UnsafePointer.of(codepoints) : null;
 
   return new Font(
     lib.LoadFontFromMemory(
@@ -4641,9 +4961,7 @@ export function LoadFontData(
   codepointCount: number,
   type: number,
 ): { glyphs: GlyphInfo[]; ptr: Deno.UnsafePointer; count: int } {
-  const codepointsPtr = codepoints
-    ? Deno.UnsafePointer.of(codepoints.buffer as BufferSource)
-    : null;
+  const codepointsPtr = codepoints ? Deno.UnsafePointer.of(codepoints) : null;
   const glyphCount = new Int32Array([codepointCount]);
   const ptr = lib.LoadFontData(
     fileData as BufferSource,
@@ -4691,7 +5009,7 @@ export function GenImageFontAtlas(
   }
 
   const glyphRecsPtr = Deno.UnsafePointer.of(
-    glyphRecsOut.buffer as BufferSource,
+    glyphRecsOut,
   );
 
   return new Image(
@@ -4714,6 +5032,7 @@ export function UnloadFontData(
   },
   glyphCount: int,
 ): void {
+  if (Array.isArray(glyphs) && glyphs.length === 0) return;
   const ptr = Array.isArray(glyphs)
     ? Deno.UnsafePointer.of(glyphs[0].buffer)
     : "ptr" in Object(glyphs)
@@ -4833,7 +5152,7 @@ export function DrawTextCodepoints(
 ): void {
   lib.DrawTextCodepoints(
     font.buffer,
-    Deno.UnsafePointer.of(codepoints.buffer as BufferSource),
+    Deno.UnsafePointer.of(codepoints),
     codepointCount,
     position.buffer,
     fontSize,
@@ -4898,7 +5217,7 @@ export function MeasureTextCodepoints(
 ): Vector2 {
   const buf = lib.MeasureTextCodepoints(
     font.buffer,
-    Deno.UnsafePointer.of(codepoints.buffer as BufferSource),
+    Deno.UnsafePointer.of(codepoints),
     length,
     fontSize,
     spacing,
@@ -4912,7 +5231,7 @@ export function LoadUTF8(
   length = codepoints.length,
 ): string {
   const ptr = lib.LoadUTF8(
-    Deno.UnsafePointer.of(codepoints.buffer as BufferSource),
+    Deno.UnsafePointer.of(codepoints),
     length,
   );
   const text = readCString(ptr);
@@ -5425,22 +5744,22 @@ export function DrawCylinderWiresEx(
   );
 }
 
-//RLAPI void DrawCapsule(Vector3 startPos, Vector3 endPos, float radius, int slices, int rings, Color color); // Draw a capsule with the center of its sphere caps at startPos and endPos
+//RLAPI void DrawCapsule(Vector3 startPos, Vector3 endPos, float radius, int rings, int slices, Color color);
 /** Draw a capsule with the center of its sphere caps at startPos and endPos */
 export function DrawCapsule(
   startPos: Vector3,
   endPos: Vector3,
   radius: float,
-  slices: int,
   rings: int,
+  slices: int,
   color: Color,
 ): void {
   lib.DrawCapsule(
     startPos.buffer,
     endPos.buffer,
     radius,
-    slices,
     rings,
+    slices,
     color.buffer,
   );
 }
@@ -5450,16 +5769,16 @@ export function DrawCapsuleWires(
   startPos: Vector3,
   endPos: Vector3,
   radius: float,
-  slices: int,
   rings: int,
+  slices: int,
   color: Color,
 ): void {
   lib.DrawCapsuleWires(
     startPos.buffer,
     endPos.buffer,
     radius,
-    slices,
     rings,
+    slices,
     color.buffer,
   );
 }
@@ -5728,7 +6047,7 @@ export function DrawMeshInstanced(
   lib.DrawMeshInstanced(
     mesh.buffer,
     material.buffer,
-    transforms.buffer as ArrayBuffer,
+    transforms,
     instances,
   );
 }
@@ -6285,7 +6604,7 @@ export function LoadWaveFromMemory(
 ): Wave {
   const buf = lib.LoadWaveFromMemory(
     new TextEncoder().encode(fileType + "\0").buffer,
-    fileData.buffer as ArrayBuffer,
+    fileData,
     fileData.byteLength,
   );
   if (!buf) throw new Error("Failed to load wave from memory");
@@ -6327,12 +6646,12 @@ export function IsSoundValid(sound: Sound): boolean {
 export function UpdateSound(
   sound: Sound,
   data: BufferSource,
-  sampleCount: int,
+  frameCount: int,
 ): void {
   lib.UpdateSound(
     sound.buffer,
     Deno.UnsafePointer.of(data as ArrayBuffer),
-    sampleCount,
+    frameCount,
   );
 }
 
@@ -6477,18 +6796,21 @@ export function LoadMusicStream(fileName: string): Music {
   );
 }
 
-/** Load music stream from data */
+/** Load music stream from data, retaining an owned copy until UnloadMusicStream(). */
 export function LoadMusicStreamFromMemory(
   fileType: string,
   data: Uint8Array,
 ): Music {
-  return new Music(
+  const owned = data.slice();
+  const music = new Music(
     lib.LoadMusicStreamFromMemory(
       new TextEncoder().encode(fileType + "\0").buffer,
-      data.buffer as ArrayBuffer,
-      data.byteLength,
+      owned,
+      owned.byteLength,
     ),
   );
+  if (music.ctxDataPtr !== 0n) retained.music.set(music.ctxDataPtr, owned);
+  return music;
 }
 
 /** Checks if a music stream is valid (context and buffers initialized) */
@@ -6499,6 +6821,7 @@ export function IsMusicValid(music: Music): boolean {
 /** Unload music stream */
 export function UnloadMusicStream(music: Music): void {
   lib.UnloadMusicStream(music.buffer);
+  retained.music.delete(music.ctxDataPtr);
 }
 
 /** Start music playing */
@@ -6658,10 +6981,21 @@ export function SetAudioStreamBufferSizeDefault(size: int): void {
   lib.SetAudioStreamBufferSizeDefault(size);
 }
 
-const audioStreamCallbacks = new WeakMap<
-  AudioStream,
-  Deno.UnsafeCallback<AudioCallbackDef>
+const audioStreamCallbacks = new Map<
+  bigint,
+  Deno.UnsafeCallback<AudioCallbackDef> | null
 >();
+let pendingAudioControls = 0;
+let audioControlQueue: Promise<unknown> = Promise.resolve();
+
+function changeAudioControl<T>(action: () => Promise<T>): Promise<T> {
+  pendingAudioControls++;
+  const operation = audioControlQueue.then(action);
+  audioControlQueue = operation.catch(() => {});
+  return operation.finally(() => {
+    pendingAudioControls--;
+  });
+}
 
 /** Set an audio callback using a thread-safe bridge for raylib's audio thread. */
 export async function SetAudioStreamCallback(
@@ -6670,22 +7004,36 @@ export async function SetAudioStreamCallback(
     | ((buffer: Deno.PointerValue, frames: int) => void)
     | Deno.PointerValue,
 ): Promise<Deno.UnsafeCallback<AudioCallbackDef> | undefined> {
-  const previous = audioStreamCallbacks.get(stream);
-  if (typeof callback === "function") {
-    const bridge = Deno.UnsafeCallback.threadSafe<AudioCallbackDef>(
-      { parameters: ["pointer", "u32"], result: "void" },
-      (buffer, frames) => callback(buffer, frames as int),
-    );
-    await audioControl.SetAudioStreamCallback(stream.buffer, bridge.pointer);
-    audioStreamCallbacks.set(stream, bridge);
-    previous?.close();
-    return bridge;
+  if (!stream.bufferPtr) {
+    throw new Error("SetAudioStreamCallback requires a valid stream");
   }
-
-  await audioControl.SetAudioStreamCallback(stream.buffer, callback);
-  audioStreamCallbacks.delete(stream);
-  previous?.close();
-  return undefined;
+  return await changeAudioControl(async () => {
+    const key = stream.bufferPtr;
+    const previous = audioStreamCallbacks.get(key);
+    if (typeof callback === "function") {
+      const bridge = Deno.UnsafeCallback.threadSafe<AudioCallbackDef>(
+        { parameters: ["pointer", "u32"], result: "void" },
+        (buffer, frames) => callback(buffer, frames as int),
+      );
+      try {
+        await audioControl.SetAudioStreamCallback(
+          stream.buffer,
+          bridge.pointer,
+        );
+      } catch (error) {
+        bridge.close();
+        throw error;
+      }
+      audioStreamCallbacks.set(key, bridge);
+      previous?.close();
+      return bridge;
+    }
+    await audioControl.SetAudioStreamCallback(stream.buffer, callback);
+    if (callback === null) audioStreamCallbacks.delete(key);
+    else audioStreamCallbacks.set(key, null);
+    previous?.close();
+    return undefined;
+  });
 }
 
 /** AudioCallbackDef exported by Deno Raylib. */
@@ -6694,13 +7042,19 @@ export type AudioCallbackDef = {
   result: "void";
 };
 
-const audioProcessors = new Set<Deno.UnsafeCallback<AudioCallbackDef>>();
+const audioProcessors = new Map<
+  Deno.UnsafeCallback<AudioCallbackDef>,
+  bigint | "mixed"
+>();
 
 /** Attach audio stream processor to stream, receives frames x 2 samples as 'float' (stereo) */
-export function AttachAudioStreamProcessor(
+export async function AttachAudioStreamProcessor(
   stream: AudioStream,
   processor: (buffer: Deno.PointerObject, frames: int) => void,
-): Deno.UnsafeCallback<AudioCallbackDef> {
+): Promise<Deno.UnsafeCallback<AudioCallbackDef>> {
+  if (!stream.bufferPtr) {
+    throw new Error("AttachAudioStreamProcessor requires a valid stream");
+  }
   const cb = Deno.UnsafeCallback.threadSafe<AudioCallbackDef>(
     { parameters: ["pointer", "u32"], result: "void" },
     (buf, frames) => {
@@ -6709,10 +7063,16 @@ export function AttachAudioStreamProcessor(
     },
   );
 
-  audioProcessors.add(cb);
-  lib.AttachAudioStreamProcessor(stream.buffer, cb.pointer);
-
-  return cb;
+  return await changeAudioControl(async () => {
+    try {
+      await audioControl.AttachAudioStreamProcessor(stream.buffer, cb.pointer);
+    } catch (error) {
+      cb.close();
+      throw error;
+    }
+    audioProcessors.set(cb, stream.bufferPtr);
+    return cb;
+  });
 }
 
 /** Detach audio stream processor from stream */
@@ -6720,18 +7080,23 @@ export async function DetachAudioStreamProcessor(
   stream: AudioStream,
   processor: Deno.UnsafeCallback<AudioCallbackDef>,
 ): Promise<void> {
-  await audioControl.DetachAudioStreamProcessor(
-    stream.buffer,
-    processor.pointer,
-  );
-  audioProcessors.delete(processor);
-  processor.close();
+  await changeAudioControl(async () => {
+    if (audioProcessors.get(processor) !== stream.bufferPtr) {
+      throw new Error("Processor is not attached to this stream");
+    }
+    await audioControl.DetachAudioStreamProcessor(
+      stream.buffer,
+      processor.pointer,
+    );
+    audioProcessors.delete(processor);
+    processor.close();
+  });
 }
 
 /** Attach audio stream processor to the entire audio pipeline, receives frames x 2 samples as 'float' (stereo) */
-export function AttachAudioMixedProcessor(
+export async function AttachAudioMixedProcessor(
   processor: (buffer: Deno.PointerObject, frames: int) => void,
-): Deno.UnsafeCallback<AudioCallbackDef> {
+): Promise<Deno.UnsafeCallback<AudioCallbackDef>> {
   const cb = Deno.UnsafeCallback.threadSafe<AudioCallbackDef>(
     { parameters: ["pointer", "u32"], result: "void" },
     (buf, frames) => {
@@ -6740,17 +7105,28 @@ export function AttachAudioMixedProcessor(
     },
   );
 
-  audioProcessors.add(cb);
-  lib.AttachAudioMixedProcessor(cb.pointer);
-
-  return cb;
+  return await changeAudioControl(async () => {
+    try {
+      await audioControl.AttachAudioMixedProcessor(cb.pointer);
+    } catch (error) {
+      cb.close();
+      throw error;
+    }
+    audioProcessors.set(cb, "mixed");
+    return cb;
+  });
 }
 
 /** Detach audio stream processor from the entire audio pipeline */
 export async function DetachAudioMixedProcessor(
   processor: Deno.UnsafeCallback<AudioCallbackDef>,
 ): Promise<void> {
-  await audioControl.DetachAudioMixedProcessor(processor.pointer);
-  audioProcessors.delete(processor);
-  processor.close();
+  await changeAudioControl(async () => {
+    if (audioProcessors.get(processor) !== "mixed") {
+      throw new Error("Processor is not attached to the mixed output");
+    }
+    await audioControl.DetachAudioMixedProcessor(processor.pointer);
+    audioProcessors.delete(processor);
+    processor.close();
+  });
 }

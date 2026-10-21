@@ -1,6 +1,6 @@
 import { basename, join, resolve } from "path";
 
-const VERSION = "6.0";
+const VERSION = "6.2";
 const ASSET = `raylib-${VERSION}_webassembly.zip`;
 const DOWNLOAD_URL =
   `https://github.com/raysan5/raylib/releases/download/${VERSION}/${ASSET}`;
@@ -56,7 +56,7 @@ async function main(): Promise<void> {
         join(destination, header),
       );
     }
-    console.log("Prepared the exact raylib 6.0 WebAssembly static library.");
+    console.log("Prepared the exact raylib 6.2 WebAssembly static library.");
     console.log("Location: Lib/Web/libraylib.web.a");
   } finally {
     await Deno.remove(temporary, { recursive: true });

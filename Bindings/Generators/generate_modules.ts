@@ -1,4 +1,4 @@
-// Generate exhaustive separation-of-concerns facades from the raylib 6.0 API.
+// Generate exhaustive separation-of-concerns facades from the raylib 6.2 API.
 // deno-lint-ignore-file no-explicit-any
 
 const api = JSON.parse(
@@ -33,7 +33,7 @@ const selected = (group: Iterable<string>, names: string[]) => {
   return set(names.filter((name) => available.has(name)));
 };
 
-// Official raylib.h module boundaries in the pinned 6.0 header.
+// Official raylib.h module boundaries in the pinned 6.2 header.
 const core = set(namesBetween("InitWindow", "SetShapesTexture"));
 const shapes = set(namesBetween("SetShapesTexture", "LoadImage"));
 const textures = set(namesBetween("LoadImage", "GetFontDefault"));
@@ -41,8 +41,11 @@ const text = set(namesBetween("GetFontDefault", "DrawLine3D"));
 const models = set(namesBetween("DrawLine3D", "InitAudioDevice"));
 const audio = set(namesBetween("InitAudioDevice", "Clamp"));
 const math = set(namesBetween("Clamp", "GetCameraForward"));
-const cameraControls = set(namesBetween("GetCameraForward", "rlMatrixMode"));
-const rlgl = set(namesBetween("rlMatrixMode"));
+const cameraControls = union(
+  namesBetween("GetCameraForward", "rlMatrixMode"),
+  selected(core, ["UpdateCamera", "UpdateCameraPro"]),
+);
+const rlgl = matching(namesBetween("rlMatrixMode"), /^rl/);
 
 const modules = new Map<string, ModuleDef>();
 const define = (
@@ -94,7 +97,7 @@ define(
 define(
   "Events",
   "Window event waiting and polling behavior.",
-  matching(core, /EventWaiting/),
+  union(matching(core, /EventWaiting/), selected(core, ["PollInputEvents"])),
 );
 define(
   "Timing",
@@ -135,7 +138,7 @@ define(
 define(
   "Files",
   "Binary and text file loading, saving, copying, moving, and inspection.",
-  matching(core, /File|Dropped/),
+  union(matching(core, /File|Dropped/), selected(core, ["ExportDataAsCode"])),
   ["FilePathList"],
 );
 define(
@@ -167,7 +170,10 @@ define(
 );
 
 // Input
-const keyboard = matching(core, /Key|ExitKey/);
+const keyboard = union(
+  matching(core, /Key|ExitKey/),
+  selected(core, ["GetCharPressed"]),
+);
 const mouse = matching(core, /Mouse/);
 const cursor = matching(core, /Cursor/);
 const gamepad = matching(core, /Gamepad/);
@@ -200,13 +206,22 @@ define("Touch", "Touch points, positions, and identifiers.", touch, [
 define(
   "Gestures",
   "Gesture enabling, recognition, vectors, angles, and duration.",
-  gestures,
-  ["Gesture", "Vector2"],
+  union(gestures, ["ProcessGestureEvent", "UpdateGestures"]),
+  ["Gesture", "Vector2", "GestureEvent", "TouchAction"],
 );
 define(
   "Input",
   "All keyboard, mouse, cursor, gamepad, touch, and gesture APIs.",
-  union(keyboard, mouse, cursor, gamepad, touch, gestures),
+  union(
+    keyboard,
+    mouse,
+    cursor,
+    gamepad,
+    touch,
+    gestures,
+    ["ProcessGestureEvent", "UpdateGestures"],
+    selected(core, ["PollInputEvents"]),
+  ),
 );
 
 // Drawing and rendering modes
@@ -276,20 +291,53 @@ define(
   "Colors",
   "Color conversion, normalization, tinting, fading, blending, and constants.",
   matching(textures, /Color|Fade/),
-  ["Color", "Vector3", "Vector4"],
+  [
+    "Color",
+    "Vector3",
+    "Vector4",
+    "LightGray",
+    "Gray",
+    "DarkGray",
+    "Yellow",
+    "Gold",
+    "Orange",
+    "Pink",
+    "Red",
+    "Maroon",
+    "Green",
+    "Lime",
+    "DarkGreen",
+    "SkyBlue",
+    "Blue",
+    "DarkBlue",
+    "Purple",
+    "Violet",
+    "DarkPurple",
+    "Beige",
+    "Brown",
+    "DarkBrown",
+    "White",
+    "Black",
+    "Blank",
+    "Magenta",
+    "RayWhite",
+  ],
 );
 
 // Images and textures
 define(
   "Image",
   "Image loading, generation, manipulation, drawing, colors, palettes, and export.",
-  matching(textures, /Image/),
+  union(matching(textures, /Image/), selected(textures, ["GetPixelDataSize"])),
   ["Color", "Font", "Image", "PixelFormat", "Rectangle", "Vector2"],
 );
 define(
   "Texture",
   "Texture loading, updating, filtering, wrapping, mipmaps, and drawing.",
-  matching(textures, /Texture|DrawTexture/),
+  union(
+    matching(textures, /Texture|DrawTexture/),
+    selected(textures, ["GetPixelDataSize"]),
+  ),
   [
     "Color",
     "Image",
@@ -456,9 +504,9 @@ const cameraCore = matching(core, /Camera/);
 const coordinates = matching(core, /WorldToScreen|ScreenToWorld/);
 define(
   "Camera2D",
-  "2D camera drawing and coordinate conversion.",
+  "2D camera drawing, matrices, and coordinate conversion.",
   union(
-    selected(core, ["BeginMode2D", "EndMode2D"]),
+    selected(core, ["BeginMode2D", "EndMode2D", "GetCameraMatrix2D"]),
     matching(coordinates, /2D/),
   ),
   ["Camera2D", "Matrix", "Vector2"],
@@ -468,7 +516,13 @@ define(
   "3D camera drawing, matrices, rays, and coordinate conversion.",
   union(
     selected(core, ["BeginMode3D", "EndMode3D"]),
-    matching(core, /CameraMatrix|WorldToScreen|ScreenToWorldRay/),
+    selected(core, [
+      "GetCameraMatrix",
+      "GetWorldToScreen",
+      "GetWorldToScreenEx",
+      "GetScreenToWorldRay",
+      "GetScreenToWorldRayEx",
+    ]),
     cameraControls,
   ),
   [
@@ -483,9 +537,9 @@ define(
 );
 define(
   "CameraControls",
-  "rcamera movement, rotation, direction, view, and projection controls.",
+  "Camera update, movement, rotation, direction, view, and projection controls.",
   cameraControls,
-  ["Camera3D", "Matrix", "Vector3"],
+  ["Camera3D", "CameraMode", "CameraProjection", "Matrix", "Vector3"],
 );
 define(
   "Coordinates",

@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${1:-6.0}"
+VERSION="${1:-6.2}"
 OUT_DIR="${2:-Lib}"
 
 ROOT="$(pwd)"
-TMP="$ROOT/_raylib_tmp"
-BLOBS="$ROOT/$OUT_DIR"
-
-rm -rf "$TMP"
-mkdir -p "$TMP" "$BLOBS"
+TMP="$(mktemp -d -t deno-raylib.XXXXXXXX)"
+trap 'rm -rf -- "$TMP"' EXIT
+case "$OUT_DIR" in
+  /*) BLOBS="$OUT_DIR" ;;
+  *) BLOBS="$ROOT/$OUT_DIR" ;;
+esac
+mkdir -p "$BLOBS"
 
 UNAME="$(uname -s)"
 ARCH="$(uname -m)"
@@ -81,7 +83,7 @@ case "$FILE" in
 esac
 
 FOUND="$(
-  find "$TMP" \( -type f -o -type l \) -name "$LIB_BASE*" |
+  find "$TMP" -type f \( -name "$LIB_BASE" -o -name 'libraylib.so.*' -o -name 'libraylib.*.dylib' \) |
     sort |
     head -n 1
 )"
@@ -91,7 +93,7 @@ if [ -z "$FOUND" ]; then
   exit 1
 fi
 
-REAL_FOUND="$(readlink -f "$FOUND")"
+REAL_FOUND="$FOUND"
 
 case "$REAL_FOUND" in
   "$TMP"/*) ;;
@@ -100,33 +102,10 @@ esac
 
 echo "Found: $FOUND"
 
-rm -f "$BLOBS/$LIB_BASE" "$BLOBS/$LIB_BASE".*
-
-case "$OS" in
-  linux)
-    REAL_NAME="$(basename "$REAL_FOUND")"
-    cp "$REAL_FOUND" "$BLOBS/$REAL_NAME"
-
-    if [ "$REAL_NAME" != "$LIB_BASE" ]; then
-      ln -s "$REAL_NAME" "$BLOBS/$LIB_BASE"
-    fi
-    ;;
-
-  darwin)
-    REAL_NAME="$(basename "$REAL_FOUND")"
-    cp "$REAL_FOUND" "$BLOBS/$REAL_NAME"
-
-    if [ "$REAL_NAME" != "$LIB_BASE" ]; then
-      ln -s "$REAL_NAME" "$BLOBS/$LIB_BASE"
-    fi
-    ;;
-
-  windows)
-    cp "$REAL_FOUND" "$BLOBS/$LIB_BASE"
-    ;;
-esac
-
-rm -rf "$TMP"
+cp "$REAL_FOUND" "$TMP/installed-library"
+# Replace the link itself if an older install used symlinks. Keep older versioned
+# libraries intact and never delete an application's pre-existing temp directory.
+mv -f "$TMP/installed-library" "$BLOBS/$LIB_BASE"
 
 echo "Done:"
 ls -l "$BLOBS"

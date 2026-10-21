@@ -7,6 +7,7 @@
 export {
   DisableCursor,
   EnableCursor,
+  GetCharPressed,
   GetGamepadAxisCount,
   GetGamepadAxisMovement,
   GetGamepadButtonPressed,
@@ -48,6 +49,8 @@ export {
   IsMouseButtonPressed,
   IsMouseButtonReleased,
   IsMouseButtonUp,
+  PollInputEvents,
+  ProcessGestureEvent,
   SetExitKey,
   SetGamepadMappings,
   SetGamepadVibration,
@@ -57,4 +60,5 @@ export {
   SetMousePosition,
   SetMouseScale,
   ShowCursor,
+  UpdateGestures,
 } from "./raylib.ts";

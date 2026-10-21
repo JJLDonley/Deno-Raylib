@@ -10,7 +10,7 @@ import {
   type NativeTargetKey,
 } from "../Bindings/platforms.ts";
 
-const VERSION = "6.0";
+const VERSION = "6.2";
 const TEMPLATES = ["desktop", "web", "both"] as const;
 const DESKTOP_STARTER = `import * as raylib from "raylib";
 
@@ -420,6 +420,7 @@ export async function createStarterProject(
   for (
     const name of [
       "deno.json",
+      "deno.jsonc",
       "Raylib",
       "Source",
     ]

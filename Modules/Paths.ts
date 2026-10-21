@@ -12,5 +12,7 @@ export {
   GetPrevDirectoryPath,
   IsFileExtension,
   IsFileNameValid,
+  IsPathAbsolute,
+  IsPathDirectory,
   IsPathFile,
 } from "../Raylib/raylib.ts";

@@ -4,6 +4,7 @@
 #include "raymath.h"
 #include "rlgl.h"
 #include "rcamera.h"
+#include "rgestures.h"
 #include <emscripten/emscripten.h>
 
 EMSCRIPTEN_KEEPALIVE
@@ -316,9 +317,6 @@ EMSCRIPTEN_KEEPALIVE
 char * dr_LoadFileText(const char * p0) { return LoadFileText(p0); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_UnloadFileText(char * p0) { UnloadFileText(p0); }
-
-EMSCRIPTEN_KEEPALIVE
 bool dr_SaveFileText(const char * p0, const char * p1) { return SaveFileText(p0, p1); }
 
 EMSCRIPTEN_KEEPALIVE
@@ -347,6 +345,9 @@ bool dr_DirectoryExists(const char * p0) { return DirectoryExists(p0); }
 
 EMSCRIPTEN_KEEPALIVE
 bool dr_IsFileExtension(const char * p0, const char * p1) { return IsFileExtension(p0, p1); }
+
+EMSCRIPTEN_KEEPALIVE
+bool dr_IsFileHidden(const char * p0) { return IsFileHidden(p0); }
 
 EMSCRIPTEN_KEEPALIVE
 int dr_GetFileLength(const char * p0) { return GetFileLength(p0); }
@@ -379,10 +380,16 @@ EMSCRIPTEN_KEEPALIVE
 int dr_MakeDirectory(const char * p0) { return MakeDirectory(p0); }
 
 EMSCRIPTEN_KEEPALIVE
-bool dr_ChangeDirectory(const char * p0) { return ChangeDirectory(p0); }
+int dr_ChangeDirectory(const char * p0) { return ChangeDirectory(p0); }
 
 EMSCRIPTEN_KEEPALIVE
 bool dr_IsPathFile(const char * p0) { return IsPathFile(p0); }
+
+EMSCRIPTEN_KEEPALIVE
+bool dr_IsPathDirectory(const char * p0) { return IsPathDirectory(p0); }
+
+EMSCRIPTEN_KEEPALIVE
+bool dr_IsPathAbsolute(const char * p0) { return IsPathAbsolute(p0); }
 
 EMSCRIPTEN_KEEPALIVE
 bool dr_IsFileNameValid(const char * p0) { return IsFileNameValid(p0); }
@@ -419,9 +426,6 @@ void dr_UnloadAutomationEventList(const AutomationEventList *p0) { UnloadAutomat
 
 EMSCRIPTEN_KEEPALIVE
 bool dr_ExportAutomationEventList(const AutomationEventList *p0, const char * p1) { return ExportAutomationEventList(*p0, p1); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_SetAutomationEventList(AutomationEventList * p0) { SetAutomationEventList(p0); }
 
 EMSCRIPTEN_KEEPALIVE
 void dr_SetAutomationEventBaseFrame(int p0) { SetAutomationEventBaseFrame(p0); }
@@ -613,43 +617,16 @@ EMSCRIPTEN_KEEPALIVE
 void dr_DrawLineDashed(const Vector2 *p0, const Vector2 *p1, int p2, int p3, const Color *p4) { DrawLineDashed(*p0, *p1, p2, p3, *p4); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_DrawCircle(int p0, int p1, float p2, const Color *p3) { DrawCircle(p0, p1, p2, *p3); }
+void dr_DrawTriangle(const Vector2 *p0, const Vector2 *p1, const Vector2 *p2, const Color *p3) { DrawTriangle(*p0, *p1, *p2, *p3); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_DrawCircleV(const Vector2 *p0, float p1, const Color *p2) { DrawCircleV(*p0, p1, *p2); }
+void dr_DrawTriangleGradient(const Vector2 *p0, const Vector2 *p1, const Vector2 *p2, const Color *p3, const Color *p4, const Color *p5) { DrawTriangleGradient(*p0, *p1, *p2, *p3, *p4, *p5); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_DrawCircleGradient(const Vector2 *p0, float p1, const Color *p2, const Color *p3) { DrawCircleGradient(*p0, p1, *p2, *p3); }
+void dr_DrawTriangleLines(const Vector2 *p0, const Vector2 *p1, const Vector2 *p2, const Color *p3) { DrawTriangleLines(*p0, *p1, *p2, *p3); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_DrawCircleSector(const Vector2 *p0, float p1, float p2, float p3, int p4, const Color *p5) { DrawCircleSector(*p0, p1, p2, p3, p4, *p5); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_DrawCircleSectorLines(const Vector2 *p0, float p1, float p2, float p3, int p4, const Color *p5) { DrawCircleSectorLines(*p0, p1, p2, p3, p4, *p5); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_DrawCircleLines(int p0, int p1, float p2, const Color *p3) { DrawCircleLines(p0, p1, p2, *p3); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_DrawCircleLinesV(const Vector2 *p0, float p1, const Color *p2) { DrawCircleLinesV(*p0, p1, *p2); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_DrawEllipse(int p0, int p1, float p2, float p3, const Color *p4) { DrawEllipse(p0, p1, p2, p3, *p4); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_DrawEllipseV(const Vector2 *p0, float p1, float p2, const Color *p3) { DrawEllipseV(*p0, p1, p2, *p3); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_DrawEllipseLines(int p0, int p1, float p2, float p3, const Color *p4) { DrawEllipseLines(p0, p1, p2, p3, *p4); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_DrawEllipseLinesV(const Vector2 *p0, float p1, float p2, const Color *p3) { DrawEllipseLinesV(*p0, p1, p2, *p3); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_DrawRing(const Vector2 *p0, float p1, float p2, float p3, float p4, int p5, const Color *p6) { DrawRing(*p0, p1, p2, p3, p4, p5, *p6); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_DrawRingLines(const Vector2 *p0, float p1, float p2, float p3, float p4, int p5, const Color *p6) { DrawRingLines(*p0, p1, p2, p3, p4, p5, *p6); }
+void dr_DrawTriangleLinesEx(const Vector2 *p0, const Vector2 *p1, const Vector2 *p2, float p3, const Color *p4) { DrawTriangleLinesEx(*p0, *p1, *p2, p3, *p4); }
 
 EMSCRIPTEN_KEEPALIVE
 void dr_DrawRectangle(int p0, int p1, int p2, int p3, const Color *p4) { DrawRectangle(p0, p1, p2, p3, *p4); }
@@ -688,12 +665,6 @@ EMSCRIPTEN_KEEPALIVE
 void dr_DrawRectangleRoundedLinesEx(const Rectangle *p0, float p1, int p2, float p3, const Color *p4) { DrawRectangleRoundedLinesEx(*p0, p1, p2, p3, *p4); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_DrawTriangle(const Vector2 *p0, const Vector2 *p1, const Vector2 *p2, const Color *p3) { DrawTriangle(*p0, *p1, *p2, *p3); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_DrawTriangleLines(const Vector2 *p0, const Vector2 *p1, const Vector2 *p2, const Color *p3) { DrawTriangleLines(*p0, *p1, *p2, *p3); }
-
-EMSCRIPTEN_KEEPALIVE
 void dr_DrawPoly(const Vector2 *p0, int p1, float p2, float p3, const Color *p4) { DrawPoly(*p0, p1, p2, p3, *p4); }
 
 EMSCRIPTEN_KEEPALIVE
@@ -701,6 +672,57 @@ void dr_DrawPolyLines(const Vector2 *p0, int p1, float p2, float p3, const Color
 
 EMSCRIPTEN_KEEPALIVE
 void dr_DrawPolyLinesEx(const Vector2 *p0, int p1, float p2, float p3, float p4, const Color *p5) { DrawPolyLinesEx(*p0, p1, p2, p3, p4, *p5); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawCircle(int p0, int p1, float p2, const Color *p3) { DrawCircle(p0, p1, p2, *p3); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawCircleV(const Vector2 *p0, float p1, const Color *p2) { DrawCircleV(*p0, p1, *p2); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawCircleGradient(const Vector2 *p0, float p1, const Color *p2, const Color *p3) { DrawCircleGradient(*p0, p1, *p2, *p3); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawCircleSector(const Vector2 *p0, float p1, float p2, float p3, int p4, const Color *p5) { DrawCircleSector(*p0, p1, p2, p3, p4, *p5); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawCircleSectorLines(const Vector2 *p0, float p1, float p2, float p3, int p4, const Color *p5) { DrawCircleSectorLines(*p0, p1, p2, p3, p4, *p5); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawCircleSectorLinesEx(const Vector2 *p0, float p1, float p2, float p3, int p4, float p5, const Color *p6) { DrawCircleSectorLinesEx(*p0, p1, p2, p3, p4, p5, *p6); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawCircleLines(int p0, int p1, float p2, const Color *p3) { DrawCircleLines(p0, p1, p2, *p3); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawCircleLinesV(const Vector2 *p0, float p1, const Color *p2) { DrawCircleLinesV(*p0, p1, *p2); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawCircleLinesEx(const Vector2 *p0, float p1, float p2, const Color *p3) { DrawCircleLinesEx(*p0, p1, p2, *p3); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawEllipse(int p0, int p1, float p2, float p3, const Color *p4) { DrawEllipse(p0, p1, p2, p3, *p4); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawEllipseV(const Vector2 *p0, float p1, float p2, const Color *p3) { DrawEllipseV(*p0, p1, p2, *p3); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawEllipseLines(int p0, int p1, float p2, float p3, const Color *p4) { DrawEllipseLines(p0, p1, p2, p3, *p4); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawEllipseLinesV(const Vector2 *p0, float p1, float p2, const Color *p3) { DrawEllipseLinesV(*p0, p1, p2, *p3); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawEllipseLinesEx(const Vector2 *p0, float p1, float p2, float p3, const Color *p4) { DrawEllipseLinesEx(*p0, p1, p2, p3, *p4); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawRing(const Vector2 *p0, float p1, float p2, float p3, float p4, int p5, const Color *p6) { DrawRing(*p0, p1, p2, p3, p4, p5, *p6); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawRingLines(const Vector2 *p0, float p1, float p2, float p3, float p4, int p5, const Color *p6) { DrawRingLines(*p0, p1, p2, p3, p4, p5, *p6); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_DrawRingLinesEx(const Vector2 *p0, float p1, float p2, float p3, float p4, int p5, float p6, const Color *p7) { DrawRingLinesEx(*p0, p1, p2, p3, p4, p5, p6, *p7); }
 
 EMSCRIPTEN_KEEPALIVE
 void dr_DrawSplineSegmentLinear(const Vector2 *p0, const Vector2 *p1, float p2, const Color *p3) { DrawSplineSegmentLinear(*p0, *p1, p2, *p3); }
@@ -727,7 +749,7 @@ EMSCRIPTEN_KEEPALIVE
 void dr_GetSplinePointCatmullRom(Vector2 *result, const Vector2 *p0, const Vector2 *p1, const Vector2 *p2, const Vector2 *p3, float p4) { *result = GetSplinePointCatmullRom(*p0, *p1, *p2, *p3, p4); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_GetSplinePointBezierQuad(Vector2 *result, const Vector2 *p0, const Vector2 *p1, const Vector2 *p2, float p3) { *result = GetSplinePointBezierQuad(*p0, *p1, *p2, p3); }
+void dr_GetSplinePointBezierQuadratic(Vector2 *result, const Vector2 *p0, const Vector2 *p1, const Vector2 *p2, float p3) { *result = GetSplinePointBezierQuadratic(*p0, *p1, *p2, p3); }
 
 EMSCRIPTEN_KEEPALIVE
 void dr_GetSplinePointBezierCubic(Vector2 *result, const Vector2 *p0, const Vector2 *p1, const Vector2 *p2, const Vector2 *p3, float p4) { *result = GetSplinePointBezierCubic(*p0, *p1, *p2, *p3, p4); }
@@ -892,7 +914,7 @@ EMSCRIPTEN_KEEPALIVE
 void dr_ImageColorGrayscale(Image * p0) { ImageColorGrayscale(p0); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_ImageColorContrast(Image * p0, float p1) { ImageColorContrast(p0, p1); }
+void dr_ImageColorContrast(Image * p0, int p1) { ImageColorContrast(p0, p1); }
 
 EMSCRIPTEN_KEEPALIVE
 void dr_ImageColorBrightness(Image * p0, int p1) { ImageColorBrightness(p0, p1); }
@@ -902,6 +924,9 @@ void dr_ImageColorReplace(Image * p0, const Color *p1, const Color *p2) { ImageC
 
 EMSCRIPTEN_KEEPALIVE
 Color * dr_LoadImageColors(const Image *p0) { return LoadImageColors(*p0); }
+
+EMSCRIPTEN_KEEPALIVE
+Color * dr_LoadImagePalette(const Image *p0, int p1, int * p2) { return LoadImagePalette(*p0, p1, p2); }
 
 EMSCRIPTEN_KEEPALIVE
 void dr_UnloadImageColors(Color * p0) { UnloadImageColors(p0); }
@@ -934,6 +959,36 @@ EMSCRIPTEN_KEEPALIVE
 void dr_ImageDrawLineEx(Image * p0, const Vector2 *p1, const Vector2 *p2, int p3, const Color *p4) { ImageDrawLineEx(p0, *p1, *p2, p3, *p4); }
 
 EMSCRIPTEN_KEEPALIVE
+void dr_ImageDrawTriangle(Image * p0, const Vector2 *p1, const Vector2 *p2, const Vector2 *p3, const Color *p4) { ImageDrawTriangle(p0, *p1, *p2, *p3, *p4); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_ImageDrawTriangleGradient(Image * p0, const Vector2 *p1, const Vector2 *p2, const Vector2 *p3, const Color *p4, const Color *p5, const Color *p6) { ImageDrawTriangleGradient(p0, *p1, *p2, *p3, *p4, *p5, *p6); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_ImageDrawTriangleLines(Image * p0, const Vector2 *p1, const Vector2 *p2, const Vector2 *p3, const Color *p4) { ImageDrawTriangleLines(p0, *p1, *p2, *p3, *p4); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_ImageDrawRectangle(Image * p0, int p1, int p2, int p3, int p4, const Color *p5) { ImageDrawRectangle(p0, p1, p2, p3, p4, *p5); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_ImageDrawRectangleV(Image * p0, const Vector2 *p1, const Vector2 *p2, const Color *p3) { ImageDrawRectangleV(p0, *p1, *p2, *p3); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_ImageDrawRectangleRec(Image * p0, const Rectangle *p1, const Color *p2) { ImageDrawRectangleRec(p0, *p1, *p2); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_ImageDrawRectanglePro(Image * p0, const Rectangle *p1, const Vector2 *p2, float p3, const Color *p4) { ImageDrawRectanglePro(p0, *p1, *p2, p3, *p4); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_ImageDrawRectangleLines(Image * p0, int p1, int p2, int p3, int p4, const Color *p5) { ImageDrawRectangleLines(p0, p1, p2, p3, p4, *p5); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_ImageDrawRectangleLinesEx(Image * p0, const Rectangle *p1, int p2, const Color *p3) { ImageDrawRectangleLinesEx(p0, *p1, p2, *p3); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_ImageDrawRectangleGradientEx(Image * p0, const Rectangle *p1, const Color *p2, const Color *p3, const Color *p4, const Color *p5) { ImageDrawRectangleGradientEx(p0, *p1, *p2, *p3, *p4, *p5); }
+
+EMSCRIPTEN_KEEPALIVE
 void dr_ImageDrawCircle(Image * p0, int p1, int p2, int p3, const Color *p4) { ImageDrawCircle(p0, p1, p2, p3, *p4); }
 
 EMSCRIPTEN_KEEPALIVE
@@ -946,34 +1001,28 @@ EMSCRIPTEN_KEEPALIVE
 void dr_ImageDrawCircleLinesV(Image * p0, const Vector2 *p1, int p2, const Color *p3) { ImageDrawCircleLinesV(p0, *p1, p2, *p3); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_ImageDrawRectangle(Image * p0, int p1, int p2, int p3, int p4, const Color *p5) { ImageDrawRectangle(p0, p1, p2, p3, p4, *p5); }
+void dr_ImageDrawCircleGradient(Image * p0, const Vector2 *p1, float p2, const Color *p3, const Color *p4) { ImageDrawCircleGradient(p0, *p1, p2, *p3, *p4); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_ImageDrawRectangleV(Image * p0, const Vector2 *p1, const Vector2 *p2, const Color *p3) { ImageDrawRectangleV(p0, *p1, *p2, *p3); }
+void dr_ImageDrawImage(Image * p0, const Image *p1, int p2, int p3, const Color *p4) { ImageDrawImage(p0, *p1, p2, p3, *p4); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_ImageDrawRectangleRec(Image * p0, const Rectangle *p1, const Color *p2) { ImageDrawRectangleRec(p0, *p1, *p2); }
+void dr_ImageDrawImageEx(Image * p0, const Image *p1, const Vector2 *p2, float p3, float p4, const Color *p5) { ImageDrawImageEx(p0, *p1, *p2, p3, p4, *p5); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_ImageDrawRectangleLines(Image * p0, const Rectangle *p1, int p2, const Color *p3) { ImageDrawRectangleLines(p0, *p1, p2, *p3); }
+void dr_ImageDrawImageRec(Image * p0, const Image *p1, const Rectangle *p2, const Vector2 *p3, const Color *p4) { ImageDrawImageRec(p0, *p1, *p2, *p3, *p4); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_ImageDrawTriangle(Image * p0, const Vector2 *p1, const Vector2 *p2, const Vector2 *p3, const Color *p4) { ImageDrawTriangle(p0, *p1, *p2, *p3, *p4); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_ImageDrawTriangleEx(Image * p0, const Vector2 *p1, const Vector2 *p2, const Vector2 *p3, const Color *p4, const Color *p5, const Color *p6) { ImageDrawTriangleEx(p0, *p1, *p2, *p3, *p4, *p5, *p6); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_ImageDrawTriangleLines(Image * p0, const Vector2 *p1, const Vector2 *p2, const Vector2 *p3, const Color *p4) { ImageDrawTriangleLines(p0, *p1, *p2, *p3, *p4); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_ImageDraw(Image * p0, const Image *p1, const Rectangle *p2, const Rectangle *p3, const Color *p4) { ImageDraw(p0, *p1, *p2, *p3, *p4); }
+void dr_ImageDrawImagePro(Image * p0, const Image *p1, const Rectangle *p2, const Rectangle *p3, const Vector2 *p4, float p5, const Color *p6) { ImageDrawImagePro(p0, *p1, *p2, *p3, *p4, p5, *p6); }
 
 EMSCRIPTEN_KEEPALIVE
 void dr_ImageDrawText(Image * p0, const char * p1, int p2, int p3, int p4, const Color *p5) { ImageDrawText(p0, p1, p2, p3, p4, *p5); }
 
 EMSCRIPTEN_KEEPALIVE
 void dr_ImageDrawTextEx(Image * p0, const Font *p1, const char * p2, const Vector2 *p3, float p4, float p5, const Color *p6) { ImageDrawTextEx(p0, *p1, p2, *p3, p4, p5, *p6); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_ImageDrawTextPro(Image * p0, const Font *p1, const char * p2, const Vector2 *p3, const Vector2 *p4, float p5, float p6, float p7, const Color *p8) { ImageDrawTextPro(p0, *p1, p2, *p3, *p4, p5, p6, p7, *p8); }
 
 EMSCRIPTEN_KEEPALIVE
 void dr_LoadTexture(Texture2D *result, const char * p0) { *result = LoadTexture(p0); }
@@ -986,6 +1035,9 @@ void dr_LoadTextureCubemap(TextureCubemap *result, const Image *p0, int p1) { *r
 
 EMSCRIPTEN_KEEPALIVE
 void dr_LoadRenderTexture(RenderTexture2D *result, int p0, int p1) { *result = LoadRenderTexture(p0, p1); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_LoadRenderTextureEx(RenderTexture2D *result, int p0, int p1, int p2) { *result = LoadRenderTextureEx(p0, p1, p2); }
 
 EMSCRIPTEN_KEEPALIVE
 bool dr_IsTextureValid(const Texture2D *p0) { return IsTextureValid(*p0); }
@@ -1084,9 +1136,6 @@ EMSCRIPTEN_KEEPALIVE
 bool dr_IsFontValid(const Font *p0) { return IsFontValid(*p0); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_UnloadFontData(GlyphInfo * p0, int p1) { UnloadFontData(p0, p1); }
-
-EMSCRIPTEN_KEEPALIVE
 void dr_UnloadFont(const Font *p0) { UnloadFont(*p0); }
 
 EMSCRIPTEN_KEEPALIVE
@@ -1124,9 +1173,6 @@ void dr_GetGlyphInfo(GlyphInfo *result, const Font *p0, int p1) { *result = GetG
 
 EMSCRIPTEN_KEEPALIVE
 void dr_GetGlyphAtlasRec(Rectangle *result, const Font *p0, int p1) { *result = GetGlyphAtlasRec(*p0, p1); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_UnloadUTF8(char * p0) { UnloadUTF8(p0); }
 
 EMSCRIPTEN_KEEPALIVE
 int dr_GetCodepointCount(const char * p0) { return GetCodepointCount(p0); }
@@ -1364,9 +1410,6 @@ void dr_UpdateModelAnimation(const Model *p0, const ModelAnimation *p1, float p2
 
 EMSCRIPTEN_KEEPALIVE
 void dr_UpdateModelAnimationEx(const Model *p0, const ModelAnimation *p1, float p2, const ModelAnimation *p3, float p4, float p5) { UpdateModelAnimationEx(*p0, *p1, p2, *p3, p4, p5); }
-
-EMSCRIPTEN_KEEPALIVE
-void dr_UnloadModelAnimations(ModelAnimation * p0, int p1) { UnloadModelAnimations(p0, p1); }
 
 EMSCRIPTEN_KEEPALIVE
 bool dr_IsModelAnimationValid(const Model *p0, const ModelAnimation *p1) { return IsModelAnimationValid(*p0, *p1); }
@@ -2305,9 +2348,6 @@ EMSCRIPTEN_KEEPALIVE
 void dr_rlDrawRenderBatch(rlRenderBatch * p0) { rlDrawRenderBatch(p0); }
 
 EMSCRIPTEN_KEEPALIVE
-void dr_rlSetRenderBatchActive(rlRenderBatch * p0) { rlSetRenderBatchActive(p0); }
-
-EMSCRIPTEN_KEEPALIVE
 void dr_rlDrawRenderBatchActive(void) { rlDrawRenderBatchActive(); }
 
 EMSCRIPTEN_KEEPALIVE
@@ -2441,4 +2481,10 @@ void dr_rlLoadDrawCube(void) { rlLoadDrawCube(); }
 
 EMSCRIPTEN_KEEPALIVE
 void dr_rlLoadDrawQuad(void) { rlLoadDrawQuad(); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_ProcessGestureEvent(const GestureEvent *p0) { ProcessGestureEvent(*p0); }
+
+EMSCRIPTEN_KEEPALIVE
+void dr_UpdateGestures(void) { UpdateGestures(); }
 

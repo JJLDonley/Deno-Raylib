@@ -7,7 +7,9 @@ export { UnsupportedPlatformError, WebNotInitializedError } from "./context.ts";
 export interface WebBackendFactoryOptions {
   /** A CSS selector, HTMLCanvasElement, or OffscreenCanvas. */
   canvas?: object | string;
+  /** Wasm binary URL; relative URLs resolve beside the generated backend. */
   wasmUrl?: URL | string;
+  /** Base directory for Emscripten runtime files (not a virtual filesystem mount). */
   assetBaseUrl?: URL | string;
 }
 
@@ -32,8 +34,11 @@ export interface RunOptions {
   shouldClose?: () => boolean;
 }
 
-let stopRequested = false;
-let animationFrame: number | undefined;
+let activeRun:
+  | { stop: (close: boolean) => void; isClosing: () => boolean }
+  | undefined;
+let initialization: Promise<void> | undefined;
+let generation = 0;
 
 type BrowserHost = {
   location?: { href: string };
@@ -48,8 +53,27 @@ function asUrl(value: URL | string): URL {
 }
 
 export async function Init(options: InitOptions = {}): Promise<void> {
+  if (activeRun?.isClosing()) {
+    throw new Error(
+      "Await Application.Run() shutdown before initializing again.",
+    );
+  }
+  if (initialization) return await initialization;
   if (isInitialized()) return;
+  const currentGeneration = generation;
+  const operation = initialize(options, currentGeneration);
+  initialization = operation;
+  try {
+    await operation;
+  } finally {
+    if (initialization === operation) initialization = undefined;
+  }
+}
 
+async function initialize(
+  options: InitOptions,
+  currentGeneration: number,
+): Promise<void> {
   if (options.backend) {
     installBackend(options.backend);
     return;
@@ -77,10 +101,15 @@ export async function Init(options: InitOptions = {}): Promise<void> {
     factory = module.default;
   }
 
-  installBackend(await factory(options));
+  const backend = await factory(options);
+  if (currentGeneration !== generation) {
+    throw new Error("Web initialization was cancelled by Application.Close().");
+  }
+  installBackend(backend);
 }
 
 export async function Run(options: RunOptions): Promise<void> {
+  if (activeRun) throw new Error("Application.Run() is already active.");
   if (!isInitialized()) {
     throw new Error(
       "Call `await Application.Init()` before Application.Run().",
@@ -92,54 +121,95 @@ export async function Run(options: RunOptions): Promise<void> {
     );
   }
 
-  stopRequested = false;
-  await options.init?.();
-
   return await new Promise<void>((resolve, reject) => {
+    let stopRequested = false;
+    let closeRequested = false;
+    let busy = true;
+    let finished = false;
+    let animationFrame: number | undefined;
     let previous = performance.now();
 
-    const finish = async () => {
+    const finish = async (failure?: { error: unknown }) => {
+      if (finished) return;
+      finished = true;
+      if (animationFrame !== undefined) {
+        browser.cancelAnimationFrame?.(animationFrame);
+      }
       animationFrame = undefined;
       try {
         await options.shutdown?.();
-        resolve();
       } catch (error) {
-        reject(error);
+        failure = {
+          error: failure
+            ? new AggregateError(
+              [failure.error, error],
+              "Application and shutdown both failed",
+            )
+            : error,
+        };
+      } finally {
+        if (closeRequested) removeBackend();
+        activeRun = undefined;
       }
+      if (failure) reject(failure.error);
+      else resolve();
     };
 
     const frame = (now: number) => {
-      if (stopRequested || options.shouldClose?.()) {
-        void finish();
-        return;
-      }
+      animationFrame = undefined;
+      if (finished) return;
+      busy = true;
       try {
+        if (stopRequested || options.shouldClose?.() || stopRequested) {
+          void finish();
+          return;
+        }
         const deltaTime = Math.max(0, (now - previous) / 1000);
         previous = now;
         options.update?.(deltaTime);
-        options.draw();
-        animationFrame = browser.requestAnimationFrame!(frame);
+        if (!stopRequested) options.draw();
+        if (stopRequested) void finish();
+        else animationFrame = browser.requestAnimationFrame!(frame);
       } catch (error) {
-        animationFrame = undefined;
-        reject(error);
+        void finish({ error });
+      } finally {
+        busy = false;
       }
     };
 
-    animationFrame = browser.requestAnimationFrame!(frame);
+    activeRun = {
+      isClosing: () => closeRequested,
+      stop(close) {
+        stopRequested = true;
+        closeRequested ||= close;
+        if (!busy) void finish();
+      },
+    };
+    void (async () => {
+      try {
+        await options.init?.();
+        previous = performance.now();
+        busy = false;
+        if (stopRequested) await finish();
+        else animationFrame = browser.requestAnimationFrame!(frame);
+      } catch (error) {
+        busy = false;
+        await finish({ error });
+      }
+    })();
   });
 }
 
 export function Stop(): void {
-  stopRequested = true;
+  activeRun?.stop(false);
 }
 
+/** Stop the loop; Run() settles after shutdown, then the backend is detached. */
 export function Close(): void {
-  stopRequested = true;
-  if (animationFrame !== undefined) {
-    browser.cancelAnimationFrame?.(animationFrame);
-    animationFrame = undefined;
-  }
-  removeBackend();
+  generation++;
+  initialization = undefined;
+  if (activeRun) activeRun.stop(true);
+  else removeBackend();
 }
 
 export { isInitialized as IsInitialized } from "./context.ts";

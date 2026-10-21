@@ -56,8 +56,12 @@ export type WebValue<T> = T extends number ? number
   : T extends import("../Raylib/raylib.ts").rlDrawCall ? WebStructs.rlDrawCall
   : T extends import("../Raylib/raylib.ts").rlRenderBatch
     ? WebStructs.rlRenderBatch
+  : T extends import("../Raylib/raylib.ts").GestureEvent
+    ? WebStructs.GestureEvent
   : T extends Promise<infer Value> ? Promise<WebValue<Value>>
   : T extends readonly (infer Value)[] ? WebValue<Value>[]
+  : T extends ArrayBufferView | ArrayBuffer | AnyFunction ? T
+  : T extends object ? { [Key in keyof T]: WebValue<T[Key]> }
   : T;
 export type WebFunction<Name extends FunctionName> =
   Extract<NativeAPI[Name], AnyFunction> extends

@@ -2470,12 +2470,12 @@ export class ModelSkeleton {
 
   /** boneCount member. */
   get boneCount(): number {
-    return this.#view.getInt32(0, littleEndian) as number;
+    return this.#view.getUint32(0, littleEndian) as number;
   }
 
   /** boneCount member. */
   set boneCount(value: number) {
-    this.#view.setInt32(0, value as any, littleEndian);
+    this.#view.setUint32(0, value as any, littleEndian);
   }
 
   /** bonesPtr member. */
@@ -2692,12 +2692,12 @@ export class ModelAnimation {
 
   /** boneCount member. */
   get boneCount(): number {
-    return this.#view.getInt32(32, littleEndian) as number;
+    return this.#view.getUint32(32, littleEndian) as number;
   }
 
   /** boneCount member. */
   set boneCount(value: number) {
-    this.#view.setInt32(32, value as any, littleEndian);
+    this.#view.setUint32(32, value as any, littleEndian);
   }
 
   /** keyframeCount member. */
@@ -3867,7 +3867,7 @@ export class AutomationEventList {
   }
 }
 
-/** float3 from the raylib 6.0 API. */
+/** float3 from the raylib 6.2 API. */
 export class float3 {
   /** SIZE member. */
   static readonly SIZE = 12;
@@ -3913,7 +3913,7 @@ export class float3 {
   }
 }
 
-/** float16 from the raylib 6.0 API. */
+/** float16 from the raylib 6.2 API. */
 export class float16 {
   /** SIZE member. */
   static readonly SIZE = 64;
@@ -4292,5 +4292,96 @@ export class rlRenderBatch {
   /** currentDepth member. */
   set currentDepth(value: number) {
     this.#view.setFloat32(28, value as any, littleEndian);
+  }
+}
+
+/** Gesture input event */
+export class GestureEvent {
+  /** SIZE member. */
+  static readonly SIZE = 104;
+  #buffer: Uint8Array<ArrayBuffer>;
+  #view: DataView;
+
+  /** constructor member. */
+  constructor(buffer: Uint8Array<ArrayBuffer>) {
+    this.#buffer = buffer;
+    this.#view = new DataView(
+      this.#buffer.buffer,
+      this.#buffer.byteOffset,
+      this.#buffer.byteLength,
+    );
+  }
+
+  /** fromBuffer member. */
+  static fromBuffer(buffer: ArrayBufferLike, byteOffset = 0): GestureEvent {
+    return new GestureEvent(
+      new Uint8Array(buffer as ArrayBuffer, byteOffset, GestureEvent.SIZE),
+    );
+  }
+
+  /** buffer member. */
+  get buffer(): Uint8Array<ArrayBuffer> {
+    return this.#buffer;
+  }
+
+  /** touchAction member. */
+  get touchAction(): number {
+    return this.#view.getInt32(0, littleEndian) as number;
+  }
+
+  /** touchAction member. */
+  set touchAction(value: number) {
+    this.#view.setInt32(0, value as any, littleEndian);
+  }
+
+  /** pointCount member. */
+  get pointCount(): number {
+    return this.#view.getInt32(4, littleEndian) as number;
+  }
+
+  /** pointCount member. */
+  set pointCount(value: number) {
+    this.#view.setInt32(4, value as any, littleEndian);
+  }
+
+  /** pointId member. */
+  get pointId(): Int32Array {
+    return new Int32Array(this.#buffer.buffer, this.#buffer.byteOffset + 8, 8);
+  }
+
+  /** pointId member. */
+  set pointId(values: ArrayLike<number>) {
+    const view = this.pointId;
+    const count = Math.min(values.length, view.length);
+    for (let i = 0; i < count; i++) view[i] = values[i] as any;
+  }
+
+  /** position member. */
+  get position(): Vector2[] {
+    const items: Vector2[] = [];
+    const size = Vector2.SIZE;
+    for (let i = 0; i < 8; i++) {
+      items.push(
+        Vector2.fromBuffer(
+          this.#buffer.buffer,
+          this.#buffer.byteOffset + 40 + i * size,
+        ),
+      );
+    }
+    return items;
+  }
+
+  /** position member. */
+  set position(values: Vector2[]) {
+    const size = Vector2.SIZE;
+    const count = Math.min(values.length, 8);
+    for (let i = 0; i < count; i++) {
+      const target = new Uint8Array(
+        this.#buffer.buffer,
+        this.#buffer.byteOffset + 40 + i * size,
+        size,
+      );
+      target.set(values[i].buffer);
+    }
   }
 }

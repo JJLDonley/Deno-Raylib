@@ -2,10 +2,42 @@
  * @module
  */
 import { lib as DLL } from "../Bindings/bindings.ts";
-import { Vector2 } from "../Bindings/Structs/structs.ts";
-export { Vector2 } from "../Bindings/Structs/structs.ts";
+import { type GestureEvent, Vector2 } from "../Bindings/Structs/structs.ts";
+export { GestureEvent, Vector2 } from "../Bindings/Structs/structs.ts";
 import type { float } from "./raylib.ts";
 const lib = DLL.symbols;
+
+/** Touch actions from rgestures.h. */
+export enum TouchAction {
+  /** TOUCH_ACTION_UP member. */
+  TOUCH_ACTION_UP = 0,
+  /** TOUCH_ACTION_DOWN member. */
+  TOUCH_ACTION_DOWN = 1,
+  /** TOUCH_ACTION_MOVE member. */
+  TOUCH_ACTION_MOVE = 2,
+  /** TOUCH_ACTION_CANCEL member. */
+  TOUCH_ACTION_CANCEL = 3,
+}
+
+/** Process a gesture event. Requires a native library exporting this internal symbol. */
+export function ProcessGestureEvent(event: GestureEvent): void {
+  if (!lib.ProcessGestureEvent) {
+    throw new Error(
+      "ProcessGestureEvent is not exported by this native raylib library; use a build exporting rgestures internals. Browser Wasm builds support it.",
+    );
+  }
+  lib.ProcessGestureEvent(event.buffer);
+}
+
+/** Advance gesture state. Requires a native library exporting this internal symbol. */
+export function UpdateGestures(): void {
+  if (!lib.UpdateGestures) {
+    throw new Error(
+      "UpdateGestures is not exported by this native raylib library; use a build exporting rgestures internals. Browser Wasm builds support it.",
+    );
+  }
+  lib.UpdateGestures();
+}
 
 /** Gesture */
 export enum Gesture {

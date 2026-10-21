@@ -18,12 +18,20 @@ function resolveCanvas(canvas) {
 }
 
 export default async function createBackend(options = {}) {
+  const assetBase = new URL(options.assetBaseUrl ?? "./", import.meta.url);
+  if (!assetBase.pathname.endsWith("/")) assetBase.pathname += "/";
   const module = await createRaylibModule({
     canvas: resolveCanvas(options.canvas),
-    locateFile: (path) => new URL(path, import.meta.url).href,
+    locateFile: (path) =>
+      path.endsWith(".wasm") && options.wasmUrl
+        ? new URL(options.wasmUrl, import.meta.url).href
+        : new URL(path, assetBase).href,
   });
   const allocate = (value) => {
-    const pointer = module._malloc(value.buffer.byteLength);
+    if (!(value?.buffer instanceof Uint8Array)) {
+      throw new TypeError("Expected a Web struct");
+    }
+    const pointer = malloc(value.buffer.byteLength);
     module.HEAPU8.set(value.buffer, pointer);
     return pointer;
   };
@@ -32,6 +40,11 @@ export default async function createBackend(options = {}) {
     return new Type(module.HEAPU8.slice(pointer, pointer + Type.SIZE));
   };
   const backend = {};
+  const malloc = (size) => {
+    const pointer = module._malloc(Math.max(1, size));
+    if (!pointer) throw new Error("WebAssembly allocation failed");
+    return pointer;
+  };
   {
     const call = module.cwrap("dr_InitWindow", null, [
       "number",
@@ -248,23 +261,6 @@ export default async function createBackend(options = {}) {
     };
   }
   {
-    const call = module.cwrap("dr_SetWindowIcons", null, ["number", "number"]);
-    backend.SetWindowIcons = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        call(p0, args[1]);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
     const call = module.cwrap("dr_SetWindowTitle", null, ["string"]);
     backend.SetWindowTitle = (...args) => {
       const allocations = [];
@@ -434,7 +430,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetMonitorPosition = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -507,7 +503,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetWindowPosition", null, ["number"]);
     backend.GetWindowPosition = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -521,7 +517,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetWindowScaleDPI", null, ["number"]);
     backend.GetWindowScaleDPI = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -568,7 +564,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetClipboardImage", null, ["number"]);
     backend.GetClipboardImage = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -877,7 +873,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadVrStereoConfig = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.VrStereoConfig.SIZE);
+      const result = malloc(Structs.VrStereoConfig.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -910,7 +906,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadShader = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Shader.SIZE);
+      const result = malloc(Structs.Shader.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1]);
@@ -928,7 +924,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadShaderFromMemory = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Shader.SIZE);
+      const result = malloc(Structs.Shader.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1]);
@@ -1042,7 +1038,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetScreenToWorldRay = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Ray.SIZE);
+      const result = malloc(Structs.Ray.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -1066,7 +1062,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetScreenToWorldRayEx = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Ray.SIZE);
+      const result = malloc(Structs.Ray.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -1088,7 +1084,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetWorldToScreen = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -1112,7 +1108,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetWorldToScreenEx = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -1134,7 +1130,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetWorldToScreen2D = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -1156,7 +1152,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetScreenToWorld2D = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -1174,7 +1170,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetCameraMatrix", null, ["number", "number"]);
     backend.GetCameraMatrix = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -1193,7 +1189,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetCameraMatrix2D = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -1358,20 +1354,11 @@ export default async function createBackend(options = {}) {
       try {
         const pointer = call(args[0]);
         if (!pointer) return "";
-        const value = module.UTF8ToString(pointer);
-        module._free(pointer);
-        return value;
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_UnloadFileText", null, ["string"]);
-    backend.UnloadFileText = (...args) => {
-      const allocations = [];
-      try {
-        call(args[0]);
+        try {
+          return module.UTF8ToString(pointer);
+        } finally {
+          module._free(pointer);
+        }
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -1501,6 +1488,17 @@ export default async function createBackend(options = {}) {
     };
   }
   {
+    const call = module.cwrap("dr_IsFileHidden", "number", ["string"]);
+    backend.IsFileHidden = (...args) => {
+      const allocations = [];
+      try {
+        return Boolean(call(args[0]));
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
     const call = module.cwrap("dr_GetFileLength", "number", ["string"]);
     backend.GetFileLength = (...args) => {
       const allocations = [];
@@ -1615,7 +1613,7 @@ export default async function createBackend(options = {}) {
     backend.ChangeDirectory = (...args) => {
       const allocations = [];
       try {
-        return Boolean(call(args[0]));
+        return call(args[0]);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -1624,6 +1622,28 @@ export default async function createBackend(options = {}) {
   {
     const call = module.cwrap("dr_IsPathFile", "number", ["string"]);
     backend.IsPathFile = (...args) => {
+      const allocations = [];
+      try {
+        return Boolean(call(args[0]));
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_IsPathDirectory", "number", ["string"]);
+    backend.IsPathDirectory = (...args) => {
+      const allocations = [];
+      try {
+        return Boolean(call(args[0]));
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_IsPathAbsolute", "number", ["string"]);
+    backend.IsPathAbsolute = (...args) => {
       const allocations = [];
       try {
         return Boolean(call(args[0]));
@@ -1650,7 +1670,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadDirectoryFiles = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.FilePathList.SIZE);
+      const result = malloc(Structs.FilePathList.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -1669,7 +1689,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadDirectoryFilesEx = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.FilePathList.SIZE);
+      const result = malloc(Structs.FilePathList.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2]);
@@ -1698,20 +1718,6 @@ export default async function createBackend(options = {}) {
       const allocations = [];
       try {
         return Boolean(call());
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_LoadDroppedFiles", null, ["number"]);
-    backend.LoadDroppedFiles = (...args) => {
-      const allocations = [];
-      const result = module._malloc(Structs.FilePathList.SIZE);
-      allocations.push(result);
-      try {
-        call(result);
-        return copyStruct("FilePathList", result);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -1763,7 +1769,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadAutomationEventList = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.AutomationEventList.SIZE);
+      const result = malloc(Structs.AutomationEventList.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -1798,23 +1804,6 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         return Boolean(call(p0, args[1]));
       } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_SetAutomationEventList", null, ["number"]);
-    backend.SetAutomationEventList = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        call(p0);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -2177,7 +2166,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetMousePosition", null, ["number"]);
     backend.GetMousePosition = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -2191,7 +2180,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetMouseDelta", null, ["number"]);
     backend.GetMouseDelta = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -2252,7 +2241,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetMouseWheelMoveV", null, ["number"]);
     backend.GetMouseWheelMoveV = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -2302,7 +2291,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetTouchPosition = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -2382,7 +2371,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetGestureDragVector", null, ["number"]);
     backend.GetGestureDragVector = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -2407,7 +2396,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetGesturePinchVector", null, ["number"]);
     backend.GetGesturePinchVector = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -2438,9 +2427,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -2464,9 +2455,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p2);
         call(p0, p1, p2, args[3]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -2493,7 +2486,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetShapesTexture", null, ["number"]);
     backend.GetShapesTexture = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Texture.SIZE);
+      const result = malloc(Structs.Texture.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -2507,7 +2500,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetShapesTextureRectangle", null, ["number"]);
     backend.GetShapesTextureRectangle = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Rectangle.SIZE);
+      const result = malloc(Structs.Rectangle.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -2657,66 +2650,31 @@ export default async function createBackend(options = {}) {
     };
   }
   {
-    const call = module.cwrap("dr_DrawCircle", null, [
+    const call = module.cwrap("dr_DrawTriangle", null, [
       "number",
       "number",
       "number",
       "number",
     ]);
-    backend.DrawCircle = (...args) => {
-      const allocations = [];
-      try {
-        const p3 = allocate(args[3]);
-        allocations.push(p3);
-        call(args[0], args[1], args[2], p3);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_DrawCircleV", null, [
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.DrawCircleV = (...args) => {
+    backend.DrawTriangle = (...args) => {
       const allocations = [];
       try {
         const p0 = allocate(args[0]);
         allocations.push(p0);
-        const p2 = allocate(args[2]);
-        allocations.push(p2);
-        call(p0, args[1], p2);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_DrawCircleGradient", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.DrawCircleGradient = (...args) => {
-      const allocations = [];
-      try {
-        const p0 = allocate(args[0]);
-        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
         const p2 = allocate(args[2]);
         allocations.push(p2);
         const p3 = allocate(args[3]);
         allocations.push(p3);
-        call(p0, args[1], p2, p3);
+        call(p0, p1, p2, p3);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
     };
   }
   {
-    const call = module.cwrap("dr_DrawCircleSector", null, [
+    const call = module.cwrap("dr_DrawTriangleGradient", null, [
       "number",
       "number",
       "number",
@@ -2724,197 +2682,71 @@ export default async function createBackend(options = {}) {
       "number",
       "number",
     ]);
-    backend.DrawCircleSector = (...args) => {
+    backend.DrawTriangleGradient = (...args) => {
       const allocations = [];
       try {
         const p0 = allocate(args[0]);
         allocations.push(p0);
-        const p5 = allocate(args[5]);
-        allocations.push(p5);
-        call(p0, args[1], args[2], args[3], args[4], p5);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_DrawCircleSectorLines", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.DrawCircleSectorLines = (...args) => {
-      const allocations = [];
-      try {
-        const p0 = allocate(args[0]);
-        allocations.push(p0);
-        const p5 = allocate(args[5]);
-        allocations.push(p5);
-        call(p0, args[1], args[2], args[3], args[4], p5);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_DrawCircleLines", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.DrawCircleLines = (...args) => {
-      const allocations = [];
-      try {
-        const p3 = allocate(args[3]);
-        allocations.push(p3);
-        call(args[0], args[1], args[2], p3);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_DrawCircleLinesV", null, [
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.DrawCircleLinesV = (...args) => {
-      const allocations = [];
-      try {
-        const p0 = allocate(args[0]);
-        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
         const p2 = allocate(args[2]);
         allocations.push(p2);
-        call(p0, args[1], p2);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_DrawEllipse", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.DrawEllipse = (...args) => {
-      const allocations = [];
-      try {
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
         const p4 = allocate(args[4]);
         allocations.push(p4);
-        call(args[0], args[1], args[2], args[3], p4);
+        const p5 = allocate(args[5]);
+        allocations.push(p5);
+        call(p0, p1, p2, p3, p4, p5);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
     };
   }
   {
-    const call = module.cwrap("dr_DrawEllipseV", null, [
+    const call = module.cwrap("dr_DrawTriangleLines", null, [
       "number",
       "number",
       "number",
       "number",
     ]);
-    backend.DrawEllipseV = (...args) => {
+    backend.DrawTriangleLines = (...args) => {
       const allocations = [];
       try {
         const p0 = allocate(args[0]);
         allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
+        const p2 = allocate(args[2]);
+        allocations.push(p2);
         const p3 = allocate(args[3]);
         allocations.push(p3);
-        call(p0, args[1], args[2], p3);
+        call(p0, p1, p2, p3);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
     };
   }
   {
-    const call = module.cwrap("dr_DrawEllipseLines", null, [
+    const call = module.cwrap("dr_DrawTriangleLinesEx", null, [
       "number",
       "number",
       "number",
       "number",
       "number",
     ]);
-    backend.DrawEllipseLines = (...args) => {
+    backend.DrawTriangleLinesEx = (...args) => {
       const allocations = [];
       try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
+        const p2 = allocate(args[2]);
+        allocations.push(p2);
         const p4 = allocate(args[4]);
         allocations.push(p4);
-        call(args[0], args[1], args[2], args[3], p4);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_DrawEllipseLinesV", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.DrawEllipseLinesV = (...args) => {
-      const allocations = [];
-      try {
-        const p0 = allocate(args[0]);
-        allocations.push(p0);
-        const p3 = allocate(args[3]);
-        allocations.push(p3);
-        call(p0, args[1], args[2], p3);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_DrawRing", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.DrawRing = (...args) => {
-      const allocations = [];
-      try {
-        const p0 = allocate(args[0]);
-        allocations.push(p0);
-        const p6 = allocate(args[6]);
-        allocations.push(p6);
-        call(p0, args[1], args[2], args[3], args[4], args[5], p6);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_DrawRingLines", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.DrawRingLines = (...args) => {
-      const allocations = [];
-      try {
-        const p0 = allocate(args[0]);
-        allocations.push(p0);
-        const p6 = allocate(args[6]);
-        allocations.push(p6);
-        call(p0, args[1], args[2], args[3], args[4], args[5], p6);
+        call(p0, p1, p2, args[3], p4);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -3171,54 +3003,6 @@ export default async function createBackend(options = {}) {
     };
   }
   {
-    const call = module.cwrap("dr_DrawTriangle", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.DrawTriangle = (...args) => {
-      const allocations = [];
-      try {
-        const p0 = allocate(args[0]);
-        allocations.push(p0);
-        const p1 = allocate(args[1]);
-        allocations.push(p1);
-        const p2 = allocate(args[2]);
-        allocations.push(p2);
-        const p3 = allocate(args[3]);
-        allocations.push(p3);
-        call(p0, p1, p2, p3);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_DrawTriangleLines", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.DrawTriangleLines = (...args) => {
-      const allocations = [];
-      try {
-        const p0 = allocate(args[0]);
-        allocations.push(p0);
-        const p1 = allocate(args[1]);
-        allocations.push(p1);
-        const p2 = allocate(args[2]);
-        allocations.push(p2);
-        const p3 = allocate(args[3]);
-        allocations.push(p3);
-        call(p0, p1, p2, p3);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
     const call = module.cwrap("dr_DrawPoly", null, [
       "number",
       "number",
@@ -3277,6 +3061,358 @@ export default async function createBackend(options = {}) {
         const p5 = allocate(args[5]);
         allocations.push(p5);
         call(p0, args[1], args[2], args[3], args[4], p5);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawCircle", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawCircle = (...args) => {
+      const allocations = [];
+      try {
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
+        call(args[0], args[1], args[2], p3);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawCircleV", null, [
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawCircleV = (...args) => {
+      const allocations = [];
+      try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p2 = allocate(args[2]);
+        allocations.push(p2);
+        call(p0, args[1], p2);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawCircleGradient", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawCircleGradient = (...args) => {
+      const allocations = [];
+      try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p2 = allocate(args[2]);
+        allocations.push(p2);
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
+        call(p0, args[1], p2, p3);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawCircleSector", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawCircleSector = (...args) => {
+      const allocations = [];
+      try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p5 = allocate(args[5]);
+        allocations.push(p5);
+        call(p0, args[1], args[2], args[3], args[4], p5);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawCircleSectorLines", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawCircleSectorLines = (...args) => {
+      const allocations = [];
+      try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p5 = allocate(args[5]);
+        allocations.push(p5);
+        call(p0, args[1], args[2], args[3], args[4], p5);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawCircleSectorLinesEx", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawCircleSectorLinesEx = (...args) => {
+      const allocations = [];
+      try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p6 = allocate(args[6]);
+        allocations.push(p6);
+        call(p0, args[1], args[2], args[3], args[4], args[5], p6);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawCircleLines", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawCircleLines = (...args) => {
+      const allocations = [];
+      try {
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
+        call(args[0], args[1], args[2], p3);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawCircleLinesV", null, [
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawCircleLinesV = (...args) => {
+      const allocations = [];
+      try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p2 = allocate(args[2]);
+        allocations.push(p2);
+        call(p0, args[1], p2);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawCircleLinesEx", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawCircleLinesEx = (...args) => {
+      const allocations = [];
+      try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
+        call(p0, args[1], args[2], p3);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawEllipse", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawEllipse = (...args) => {
+      const allocations = [];
+      try {
+        const p4 = allocate(args[4]);
+        allocations.push(p4);
+        call(args[0], args[1], args[2], args[3], p4);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawEllipseV", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawEllipseV = (...args) => {
+      const allocations = [];
+      try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
+        call(p0, args[1], args[2], p3);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawEllipseLines", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawEllipseLines = (...args) => {
+      const allocations = [];
+      try {
+        const p4 = allocate(args[4]);
+        allocations.push(p4);
+        call(args[0], args[1], args[2], args[3], p4);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawEllipseLinesV", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawEllipseLinesV = (...args) => {
+      const allocations = [];
+      try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
+        call(p0, args[1], args[2], p3);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawEllipseLinesEx", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawEllipseLinesEx = (...args) => {
+      const allocations = [];
+      try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p4 = allocate(args[4]);
+        allocations.push(p4);
+        call(p0, args[1], args[2], args[3], p4);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawRing", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawRing = (...args) => {
+      const allocations = [];
+      try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p6 = allocate(args[6]);
+        allocations.push(p6);
+        call(p0, args[1], args[2], args[3], args[4], args[5], p6);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawRingLines", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawRingLines = (...args) => {
+      const allocations = [];
+      try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p6 = allocate(args[6]);
+        allocations.push(p6);
+        call(p0, args[1], args[2], args[3], args[4], args[5], p6);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_DrawRingLinesEx", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.DrawRingLinesEx = (...args) => {
+      const allocations = [];
+      try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p7 = allocate(args[7]);
+        allocations.push(p7);
+        call(p0, args[1], args[2], args[3], args[4], args[5], args[6], p7);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -3422,7 +3558,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetSplinePointLinear = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -3447,7 +3583,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetSplinePointBasis = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -3476,7 +3612,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetSplinePointCatmullRom = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -3495,16 +3631,16 @@ export default async function createBackend(options = {}) {
     };
   }
   {
-    const call = module.cwrap("dr_GetSplinePointBezierQuad", null, [
+    const call = module.cwrap("dr_GetSplinePointBezierQuadratic", null, [
       "number",
       "number",
       "number",
       "number",
       "number",
     ]);
-    backend.GetSplinePointBezierQuad = (...args) => {
+    backend.GetSplinePointBezierQuadratic = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -3531,7 +3667,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetSplinePointBezierCubic = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -3735,9 +3871,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p4);
         return Boolean(call(p0, p1, p2, p3, p4));
       } finally {
-        args[4].buffer.set(
-          module.HEAPU8.subarray(p4, p4 + args[4].buffer.byteLength),
-        );
+        if (p4 !== undefined) {
+          args[4].buffer.set(
+            module.HEAPU8.subarray(p4, p4 + args[4].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -3750,7 +3888,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetCollisionRec = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Rectangle.SIZE);
+      const result = malloc(Structs.Rectangle.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -3768,7 +3906,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_LoadImage", null, ["number", "string"]);
     backend.LoadImage = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -3789,7 +3927,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadImageRaw = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2], args[3], args[4]);
@@ -3806,7 +3944,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadImageFromTexture = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -3822,7 +3960,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_LoadImageFromScreen", null, ["number"]);
     backend.LoadImageFromScreen = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -3896,7 +4034,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenImageColor = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         const p2 = allocate(args[2]);
@@ -3919,7 +4057,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenImageGradientLinear = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         const p3 = allocate(args[3]);
@@ -3944,7 +4082,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenImageGradientRadial = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         const p3 = allocate(args[3]);
@@ -3969,7 +4107,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenImageGradientSquare = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         const p3 = allocate(args[3]);
@@ -3995,7 +4133,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenImageChecked = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         const p4 = allocate(args[4]);
@@ -4018,7 +4156,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenImageWhiteNoise = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2]);
@@ -4039,7 +4177,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenImagePerlinNoise = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2], args[3], args[4]);
@@ -4058,7 +4196,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenImageCellular = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2]);
@@ -4077,7 +4215,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenImageText = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2]);
@@ -4091,7 +4229,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_ImageCopy", null, ["number", "number"]);
     backend.ImageCopy = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -4111,7 +4249,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.ImageFromImage = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -4133,7 +4271,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.ImageFromChannel = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -4154,7 +4292,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.ImageText = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         const p2 = allocate(args[2]);
@@ -4177,7 +4315,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.ImageTextEx = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Image.SIZE);
+      const result = malloc(Structs.Image.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -4201,9 +4339,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4220,9 +4360,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p1);
         call(p0, p1);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4239,9 +4381,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p1);
         call(p0, p1);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4256,9 +4400,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4279,9 +4425,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p1);
         call(p0, p1, args[2]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4298,9 +4446,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p1);
         call(p0, p1);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4315,9 +4465,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4335,9 +4487,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4356,9 +4510,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1], args[2]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4377,9 +4533,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1], args[2]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4403,9 +4561,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p5);
         call(p0, args[1], args[2], args[3], args[4], p5);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4420,9 +4580,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4443,9 +4605,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1], args[2], args[3], args[4]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4460,9 +4624,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4477,9 +4643,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4494,9 +4662,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4511,9 +4681,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4528,9 +4700,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4547,9 +4721,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p1);
         call(p0, p1);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4564,9 +4740,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4581,9 +4759,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4601,9 +4781,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4621,9 +4803,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4646,56 +4830,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p2);
         call(p0, p1, p2);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_LoadImageColors", "number", ["number"]);
-    backend.LoadImageColors = (...args) => {
-      const allocations = [];
-      try {
-        const p0 = allocate(args[0]);
-        allocations.push(p0);
-        return call(p0);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_UnloadImageColors", null, ["number"]);
-    backend.UnloadImageColors = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        call(p0);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_UnloadImagePalette", null, ["number"]);
-    backend.UnloadImagePalette = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        call(p0);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4708,7 +4847,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetImageAlphaBorder = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Rectangle.SIZE);
+      const result = malloc(Structs.Rectangle.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -4729,7 +4868,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetImageColor = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Color.SIZE);
+      const result = malloc(Structs.Color.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -4756,9 +4895,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p1);
         call(p0, p1);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4780,9 +4921,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p3);
         call(p0, args[1], args[2], p3);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4805,9 +4948,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p2);
         call(p0, p1, p2);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4831,9 +4976,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p5);
         call(p0, args[1], args[2], args[3], args[4], p5);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4859,9 +5006,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p3);
         call(p0, p1, p2, p3);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -4888,216 +5037,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p4);
         call(p0, p1, p2, args[3], p4);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_ImageDrawCircle", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.ImageDrawCircle = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        const p4 = allocate(args[4]);
-        allocations.push(p4);
-        call(p0, args[1], args[2], args[3], p4);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_ImageDrawCircleV", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.ImageDrawCircleV = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        const p1 = allocate(args[1]);
-        allocations.push(p1);
-        const p3 = allocate(args[3]);
-        allocations.push(p3);
-        call(p0, p1, args[2], p3);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_ImageDrawCircleLines", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.ImageDrawCircleLines = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        const p4 = allocate(args[4]);
-        allocations.push(p4);
-        call(p0, args[1], args[2], args[3], p4);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_ImageDrawCircleLinesV", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.ImageDrawCircleLinesV = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        const p1 = allocate(args[1]);
-        allocations.push(p1);
-        const p3 = allocate(args[3]);
-        allocations.push(p3);
-        call(p0, p1, args[2], p3);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_ImageDrawRectangle", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.ImageDrawRectangle = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        const p5 = allocate(args[5]);
-        allocations.push(p5);
-        call(p0, args[1], args[2], args[3], args[4], p5);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_ImageDrawRectangleV", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.ImageDrawRectangleV = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        const p1 = allocate(args[1]);
-        allocations.push(p1);
-        const p2 = allocate(args[2]);
-        allocations.push(p2);
-        const p3 = allocate(args[3]);
-        allocations.push(p3);
-        call(p0, p1, p2, p3);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_ImageDrawRectangleRec", null, [
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.ImageDrawRectangleRec = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        const p1 = allocate(args[1]);
-        allocations.push(p1);
-        const p2 = allocate(args[2]);
-        allocations.push(p2);
-        call(p0, p1, p2);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_ImageDrawRectangleLines", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.ImageDrawRectangleLines = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        const p1 = allocate(args[1]);
-        allocations.push(p1);
-        const p3 = allocate(args[3]);
-        allocations.push(p3);
-        call(p0, p1, args[2], p3);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -5126,15 +5070,17 @@ export default async function createBackend(options = {}) {
         allocations.push(p4);
         call(p0, p1, p2, p3, p4);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
   }
   {
-    const call = module.cwrap("dr_ImageDrawTriangleEx", null, [
+    const call = module.cwrap("dr_ImageDrawTriangleGradient", null, [
       "number",
       "number",
       "number",
@@ -5143,7 +5089,7 @@ export default async function createBackend(options = {}) {
       "number",
       "number",
     ]);
-    backend.ImageDrawTriangleEx = (...args) => {
+    backend.ImageDrawTriangleGradient = (...args) => {
       const allocations = [];
       let p0;
       try {
@@ -5163,9 +5109,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p6);
         call(p0, p1, p2, p3, p4, p5, p6);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -5194,22 +5142,434 @@ export default async function createBackend(options = {}) {
         allocations.push(p4);
         call(p0, p1, p2, p3, p4);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
   }
   {
-    const call = module.cwrap("dr_ImageDraw", null, [
+    const call = module.cwrap("dr_ImageDrawRectangle", null, [
+      "number",
       "number",
       "number",
       "number",
       "number",
       "number",
     ]);
-    backend.ImageDraw = (...args) => {
+    backend.ImageDrawRectangle = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p5 = allocate(args[5]);
+        allocations.push(p5);
+        call(p0, args[1], args[2], args[3], args[4], p5);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawRectangleV", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawRectangleV = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
+        const p2 = allocate(args[2]);
+        allocations.push(p2);
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
+        call(p0, p1, p2, p3);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawRectangleRec", null, [
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawRectangleRec = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
+        const p2 = allocate(args[2]);
+        allocations.push(p2);
+        call(p0, p1, p2);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawRectanglePro", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawRectanglePro = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
+        const p2 = allocate(args[2]);
+        allocations.push(p2);
+        const p4 = allocate(args[4]);
+        allocations.push(p4);
+        call(p0, p1, p2, args[3], p4);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawRectangleLines", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawRectangleLines = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p5 = allocate(args[5]);
+        allocations.push(p5);
+        call(p0, args[1], args[2], args[3], args[4], p5);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawRectangleLinesEx", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawRectangleLinesEx = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
+        call(p0, p1, args[2], p3);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawRectangleGradientEx", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawRectangleGradientEx = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
+        const p2 = allocate(args[2]);
+        allocations.push(p2);
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
+        const p4 = allocate(args[4]);
+        allocations.push(p4);
+        const p5 = allocate(args[5]);
+        allocations.push(p5);
+        call(p0, p1, p2, p3, p4, p5);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawCircle", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawCircle = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p4 = allocate(args[4]);
+        allocations.push(p4);
+        call(p0, args[1], args[2], args[3], p4);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawCircleV", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawCircleV = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
+        call(p0, p1, args[2], p3);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawCircleLines", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawCircleLines = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p4 = allocate(args[4]);
+        allocations.push(p4);
+        call(p0, args[1], args[2], args[3], p4);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawCircleLinesV", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawCircleLinesV = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
+        call(p0, p1, args[2], p3);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawCircleGradient", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawCircleGradient = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
+        const p4 = allocate(args[4]);
+        allocations.push(p4);
+        call(p0, p1, args[2], p3, p4);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawImage", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawImage = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
+        const p4 = allocate(args[4]);
+        allocations.push(p4);
+        call(p0, p1, args[2], args[3], p4);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawImageEx", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawImageEx = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
+        const p2 = allocate(args[2]);
+        allocations.push(p2);
+        const p5 = allocate(args[5]);
+        allocations.push(p5);
+        call(p0, p1, p2, args[3], args[4], p5);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawImageRec", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawImageRec = (...args) => {
       const allocations = [];
       let p0;
       try {
@@ -5225,9 +5585,48 @@ export default async function createBackend(options = {}) {
         allocations.push(p4);
         call(p0, p1, p2, p3, p4);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawImagePro", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawImagePro = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
+        const p2 = allocate(args[2]);
+        allocations.push(p2);
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
+        const p4 = allocate(args[4]);
+        allocations.push(p4);
+        const p6 = allocate(args[6]);
+        allocations.push(p6);
+        call(p0, p1, p2, p3, p4, args[5], p6);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -5251,9 +5650,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p5);
         call(p0, args[1], args[2], args[3], args[4], p5);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -5282,9 +5683,48 @@ export default async function createBackend(options = {}) {
         allocations.push(p6);
         call(p0, p1, args[2], p3, args[4], args[5], p6);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_ImageDrawTextPro", null, [
+      "number",
+      "number",
+      "string",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.ImageDrawTextPro = (...args) => {
+      const allocations = [];
+      let p0;
+      try {
+        p0 = allocate(args[0]);
+        allocations.push(p0);
+        const p1 = allocate(args[1]);
+        allocations.push(p1);
+        const p3 = allocate(args[3]);
+        allocations.push(p3);
+        const p4 = allocate(args[4]);
+        allocations.push(p4);
+        const p8 = allocate(args[8]);
+        allocations.push(p8);
+        call(p0, p1, args[2], p3, p4, args[5], args[6], args[7], p8);
+      } finally {
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -5293,7 +5733,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_LoadTexture", null, ["number", "string"]);
     backend.LoadTexture = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Texture.SIZE);
+      const result = malloc(Structs.Texture.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -5310,7 +5750,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadTextureFromImage = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Texture.SIZE);
+      const result = malloc(Structs.Texture.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -5330,7 +5770,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadTextureCubemap = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Texture.SIZE);
+      const result = malloc(Structs.Texture.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -5350,10 +5790,29 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadRenderTexture = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.RenderTexture.SIZE);
+      const result = malloc(Structs.RenderTexture.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1]);
+        return copyStruct("RenderTexture", result);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_LoadRenderTextureEx", null, [
+      "number",
+      "number",
+      "number",
+      "number",
+    ]);
+    backend.LoadRenderTextureEx = (...args) => {
+      const allocations = [];
+      const result = malloc(Structs.RenderTexture.SIZE);
+      allocations.push(result);
+      try {
+        call(result, args[0], args[1], args[2]);
         return copyStruct("RenderTexture", result);
       } finally {
         for (const pointer of allocations) module._free(pointer);
@@ -5422,9 +5881,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -5624,7 +6085,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_Fade", null, ["number", "number", "number"]);
     backend.Fade = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Color.SIZE);
+      const result = malloc(Structs.Color.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -5653,7 +6114,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_ColorNormalize", null, ["number", "number"]);
     backend.ColorNormalize = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -5672,7 +6133,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.ColorFromNormalized = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Color.SIZE);
+      const result = malloc(Structs.Color.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -5688,7 +6149,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_ColorToHSV", null, ["number", "number"]);
     backend.ColorToHSV = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -5709,7 +6170,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.ColorFromHSV = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Color.SIZE);
+      const result = malloc(Structs.Color.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2]);
@@ -5727,7 +6188,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.ColorTint = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Color.SIZE);
+      const result = malloc(Structs.Color.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -5749,7 +6210,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.ColorBrightness = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Color.SIZE);
+      const result = malloc(Structs.Color.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -5769,7 +6230,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.ColorContrast = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Color.SIZE);
+      const result = malloc(Structs.Color.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -5789,7 +6250,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.ColorAlpha = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Color.SIZE);
+      const result = malloc(Structs.Color.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -5810,7 +6271,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.ColorAlphaBlend = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Color.SIZE);
+      const result = malloc(Structs.Color.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -5835,7 +6296,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.ColorLerp = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Color.SIZE);
+      const result = malloc(Structs.Color.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -5853,7 +6314,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetColor", null, ["number", "number"]);
     backend.GetColor = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Color.SIZE);
+      const result = malloc(Structs.Color.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -5882,7 +6343,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetFontDefault", null, ["number"]);
     backend.GetFontDefault = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Font.SIZE);
+      const result = malloc(Structs.Font.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -5896,7 +6357,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_LoadFont", null, ["number", "string"]);
     backend.LoadFont = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Font.SIZE);
+      const result = malloc(Structs.Font.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -5915,7 +6376,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadFontFromImage = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Font.SIZE);
+      const result = malloc(Structs.Font.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -5938,23 +6399,6 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         return Boolean(call(p0));
       } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_UnloadFontData", null, ["number", "number"]);
-    backend.UnloadFontData = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        call(p0, args[1]);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -6125,7 +6569,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.MeasureTextEx = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -6161,7 +6605,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetGlyphInfo = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.GlyphInfo.SIZE);
+      const result = malloc(Structs.GlyphInfo.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -6181,7 +6625,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetGlyphAtlasRec = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Rectangle.SIZE);
+      const result = malloc(Structs.Rectangle.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -6194,33 +6638,11 @@ export default async function createBackend(options = {}) {
     };
   }
   {
-    const call = module.cwrap("dr_UnloadUTF8", null, ["string"]);
-    backend.UnloadUTF8 = (...args) => {
-      const allocations = [];
-      try {
-        call(args[0]);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
     const call = module.cwrap("dr_GetCodepointCount", "number", ["string"]);
     backend.GetCodepointCount = (...args) => {
       const allocations = [];
       try {
         return call(args[0]);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_TextCopy", "number", ["string", "string"]);
-    backend.TextCopy = (...args) => {
-      const allocations = [];
-      try {
-        return call(args[0], args[1]);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -6285,9 +6707,7 @@ export default async function createBackend(options = {}) {
       try {
         const pointer = call(args[0], args[1], args[2]);
         if (!pointer) return "";
-        const value = module.UTF8ToString(pointer);
-        module._free(pointer);
-        return value;
+        return module.UTF8ToString(pointer);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -6304,9 +6724,7 @@ export default async function createBackend(options = {}) {
       try {
         const pointer = call(args[0], args[1], args[2]);
         if (!pointer) return "";
-        const value = module.UTF8ToString(pointer);
-        module._free(pointer);
-        return value;
+        return module.UTF8ToString(pointer);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -6323,9 +6741,11 @@ export default async function createBackend(options = {}) {
       try {
         const pointer = call(args[0], args[1], args[2]);
         if (!pointer) return "";
-        const value = module.UTF8ToString(pointer);
-        module._free(pointer);
-        return value;
+        try {
+          return module.UTF8ToString(pointer);
+        } finally {
+          module._free(pointer);
+        }
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -6343,9 +6763,7 @@ export default async function createBackend(options = {}) {
       try {
         const pointer = call(args[0], args[1], args[2], args[3]);
         if (!pointer) return "";
-        const value = module.UTF8ToString(pointer);
-        module._free(pointer);
-        return value;
+        return module.UTF8ToString(pointer);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -6363,9 +6781,11 @@ export default async function createBackend(options = {}) {
       try {
         const pointer = call(args[0], args[1], args[2], args[3]);
         if (!pointer) return "";
-        const value = module.UTF8ToString(pointer);
-        module._free(pointer);
-        return value;
+        try {
+          return module.UTF8ToString(pointer);
+        } finally {
+          module._free(pointer);
+        }
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -6382,9 +6802,7 @@ export default async function createBackend(options = {}) {
       try {
         const pointer = call(args[0], args[1], args[2]);
         if (!pointer) return "";
-        const value = module.UTF8ToString(pointer);
-        module._free(pointer);
-        return value;
+        return module.UTF8ToString(pointer);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -6401,9 +6819,11 @@ export default async function createBackend(options = {}) {
       try {
         const pointer = call(args[0], args[1], args[2]);
         if (!pointer) return "";
-        const value = module.UTF8ToString(pointer);
-        module._free(pointer);
-        return value;
+        try {
+          return module.UTF8ToString(pointer);
+        } finally {
+          module._free(pointer);
+        }
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -6430,9 +6850,7 @@ export default async function createBackend(options = {}) {
       try {
         const pointer = call(args[0]);
         if (!pointer) return "";
-        const value = module.UTF8ToString(pointer);
-        module._free(pointer);
-        return value;
+        return module.UTF8ToString(pointer);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -6445,9 +6863,7 @@ export default async function createBackend(options = {}) {
       try {
         const pointer = call(args[0]);
         if (!pointer) return "";
-        const value = module.UTF8ToString(pointer);
-        module._free(pointer);
-        return value;
+        return module.UTF8ToString(pointer);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -6460,9 +6876,7 @@ export default async function createBackend(options = {}) {
       try {
         const pointer = call(args[0]);
         if (!pointer) return "";
-        const value = module.UTF8ToString(pointer);
-        module._free(pointer);
-        return value;
+        return module.UTF8ToString(pointer);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -6475,9 +6889,7 @@ export default async function createBackend(options = {}) {
       try {
         const pointer = call(args[0]);
         if (!pointer) return "";
-        const value = module.UTF8ToString(pointer);
-        module._free(pointer);
-        return value;
+        return module.UTF8ToString(pointer);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -6490,9 +6902,7 @@ export default async function createBackend(options = {}) {
       try {
         const pointer = call(args[0]);
         if (!pointer) return "";
-        const value = module.UTF8ToString(pointer);
-        module._free(pointer);
-        return value;
+        return module.UTF8ToString(pointer);
       } finally {
         for (const pointer of allocations) module._free(pointer);
       }
@@ -6939,7 +7349,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_LoadModel", null, ["number", "string"]);
     backend.LoadModel = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Model.SIZE);
+      const result = malloc(Structs.Model.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -6956,7 +7366,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadModelFromMesh = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Model.SIZE);
+      const result = malloc(Structs.Model.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -7001,7 +7411,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetModelBoundingBox = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.BoundingBox.SIZE);
+      const result = malloc(Structs.BoundingBox.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -7230,9 +7640,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -7278,7 +7690,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetMeshBoundingBox = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.BoundingBox.SIZE);
+      const result = malloc(Structs.BoundingBox.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -7300,9 +7712,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -7344,7 +7758,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenMeshPoly = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Mesh.SIZE);
+      const result = malloc(Structs.Mesh.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1]);
@@ -7364,7 +7778,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenMeshPlane = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Mesh.SIZE);
+      const result = malloc(Structs.Mesh.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2], args[3]);
@@ -7383,7 +7797,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenMeshCube = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Mesh.SIZE);
+      const result = malloc(Structs.Mesh.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2]);
@@ -7402,7 +7816,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenMeshSphere = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Mesh.SIZE);
+      const result = malloc(Structs.Mesh.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2]);
@@ -7421,7 +7835,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenMeshHemiSphere = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Mesh.SIZE);
+      const result = malloc(Structs.Mesh.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2]);
@@ -7440,7 +7854,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenMeshCylinder = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Mesh.SIZE);
+      const result = malloc(Structs.Mesh.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2]);
@@ -7459,7 +7873,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenMeshCone = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Mesh.SIZE);
+      const result = malloc(Structs.Mesh.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2]);
@@ -7479,7 +7893,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenMeshTorus = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Mesh.SIZE);
+      const result = malloc(Structs.Mesh.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2], args[3]);
@@ -7499,7 +7913,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenMeshKnot = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Mesh.SIZE);
+      const result = malloc(Structs.Mesh.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2], args[3]);
@@ -7517,7 +7931,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenMeshHeightmap = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Mesh.SIZE);
+      const result = malloc(Structs.Mesh.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -7539,7 +7953,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GenMeshCubicmap = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Mesh.SIZE);
+      const result = malloc(Structs.Mesh.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -7557,7 +7971,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_LoadMaterialDefault", null, ["number"]);
     backend.LoadMaterialDefault = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Material.SIZE);
+      const result = malloc(Structs.Material.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -7609,9 +8023,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p2);
         call(p0, args[1], p2);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -7630,9 +8046,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1], args[2]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -7676,26 +8094,6 @@ export default async function createBackend(options = {}) {
         allocations.push(p3);
         call(p0, p1, args[2], p3, args[4], args[5]);
       } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_UnloadModelAnimations", null, [
-      "number",
-      "number",
-    ]);
-    backend.UnloadModelAnimations = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        call(p0, args[1]);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -7784,7 +8182,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetRayCollisionSphere = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.RayCollision.SIZE);
+      const result = malloc(Structs.RayCollision.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -7806,7 +8204,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetRayCollisionBox = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.RayCollision.SIZE);
+      const result = malloc(Structs.RayCollision.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -7829,7 +8227,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetRayCollisionMesh = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.RayCollision.SIZE);
+      const result = malloc(Structs.RayCollision.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -7855,7 +8253,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetRayCollisionTriangle = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.RayCollision.SIZE);
+      const result = malloc(Structs.RayCollision.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -7884,7 +8282,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetRayCollisionQuad = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.RayCollision.SIZE);
+      const result = malloc(Structs.RayCollision.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -7963,7 +8361,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_LoadWave", null, ["number", "string"]);
     backend.LoadWave = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Wave.SIZE);
+      const result = malloc(Structs.Wave.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -7990,7 +8388,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_LoadSound", null, ["number", "string"]);
     backend.LoadSound = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Sound.SIZE);
+      const result = malloc(Structs.Sound.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -8007,7 +8405,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadSoundFromWave = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Sound.SIZE);
+      const result = malloc(Structs.Sound.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -8023,7 +8421,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_LoadSoundAlias", null, ["number", "number"]);
     backend.LoadSoundAlias = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Sound.SIZE);
+      const result = malloc(Structs.Sound.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -8224,7 +8622,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_WaveCopy", null, ["number", "number"]);
     backend.WaveCopy = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Wave.SIZE);
+      const result = malloc(Structs.Wave.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -8250,9 +8648,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1], args[2]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -8272,9 +8672,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1], args[2], args[3]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -8283,7 +8685,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_LoadMusicStream", null, ["number", "string"]);
     backend.LoadMusicStream = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Music.SIZE);
+      const result = malloc(Structs.Music.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -8484,7 +8886,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.LoadAudioStream = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.AudioStream.SIZE);
+      const result = malloc(Structs.AudioStream.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2]);
@@ -8753,7 +9155,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_Vector2Zero", null, ["number"]);
     backend.Vector2Zero = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -8767,7 +9169,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_Vector2One", null, ["number"]);
     backend.Vector2One = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -8785,7 +9187,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2Add = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -8807,7 +9209,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2AddValue = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -8827,7 +9229,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2Subtract = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -8849,7 +9251,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2SubtractValue = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9003,7 +9405,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2Scale = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9023,7 +9425,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2Multiply = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9041,7 +9443,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_Vector2Negate", null, ["number", "number"]);
     backend.Vector2Negate = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9061,7 +9463,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2Divide = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9082,7 +9484,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2Normalize = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9102,7 +9504,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2Transform = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9125,7 +9527,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2Lerp = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9147,7 +9549,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2Reflect = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9169,7 +9571,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2Min = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9191,7 +9593,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2Max = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9213,7 +9615,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2Rotate = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9234,7 +9636,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2MoveTowards = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9252,7 +9654,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_Vector2Invert", null, ["number", "number"]);
     backend.Vector2Invert = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9273,7 +9675,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2Clamp = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9298,7 +9700,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2ClampValue = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9337,7 +9739,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector2Refract = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector2.SIZE);
+      const result = malloc(Structs.Vector2.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9355,7 +9757,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_Vector3Zero", null, ["number"]);
     backend.Vector3Zero = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -9369,7 +9771,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_Vector3One", null, ["number"]);
     backend.Vector3One = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -9387,7 +9789,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Add = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9409,7 +9811,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3AddValue = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9429,7 +9831,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Subtract = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9451,7 +9853,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3SubtractValue = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9471,7 +9873,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Scale = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9491,7 +9893,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Multiply = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9513,7 +9915,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3CrossProduct = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9534,7 +9936,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Perpendicular = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9648,7 +10050,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_Vector3Negate", null, ["number", "number"]);
     backend.Vector3Negate = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9668,7 +10070,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Divide = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9689,7 +10091,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Normalize = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9709,7 +10111,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Project = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9731,7 +10133,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Reject = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9761,12 +10163,16 @@ export default async function createBackend(options = {}) {
         allocations.push(p1);
         call(p0, p1);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
-        args[1].buffer.set(
-          module.HEAPU8.subarray(p1, p1 + args[1].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
+        if (p1 !== undefined) {
+          args[1].buffer.set(
+            module.HEAPU8.subarray(p1, p1 + args[1].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -9779,7 +10185,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Transform = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9801,7 +10207,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3RotateByQuaternion = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9824,7 +10230,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3RotateByAxisAngle = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9847,7 +10253,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3MoveTowards = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9870,7 +10276,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Lerp = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9895,7 +10301,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3CubicHermite = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9921,7 +10327,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Reflect = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9943,7 +10349,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Min = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9965,7 +10371,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Max = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -9989,7 +10395,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Barycenter = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10016,7 +10422,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Unproject = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10033,26 +10439,10 @@ export default async function createBackend(options = {}) {
     };
   }
   {
-    const call = module.cwrap("dr_Vector3ToFloatV", null, ["number", "number"]);
-    backend.Vector3ToFloatV = (...args) => {
-      const allocations = [];
-      const result = module._malloc(Structs.float3.SIZE);
-      allocations.push(result);
-      try {
-        const p0 = allocate(args[0]);
-        allocations.push(p0);
-        call(result, p0);
-        return copyStruct("float3", result);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
     const call = module.cwrap("dr_Vector3Invert", null, ["number", "number"]);
     backend.Vector3Invert = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10073,7 +10463,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Clamp = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10098,7 +10488,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3ClampValue = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10137,7 +10527,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector3Refract = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10155,7 +10545,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_Vector4Zero", null, ["number"]);
     backend.Vector4Zero = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -10169,7 +10559,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_Vector4One", null, ["number"]);
     backend.Vector4One = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -10187,7 +10577,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector4Add = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10209,7 +10599,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector4AddValue = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10229,7 +10619,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector4Subtract = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10251,7 +10641,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector4SubtractValue = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10351,7 +10741,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector4Scale = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10371,7 +10761,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector4Multiply = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10389,7 +10779,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_Vector4Negate", null, ["number", "number"]);
     backend.Vector4Negate = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10409,7 +10799,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector4Divide = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10430,7 +10820,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector4Normalize = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10450,7 +10840,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector4Min = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10472,7 +10862,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector4Max = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10495,7 +10885,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector4Lerp = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10518,7 +10908,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.Vector4MoveTowards = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10536,7 +10926,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_Vector4Invert", null, ["number", "number"]);
     backend.Vector4Invert = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10596,7 +10986,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_MatrixTranspose", null, ["number", "number"]);
     backend.MatrixTranspose = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10612,7 +11002,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_MatrixInvert", null, ["number", "number"]);
     backend.MatrixInvert = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10628,7 +11018,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_MatrixIdentity", null, ["number"]);
     backend.MatrixIdentity = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -10646,7 +11036,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.MatrixAdd = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10668,7 +11058,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.MatrixSubtract = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10690,7 +11080,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.MatrixMultiply = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10712,7 +11102,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.MatrixMultiplyValue = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10733,7 +11123,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.MatrixTranslate = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2]);
@@ -10751,7 +11141,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.MatrixRotate = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10767,7 +11157,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_MatrixRotateX", null, ["number", "number"]);
     backend.MatrixRotateX = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -10781,7 +11171,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_MatrixRotateY", null, ["number", "number"]);
     backend.MatrixRotateY = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -10795,7 +11185,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_MatrixRotateZ", null, ["number", "number"]);
     backend.MatrixRotateZ = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -10809,7 +11199,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_MatrixRotateXYZ", null, ["number", "number"]);
     backend.MatrixRotateXYZ = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10825,7 +11215,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_MatrixRotateZYX", null, ["number", "number"]);
     backend.MatrixRotateZYX = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10846,7 +11236,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.MatrixScale = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2]);
@@ -10868,7 +11258,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.MatrixFrustum = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2], args[3], args[4], args[5]);
@@ -10888,7 +11278,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.MatrixPerspective = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2], args[3]);
@@ -10910,7 +11300,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.MatrixOrtho = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2], args[3], args[4], args[5]);
@@ -10929,7 +11319,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.MatrixLookAt = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10946,22 +11336,6 @@ export default async function createBackend(options = {}) {
     };
   }
   {
-    const call = module.cwrap("dr_MatrixToFloatV", null, ["number", "number"]);
-    backend.MatrixToFloatV = (...args) => {
-      const allocations = [];
-      const result = module._malloc(Structs.float16.SIZE);
-      allocations.push(result);
-      try {
-        const p0 = allocate(args[0]);
-        allocations.push(p0);
-        call(result, p0);
-        return copyStruct("float16", result);
-      } finally {
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
     const call = module.cwrap("dr_QuaternionAdd", null, [
       "number",
       "number",
@@ -10969,7 +11343,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionAdd = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -10991,7 +11365,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionAddValue = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11011,7 +11385,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionSubtract = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11033,7 +11407,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionSubtractValue = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11049,7 +11423,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_QuaternionIdentity", null, ["number"]);
     backend.QuaternionIdentity = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -11079,7 +11453,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionNormalize = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11098,7 +11472,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionInvert = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11118,7 +11492,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionMultiply = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11140,7 +11514,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionScale = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11160,7 +11534,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionDivide = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11183,7 +11557,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionLerp = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11206,7 +11580,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionNlerp = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11229,7 +11603,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionSlerp = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11254,7 +11628,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionCubicHermiteSpline = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11280,7 +11654,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionFromVector3ToVector3 = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11301,7 +11675,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionFromMatrix = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11320,7 +11694,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionToMatrix = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11340,7 +11714,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionFromAxisAngle = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11361,7 +11735,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionFromEuler = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1], args[2]);
@@ -11378,7 +11752,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionToEuler = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11398,7 +11772,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.QuaternionTransform = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector4.SIZE);
+      const result = malloc(Structs.Vector4.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11439,7 +11813,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.MatrixCompose = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         const p0 = allocate(args[0]);
@@ -11456,49 +11830,13 @@ export default async function createBackend(options = {}) {
     };
   }
   {
-    const call = module.cwrap("dr_MatrixDecompose", null, [
-      "number",
-      "number",
-      "number",
-      "number",
-    ]);
-    backend.MatrixDecompose = (...args) => {
-      const allocations = [];
-      let p1;
-      let p2;
-      let p3;
-      try {
-        const p0 = allocate(args[0]);
-        allocations.push(p0);
-        p1 = allocate(args[1]);
-        allocations.push(p1);
-        p2 = allocate(args[2]);
-        allocations.push(p2);
-        p3 = allocate(args[3]);
-        allocations.push(p3);
-        call(p0, p1, p2, p3);
-      } finally {
-        args[1].buffer.set(
-          module.HEAPU8.subarray(p1, p1 + args[1].buffer.byteLength),
-        );
-        args[2].buffer.set(
-          module.HEAPU8.subarray(p2, p2 + args[2].buffer.byteLength),
-        );
-        args[3].buffer.set(
-          module.HEAPU8.subarray(p3, p3 + args[3].buffer.byteLength),
-        );
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
     const call = module.cwrap("dr_GetCameraForward", null, [
       "number",
       "number",
     ]);
     backend.GetCameraForward = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       let p0;
       try {
@@ -11507,9 +11845,11 @@ export default async function createBackend(options = {}) {
         call(result, p0);
         return copyStruct("Vector3", result);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -11518,7 +11858,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetCameraUp", null, ["number", "number"]);
     backend.GetCameraUp = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       let p0;
       try {
@@ -11527,9 +11867,11 @@ export default async function createBackend(options = {}) {
         call(result, p0);
         return copyStruct("Vector3", result);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -11538,7 +11880,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_GetCameraRight", null, ["number", "number"]);
     backend.GetCameraRight = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Vector3.SIZE);
+      const result = malloc(Structs.Vector3.SIZE);
       allocations.push(result);
       let p0;
       try {
@@ -11547,9 +11889,11 @@ export default async function createBackend(options = {}) {
         call(result, p0);
         return copyStruct("Vector3", result);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -11568,9 +11912,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1], args[2]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -11585,9 +11931,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -11606,9 +11954,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1], args[2]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -11626,9 +11976,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -11647,9 +11999,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1], args[2]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -11670,9 +12024,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1], args[2], args[3], args[4]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -11687,9 +12043,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0, args[1]);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -11701,7 +12059,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetCameraViewMatrix = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       let p0;
       try {
@@ -11710,9 +12068,11 @@ export default async function createBackend(options = {}) {
         call(result, p0);
         return copyStruct("Matrix", result);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -11725,7 +12085,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.GetCameraProjectionMatrix = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       let p0;
       try {
@@ -11734,9 +12094,11 @@ export default async function createBackend(options = {}) {
         call(result, p0, args[1]);
         return copyStruct("Matrix", result);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -12830,7 +13192,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.rlLoadRenderBatch = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.rlRenderBatch.SIZE);
+      const result = malloc(Structs.rlRenderBatch.SIZE);
       allocations.push(result);
       try {
         call(result, args[0], args[1]);
@@ -12863,26 +13225,11 @@ export default async function createBackend(options = {}) {
         allocations.push(p0);
         call(p0);
       } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
-        for (const pointer of allocations) module._free(pointer);
-      }
-    };
-  }
-  {
-    const call = module.cwrap("dr_rlSetRenderBatchActive", null, ["number"]);
-    backend.rlSetRenderBatchActive = (...args) => {
-      const allocations = [];
-      let p0;
-      try {
-        p0 = allocate(args[0]);
-        allocations.push(p0);
-        call(p0);
-      } finally {
-        args[0].buffer.set(
-          module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
-        );
+        if (p0 !== undefined) {
+          args[0].buffer.set(
+            module.HEAPU8.subarray(p0, p0 + args[0].buffer.byteLength),
+          );
+        }
         for (const pointer of allocations) module._free(pointer);
       }
     };
@@ -13340,7 +13687,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_rlGetMatrixModelview", null, ["number"]);
     backend.rlGetMatrixModelview = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -13354,7 +13701,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_rlGetMatrixProjection", null, ["number"]);
     backend.rlGetMatrixProjection = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -13368,7 +13715,7 @@ export default async function createBackend(options = {}) {
     const call = module.cwrap("dr_rlGetMatrixTransform", null, ["number"]);
     backend.rlGetMatrixTransform = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         call(result);
@@ -13385,7 +13732,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.rlGetMatrixProjectionStereo = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -13402,7 +13749,7 @@ export default async function createBackend(options = {}) {
     ]);
     backend.rlGetMatrixViewOffsetStereo = (...args) => {
       const allocations = [];
-      const result = module._malloc(Structs.Matrix.SIZE);
+      const result = malloc(Structs.Matrix.SIZE);
       allocations.push(result);
       try {
         call(result, args[0]);
@@ -13496,5 +13843,193 @@ export default async function createBackend(options = {}) {
       }
     };
   }
+  {
+    const call = module.cwrap("dr_ProcessGestureEvent", null, ["number"]);
+    backend.ProcessGestureEvent = (...args) => {
+      const allocations = [];
+      try {
+        const p0 = allocate(args[0]);
+        allocations.push(p0);
+        call(p0);
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  {
+    const call = module.cwrap("dr_UpdateGestures", null, []);
+    backend.UpdateGestures = (...args) => {
+      const allocations = [];
+      try {
+        call();
+      } finally {
+        for (const pointer of allocations) module._free(pointer);
+      }
+    };
+  }
+  // Embedded inside createBackend by generate_wasm_bridge.ts.
+  // Explicit adapters match the public TypeScript wrappers, not raw C signatures.
+  /* global backend, module, Structs, allocate, malloc, copyStruct */
+
+  // Track temporary allocations in a scope, including when a later allocation fails.
+  const withMemory = (action) => {
+    const pointers = [];
+    const alloc = (value) => {
+      const pointer = typeof value === "number"
+        ? malloc(value)
+        : allocate(value);
+      pointers.push(pointer);
+      return pointer;
+    };
+    try {
+      return action(alloc);
+    } finally {
+      for (const pointer of pointers) module._free(pointer);
+    }
+  };
+
+  // Desktop convenience wrappers return typed arrays, not float3/float16 structs.
+  for (
+    const [name, resultType, count] of [
+      ["Vector3ToFloatV", "float3", 3],
+      ["MatrixToFloatV", "float16", 16],
+    ]
+  ) {
+    const call = module.cwrap(`dr_${name}`, null, ["number", "number"]);
+    backend[name] = (value) =>
+      withMemory((alloc) => {
+        const result = alloc(Structs[resultType].SIZE);
+        call(result, alloc(value));
+        return new Float32Array(
+          module.HEAPU8.slice(result, result + count * 4).buffer,
+        );
+      });
+  }
+
+  const droppedFiles = module.cwrap("dr_LoadDroppedFiles", null, ["number"]);
+  const freeDroppedFiles = module.cwrap("dr_UnloadDroppedFiles", null, [
+    "number",
+  ]);
+  backend.LoadDroppedFiles = () =>
+    withMemory((alloc) => {
+      const result = alloc(Structs.FilePathList.SIZE);
+      droppedFiles(result);
+      try {
+        const list = copyStruct("FilePathList", result);
+        const paths = [];
+        for (let index = 0; index < list.count; index++) {
+          const pointer = new DataView(module.HEAPU8.buffer).getUint32(
+            Number(list.pathsPtr) + index * 4,
+            true,
+          );
+          paths.push(module.UTF8ToString(pointer));
+        }
+        return paths;
+      } finally {
+        freeDroppedFiles(result);
+      }
+    });
+
+  const decompose = module.cwrap("dr_MatrixDecompose", null, [
+    "number",
+    "number",
+    "number",
+    "number",
+  ]);
+  backend.MatrixDecompose = (matrix) =>
+    withMemory((alloc) => {
+      const mat = alloc(matrix);
+      const translation = alloc(Structs.Vector3.SIZE);
+      const rotation = alloc(Structs.Vector4.SIZE);
+      const scale = alloc(Structs.Vector3.SIZE);
+      decompose(mat, translation, rotation, scale);
+      return {
+        translation: copyStruct("Vector3", translation),
+        rotation: copyStruct("Vector4", rotation),
+        scale: copyStruct("Vector3", scale),
+      };
+    });
+
+  const windowIcons = module.cwrap("dr_SetWindowIcons", null, [
+    "number",
+    "number",
+  ]);
+  backend.SetWindowIcons = (images) =>
+    withMemory((alloc) => {
+      if (!Array.isArray(images)) {
+        throw new TypeError("Expected an Image array");
+      }
+      const pointer = images.length
+        ? alloc(images.length * Structs.Image.SIZE)
+        : 0;
+      images.forEach((image, index) => {
+        if (
+          !(image.buffer instanceof Uint8Array) ||
+          image.buffer.length !== Structs.Image.SIZE
+        ) {
+          throw new TypeError("Expected a Web Image");
+        }
+        module.HEAPU8.set(image.buffer, pointer + index * Structs.Image.SIZE);
+      });
+      windowIcons(pointer, images.length);
+    });
+
+  const textCopy = module.cwrap("dr_TextCopy", "number", ["number", "string"]);
+  backend.TextCopy = (src) =>
+    withMemory((alloc) => {
+      const dst = alloc(new TextEncoder().encode(src).length + 1);
+      const bytesCopied = textCopy(dst, src);
+      return { text: module.UTF8ToString(dst), bytesCopied };
+    });
+
+  // Copy into JS-owned memory so Wasm memory growth cannot invalidate the result.
+  // Release the raylib allocation immediately; the matching unload is a no-op.
+  const imageColors = module.cwrap("dr_LoadImageColors", "number", ["number"]);
+  const imagePalette = module.cwrap("dr_LoadImagePalette", "number", [
+    "number",
+    "number",
+    "number",
+  ]);
+  const freeColors = module.cwrap("dr_UnloadImageColors", null, ["number"]);
+  const freePalette = module.cwrap("dr_UnloadImagePalette", null, ["number"]);
+  backend.LoadImageColors = (image) =>
+    withMemory((alloc) => {
+      const pointer = imageColors(alloc(image));
+      if (!pointer) throw new Error("LoadImageColors failed");
+      try {
+        return module.HEAPU8.slice(
+          pointer,
+          pointer + image.width * image.height * 4,
+        );
+      } finally {
+        freeColors(pointer);
+      }
+    });
+  backend.LoadImagePalette = (image, maxPaletteSize) =>
+    withMemory((alloc) => {
+      const count = alloc(4);
+      module.HEAPU8.fill(0, count, count + 4);
+      const pointer = imagePalette(alloc(image), maxPaletteSize, count);
+      if (!pointer) throw new Error("LoadImagePalette failed");
+      try {
+        const colorCount = new DataView(module.HEAPU8.buffer).getInt32(
+          count,
+          true,
+        );
+        return {
+          colors: module.HEAPU8.slice(pointer, pointer + colorCount * 4),
+          colorCount,
+        };
+      } finally {
+        freePalette(pointer);
+      }
+    });
+  const unloadColors = (colors) => {
+    if (!(colors instanceof Uint8Array)) {
+      throw new TypeError("Expected color bytes");
+    }
+  };
+  backend.UnloadImageColors = unloadColors;
+  backend.UnloadImagePalette = unloadColors;
   return backend;
 }

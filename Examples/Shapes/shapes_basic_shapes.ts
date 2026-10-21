@@ -31,7 +31,12 @@ while (!raylib.WindowShouldClose()) {
     raylib.Violet,
   );
   raylib.DrawPoly(new raylib.Vector2(800 / 4 * 2, 260), 6, 80, 0, raylib.Brown);
-  raylib.DrawCircleGradient(800 / 4 * 3, 260, 60, raylib.Green, raylib.SkyBlue);
+  raylib.DrawCircleGradient(
+    new raylib.Vector2(800 / 4 * 3, 260),
+    60,
+    raylib.Green,
+    raylib.SkyBlue,
+  );
   raylib.DrawLine(18, 42, 782, 42, raylib.Black);
   raylib.EndDrawing();
 }

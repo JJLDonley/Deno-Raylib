@@ -15,8 +15,7 @@ while (!raylib.WindowShouldClose()) {
     const ratio = Math.min(24, distance) / distance;
     const pupil = new raylib.Vector2(eye.x + dx * ratio, eye.y + dy * ratio);
     raylib.DrawCircleGradient(
-      Math.trunc(eye.x),
-      Math.trunc(eye.y),
+      eye,
       70,
       raylib.LightGray,
       raylib.Gray,

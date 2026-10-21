@@ -10,7 +10,7 @@ import {
   type NativeTargetKey,
 } from "../Bindings/platforms.ts";
 
-const RAYLIB_VERSION = "6.0";
+const RAYLIB_VERSION = "6.2";
 const RELEASE_API =
   `https://api.github.com/repos/raysan5/raylib/releases/tags/${RAYLIB_VERSION}`;
 

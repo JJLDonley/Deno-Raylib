@@ -511,7 +511,6 @@ export const FUNCTION_MODULES = {
     "Core",
     "Screen",
     "Camera2D",
-    "Camera3D",
     "Coordinates",
     "Camera",
   ],
@@ -529,7 +528,7 @@ export const FUNCTION_MODULES = {
   ],
   "GetCameraMatrix2D": [
     "Core",
-    "Camera3D",
+    "Camera2D",
     "Camera",
   ],
   "SetTargetFPS": [
@@ -555,6 +554,8 @@ export const FUNCTION_MODULES = {
   ],
   "PollInputEvents": [
     "Core",
+    "Events",
+    "Input",
   ],
   "WaitTime": [
     "Core",
@@ -626,6 +627,7 @@ export const FUNCTION_MODULES = {
   ],
   "ExportDataAsCode": [
     "Core",
+    "Files",
   ],
   "LoadFileText": [
     "Core",
@@ -692,6 +694,10 @@ export const FUNCTION_MODULES = {
     "Files",
     "Paths",
   ],
+  "IsFileHidden": [
+    "Core",
+    "Files",
+  ],
   "GetFileLength": [
     "Core",
     "Files",
@@ -744,6 +750,15 @@ export const FUNCTION_MODULES = {
   "IsPathFile": [
     "Core",
     "Files",
+    "Paths",
+  ],
+  "IsPathDirectory": [
+    "Core",
+    "Directories",
+    "Paths",
+  ],
+  "IsPathAbsolute": [
+    "Core",
     "Paths",
   ],
   "IsFileNameValid": [
@@ -887,6 +902,8 @@ export const FUNCTION_MODULES = {
   ],
   "GetCharPressed": [
     "Core",
+    "Keyboard",
+    "Input",
   ],
   "GetKeyName": [
     "Core",
@@ -1091,11 +1108,17 @@ export const FUNCTION_MODULES = {
   ],
   "UpdateCamera": [
     "Core",
+    "Camera3D",
+    "CameraControls",
     "Camera",
+    "Graphics",
   ],
   "UpdateCameraPro": [
     "Core",
+    "Camera3D",
+    "CameraControls",
     "Camera",
+    "Graphics",
   ],
   "SetShapesTexture": [
     "Shapes2D",
@@ -1152,67 +1175,32 @@ export const FUNCTION_MODULES = {
     "Shapes",
     "Graphics",
   ],
-  "DrawCircle": [
+  "DrawTriangle": [
     "Shapes2D",
     "Shapes",
     "Graphics",
   ],
-  "DrawCircleV": [
+  "DrawTriangleGradient": [
     "Shapes2D",
     "Shapes",
     "Graphics",
   ],
-  "DrawCircleGradient": [
+  "DrawTriangleLines": [
     "Shapes2D",
     "Shapes",
     "Graphics",
   ],
-  "DrawCircleSector": [
+  "DrawTriangleLinesEx": [
     "Shapes2D",
     "Shapes",
     "Graphics",
   ],
-  "DrawCircleSectorLines": [
+  "DrawTriangleFan": [
     "Shapes2D",
     "Shapes",
     "Graphics",
   ],
-  "DrawCircleLines": [
-    "Shapes2D",
-    "Shapes",
-    "Graphics",
-  ],
-  "DrawCircleLinesV": [
-    "Shapes2D",
-    "Shapes",
-    "Graphics",
-  ],
-  "DrawEllipse": [
-    "Shapes2D",
-    "Shapes",
-    "Graphics",
-  ],
-  "DrawEllipseV": [
-    "Shapes2D",
-    "Shapes",
-    "Graphics",
-  ],
-  "DrawEllipseLines": [
-    "Shapes2D",
-    "Shapes",
-    "Graphics",
-  ],
-  "DrawEllipseLinesV": [
-    "Shapes2D",
-    "Shapes",
-    "Graphics",
-  ],
-  "DrawRing": [
-    "Shapes2D",
-    "Shapes",
-    "Graphics",
-  ],
-  "DrawRingLines": [
+  "DrawTriangleStrip": [
     "Shapes2D",
     "Shapes",
     "Graphics",
@@ -1277,26 +1265,6 @@ export const FUNCTION_MODULES = {
     "Shapes",
     "Graphics",
   ],
-  "DrawTriangle": [
-    "Shapes2D",
-    "Shapes",
-    "Graphics",
-  ],
-  "DrawTriangleLines": [
-    "Shapes2D",
-    "Shapes",
-    "Graphics",
-  ],
-  "DrawTriangleFan": [
-    "Shapes2D",
-    "Shapes",
-    "Graphics",
-  ],
-  "DrawTriangleStrip": [
-    "Shapes2D",
-    "Shapes",
-    "Graphics",
-  ],
   "DrawPoly": [
     "Shapes2D",
     "Shapes",
@@ -1308,6 +1276,91 @@ export const FUNCTION_MODULES = {
     "Graphics",
   ],
   "DrawPolyLinesEx": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawCircle": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawCircleV": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawCircleGradient": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawCircleSector": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawCircleSectorLines": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawCircleSectorLinesEx": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawCircleLines": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawCircleLinesV": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawCircleLinesEx": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawEllipse": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawEllipseV": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawEllipseLines": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawEllipseLinesV": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawEllipseLinesEx": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawRing": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawRingLines": [
+    "Shapes2D",
+    "Shapes",
+    "Graphics",
+  ],
+  "DrawRingLinesEx": [
     "Shapes2D",
     "Shapes",
     "Graphics",
@@ -1390,7 +1443,7 @@ export const FUNCTION_MODULES = {
     "Shapes",
     "Graphics",
   ],
-  "GetSplinePointBezierQuad": [
+  "GetSplinePointBezierQuadratic": [
     "Shapes2D",
     "Splines",
     "Shapes",
@@ -1805,6 +1858,71 @@ export const FUNCTION_MODULES = {
     "Graphics",
     "Assets",
   ],
+  "ImageDrawLineStrip": [
+    "Image",
+    "Graphics",
+    "Assets",
+  ],
+  "ImageDrawTriangle": [
+    "Image",
+    "Graphics",
+    "Assets",
+  ],
+  "ImageDrawTriangleGradient": [
+    "Image",
+    "Graphics",
+    "Assets",
+  ],
+  "ImageDrawTriangleLines": [
+    "Image",
+    "Graphics",
+    "Assets",
+  ],
+  "ImageDrawTriangleFan": [
+    "Image",
+    "Graphics",
+    "Assets",
+  ],
+  "ImageDrawTriangleStrip": [
+    "Image",
+    "Graphics",
+    "Assets",
+  ],
+  "ImageDrawRectangle": [
+    "Image",
+    "Graphics",
+    "Assets",
+  ],
+  "ImageDrawRectangleV": [
+    "Image",
+    "Graphics",
+    "Assets",
+  ],
+  "ImageDrawRectangleRec": [
+    "Image",
+    "Graphics",
+    "Assets",
+  ],
+  "ImageDrawRectanglePro": [
+    "Image",
+    "Graphics",
+    "Assets",
+  ],
+  "ImageDrawRectangleLines": [
+    "Image",
+    "Graphics",
+    "Assets",
+  ],
+  "ImageDrawRectangleLinesEx": [
+    "Image",
+    "Graphics",
+    "Assets",
+  ],
+  "ImageDrawRectangleGradientEx": [
+    "Image",
+    "Graphics",
+    "Assets",
+  ],
   "ImageDrawCircle": [
     "Image",
     "Graphics",
@@ -1825,52 +1943,27 @@ export const FUNCTION_MODULES = {
     "Graphics",
     "Assets",
   ],
-  "ImageDrawRectangle": [
+  "ImageDrawCircleGradient": [
     "Image",
     "Graphics",
     "Assets",
   ],
-  "ImageDrawRectangleV": [
+  "ImageDrawImage": [
     "Image",
     "Graphics",
     "Assets",
   ],
-  "ImageDrawRectangleRec": [
+  "ImageDrawImageEx": [
     "Image",
     "Graphics",
     "Assets",
   ],
-  "ImageDrawRectangleLines": [
+  "ImageDrawImageRec": [
     "Image",
     "Graphics",
     "Assets",
   ],
-  "ImageDrawTriangle": [
-    "Image",
-    "Graphics",
-    "Assets",
-  ],
-  "ImageDrawTriangleEx": [
-    "Image",
-    "Graphics",
-    "Assets",
-  ],
-  "ImageDrawTriangleLines": [
-    "Image",
-    "Graphics",
-    "Assets",
-  ],
-  "ImageDrawTriangleFan": [
-    "Image",
-    "Graphics",
-    "Assets",
-  ],
-  "ImageDrawTriangleStrip": [
-    "Image",
-    "Graphics",
-    "Assets",
-  ],
-  "ImageDraw": [
+  "ImageDrawImagePro": [
     "Image",
     "Graphics",
     "Assets",
@@ -1881,6 +1974,11 @@ export const FUNCTION_MODULES = {
     "Assets",
   ],
   "ImageDrawTextEx": [
+    "Image",
+    "Graphics",
+    "Assets",
+  ],
+  "ImageDrawTextPro": [
     "Image",
     "Graphics",
     "Assets",
@@ -1903,6 +2001,12 @@ export const FUNCTION_MODULES = {
     "Assets",
   ],
   "LoadRenderTexture": [
+    "RenderTexture",
+    "Texture",
+    "Graphics",
+    "Assets",
+  ],
+  "LoadRenderTextureEx": [
     "RenderTexture",
     "Texture",
     "Graphics",
@@ -2072,6 +2176,8 @@ export const FUNCTION_MODULES = {
     "Assets",
   ],
   "GetPixelDataSize": [
+    "Image",
+    "Texture",
     "Graphics",
     "Assets",
   ],
@@ -4597,5 +4703,13 @@ export const FUNCTION_MODULES = {
   "rlLoadDrawQuad": [
     "Rlgl",
     "Graphics",
+  ],
+  "ProcessGestureEvent": [
+    "Gestures",
+    "Input",
+  ],
+  "UpdateGestures": [
+    "Gestures",
+    "Input",
   ],
 } as const;

@@ -4,4 +4,8 @@
  * @module
  */
 /** Window event waiting and polling behavior. */
-export { DisableEventWaiting, EnableEventWaiting } from "../Raylib/raylib.ts";
+export {
+  DisableEventWaiting,
+  EnableEventWaiting,
+  PollInputEvents,
+} from "../Raylib/raylib.ts";

@@ -18,7 +18,7 @@ export {
   DrawSplineSegmentLinear,
   GetSplinePointBasis,
   GetSplinePointBezierCubic,
-  GetSplinePointBezierQuad,
+  GetSplinePointBezierQuadratic,
   GetSplinePointCatmullRom,
   GetSplinePointLinear,
   Vector2,

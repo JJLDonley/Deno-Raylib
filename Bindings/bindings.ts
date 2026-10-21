@@ -7,9 +7,9 @@ import { getNativeTarget } from "./platforms.ts";
 
 // --- Version constants ---
 export const RAYLIB_VERSION_MAJOR = 6;
-export const RAYLIB_VERSION_MINOR = 0;
+export const RAYLIB_VERSION_MINOR = 2;
 export const RAYLIB_VERSION_PATCH = 0;
-export const RAYLIB_VERSION = "6.0";
+export const RAYLIB_VERSION = "6.2";
 
 const nativeTarget: { libraryName: string; longFfiType: "i32" | "i64" } =
   getNativeTarget(Deno.build.os, Deno.build.arch);
@@ -116,35 +116,35 @@ const SYMBOLS = {
   EnableEventWaiting: { parameters: [], result: "void" },
   // Disable waiting for events on EndDrawing(), automatic events polling
   DisableEventWaiting: { parameters: [], result: "void" },
-  // Shows cursor
+  // Show cursor
   ShowCursor: { parameters: [], result: "void" },
-  // Hides cursor
+  // Hide cursor
   HideCursor: { parameters: [], result: "void" },
   // Check if cursor is not visible
   IsCursorHidden: { parameters: [], result: "u8" },
-  // Enables cursor (unlock cursor)
+  // Enable cursor (unlock cursor)
   EnableCursor: { parameters: [], result: "void" },
-  // Disables cursor (lock cursor)
+  // Disable cursor (lock cursor)
   DisableCursor: { parameters: [], result: "void" },
   // Check if cursor is on the screen
   IsCursorOnScreen: { parameters: [], result: "u8" },
-  // Set background color (framebuffer clear color)
+  // Clear background (framebuffer) to color
   ClearBackground: { parameters: [FFI_STRUCTS.Color], result: "void" },
-  // Setup canvas (framebuffer) to start drawing
+  // Begin canvas (framebuffer) drawing
   BeginDrawing: { parameters: [], result: "void" },
-  // End canvas drawing and swap buffers (double buffering)
+  // End canvas (framebuffer) drawing and swap buffers (double buffering)
   EndDrawing: { parameters: [], result: "void" },
   // Begin 2D mode with custom camera (2D)
   BeginMode2D: { parameters: [FFI_STRUCTS.Camera2D], result: "void" },
-  // Ends 2D mode with custom camera
+  // End 2D mode with custom camera
   EndMode2D: { parameters: [], result: "void" },
   // Begin 3D mode with custom camera (3D)
   BeginMode3D: { parameters: [FFI_STRUCTS.Camera3D], result: "void" },
-  // Ends 3D mode and returns to default 2D orthographic mode
+  // End 3D mode and returns to default 2D orthographic mode
   EndMode3D: { parameters: [], result: "void" },
   // Begin drawing to render texture
   BeginTextureMode: { parameters: [FFI_STRUCTS.RenderTexture], result: "void" },
-  // Ends drawing to render texture
+  // End drawing to render texture
   EndTextureMode: { parameters: [], result: "void" },
   // Begin custom shader drawing
   BeginShaderMode: { parameters: [FFI_STRUCTS.Shader], result: "void" },
@@ -185,7 +185,7 @@ const SYMBOLS = {
     parameters: ["buffer", "buffer"],
     result: FFI_STRUCTS.Shader,
   },
-  // Check if a shader is valid (loaded on GPU)
+  // Check if shader is valid (loaded on GPU)
   IsShaderValid: { parameters: [FFI_STRUCTS.Shader], result: "u8" },
   // Get shader uniform location
   GetShaderLocation: {
@@ -229,22 +229,22 @@ const SYMBOLS = {
     parameters: [FFI_STRUCTS.Vector2, FFI_STRUCTS.Camera3D, "i32", "i32"],
     result: FFI_STRUCTS.Ray,
   },
-  // Get the screen space position for a 3d world space position
+  // Get screen space position for a 3d world space position
   GetWorldToScreen: {
     parameters: [FFI_STRUCTS.Vector3, FFI_STRUCTS.Camera3D],
     result: FFI_STRUCTS.Vector2,
   },
-  // Get size position for a 3d world space position
+  // Get sized screen space position for a 3d world space position
   GetWorldToScreenEx: {
     parameters: [FFI_STRUCTS.Vector3, FFI_STRUCTS.Camera3D, "i32", "i32"],
     result: FFI_STRUCTS.Vector2,
   },
-  // Get the screen space position for a 2d camera world space position
+  // Get screen space position for a 2d camera world space position
   GetWorldToScreen2D: {
     parameters: [FFI_STRUCTS.Vector2, FFI_STRUCTS.Camera2D],
     result: FFI_STRUCTS.Vector2,
   },
-  // Get the world space position for a 2d camera screen space position
+  // Get world space position for a 2d camera screen space position
   GetScreenToWorld2D: {
     parameters: [FFI_STRUCTS.Vector2, FFI_STRUCTS.Camera2D],
     result: FFI_STRUCTS.Vector2,
@@ -283,7 +283,7 @@ const SYMBOLS = {
   UnloadRandomSequence: { parameters: ["pointer"], result: "void" },
   // Takes a screenshot of current screen (filename extension defines format)
   TakeScreenshot: { parameters: ["buffer"], result: "void" },
-  // Setup init configuration flags (view FLAGS)
+  // Set init configuration flags (view FLAGS)
   SetConfigFlags: { parameters: ["u32"], result: "void" },
   // Open URL with default system browser (if available)
   OpenURL: { parameters: ["buffer"], result: "void" },
@@ -321,27 +321,29 @@ const SYMBOLS = {
   SetLoadFileTextCallback: { parameters: ["function"], result: "void" },
   // Set custom file text data saver
   SetSaveFileTextCallback: { parameters: ["function"], result: "void" },
-  // Rename file (if exists)
+  // Rename file (if exists), returns 0 on success
   FileRename: { parameters: ["buffer", "buffer"], result: "i32" },
-  // Remove file (if exists)
+  // Remove file (if exists), returns 0 on success
   FileRemove: { parameters: ["buffer"], result: "i32" },
-  // Copy file from one path to another, dstPath created if it doesn't exist
+  // Copy file from one path to another, dstPath created if it doesn't exist, returns 0 on success
   FileCopy: { parameters: ["buffer", "buffer"], result: "i32" },
-  // Move file from one directory to another, dstPath created if it doesn't exist
+  // Move file from one directory to another, dstPath created if it doesn't exist, returns 0 on success
   FileMove: { parameters: ["buffer", "buffer"], result: "i32" },
-  // Replace text in an existing file
+  // Replace text in an existing file, returns 0 on success
   FileTextReplace: {
     parameters: ["buffer", "buffer", "buffer"],
     result: "i32",
   },
-  // Find text in existing file
+  // Find text in existing file, returns -1 if index not found or index otherwise
   FileTextFindIndex: { parameters: ["buffer", "buffer"], result: "i32" },
   // Check if file exists
   FileExists: { parameters: ["buffer"], result: "u8" },
-  // Check if a directory path exists
+  // Check if directory path exists
   DirectoryExists: { parameters: ["buffer"], result: "u8" },
   // Check file extension (recommended include point: .png, .wav)
   IsFileExtension: { parameters: ["buffer", "buffer"], result: "u8" },
+  // Check if file path (file or directory) is hidden by OS
+  IsFileHidden: { parameters: ["buffer"], result: "u8" },
   // Get file length in bytes (NOTE: GetFileSize() conflicts with windows.h)
   GetFileLength: { parameters: ["buffer"], result: "i32" },
   // Get file modification time (last write time)
@@ -352,9 +354,9 @@ const SYMBOLS = {
   GetFileName: { parameters: ["buffer"], result: "buffer" },
   // Get filename string without extension (uses static string)
   GetFileNameWithoutExt: { parameters: ["buffer"], result: "buffer" },
-  // Get full path for a given fileName with path (uses static string)
+  // Get full path for a provided fileName with path (uses static string)
   GetDirectoryPath: { parameters: ["buffer"], result: "buffer" },
-  // Get previous directory path for a given path (uses static string)
+  // Get previous directory path for a provided path (uses static string)
   GetPrevDirectoryPath: { parameters: ["buffer"], result: "buffer" },
   // Get current working directory (uses static string)
   GetWorkingDirectory: { parameters: [], result: "buffer" },
@@ -362,10 +364,14 @@ const SYMBOLS = {
   GetApplicationDirectory: { parameters: [], result: "buffer" },
   // Create directories (including full path requested), returns 0 on success
   MakeDirectory: { parameters: ["buffer"], result: "i32" },
-  // Change working directory, return true on success
-  ChangeDirectory: { parameters: ["buffer"], result: "u8" },
-  // Check if a given path is a file or a directory
+  // Change working directory, returns 0 on success
+  ChangeDirectory: { parameters: ["buffer"], result: "i32" },
+  // Check if provided path points to a file
   IsPathFile: { parameters: ["buffer"], result: "u8" },
+  // Check if provided path points to a directory
+  IsPathDirectory: { parameters: ["buffer"], result: "u8" },
+  // Check if provided path is an absolute path
+  IsPathAbsolute: { parameters: ["buffer"], result: "u8" },
   // Check if fileName is valid for the platform/OS
   IsFileNameValid: { parameters: ["buffer"], result: "u8" },
   // Load directory filepaths, files and directories, no subdirs scan
@@ -373,7 +379,7 @@ const SYMBOLS = {
     parameters: ["buffer"],
     result: FFI_STRUCTS.FilePathList,
   },
-  // Load directory filepaths with extension filtering and subdir scan; some filters available: "*.*", "FILES*", "DIRS*"
+  // Load directory filepaths with extension filtering and subdir scan; some filters available: '*.*','FILES*','DIRS*'
   LoadDirectoryFilesEx: {
     parameters: ["buffer", "buffer", "u8"],
     result: FFI_STRUCTS.FilePathList,
@@ -383,7 +389,7 @@ const SYMBOLS = {
     parameters: [FFI_STRUCTS.FilePathList],
     result: "void",
   },
-  // Check if a file has been dropped into window
+  // Check if file has been dropped into window
   IsFileDropped: { parameters: [], result: "u8" },
   // Load dropped filepaths
   LoadDroppedFiles: { parameters: [], result: FFI_STRUCTS.FilePathList },
@@ -449,15 +455,15 @@ const SYMBOLS = {
     parameters: [FFI_STRUCTS.AutomationEvent],
     result: "void",
   },
-  // Check if a key has been pressed once
+  // Check if key has been pressed once
   IsKeyPressed: { parameters: ["i32"], result: "u8" },
-  // Check if a key has been pressed again
+  // Check if key has been pressed again
   IsKeyPressedRepeat: { parameters: ["i32"], result: "u8" },
-  // Check if a key is being pressed
+  // Check if key is being pressed
   IsKeyDown: { parameters: ["i32"], result: "u8" },
-  // Check if a key has been released once
+  // Check if key has been released once
   IsKeyReleased: { parameters: ["i32"], result: "u8" },
-  // Check if a key is NOT being pressed
+  // Check if key is NOT being pressed
   IsKeyUp: { parameters: ["i32"], result: "u8" },
   // Get key pressed (keycode), call it multiple times for keys queued, returns 0 when the queue is empty
   GetKeyPressed: { parameters: [], result: "i32" },
@@ -467,17 +473,17 @@ const SYMBOLS = {
   GetKeyName: { parameters: ["i32"], result: "buffer" },
   // Set a custom key to exit program (default is ESC)
   SetExitKey: { parameters: ["i32"], result: "void" },
-  // Check if a gamepad is available
+  // Check if gamepad is available
   IsGamepadAvailable: { parameters: ["i32"], result: "u8" },
   // Get gamepad internal name id
   GetGamepadName: { parameters: ["i32"], result: "buffer" },
-  // Check if a gamepad button has been pressed once
+  // Check if gamepad button has been pressed once
   IsGamepadButtonPressed: { parameters: ["i32", "i32"], result: "u8" },
-  // Check if a gamepad button is being pressed
+  // Check if gamepad button is being pressed
   IsGamepadButtonDown: { parameters: ["i32", "i32"], result: "u8" },
-  // Check if a gamepad button has been released once
+  // Check if gamepad button has been released once
   IsGamepadButtonReleased: { parameters: ["i32", "i32"], result: "u8" },
-  // Check if a gamepad button is NOT being pressed
+  // Check if gamepad button is NOT being pressed
   IsGamepadButtonUp: { parameters: ["i32", "i32"], result: "u8" },
   // Get the last gamepad button pressed
   GetGamepadButtonPressed: { parameters: [], result: "i32" },
@@ -492,13 +498,13 @@ const SYMBOLS = {
     parameters: ["i32", "f32", "f32", "f32"],
     result: "void",
   },
-  // Check if a mouse button has been pressed once
+  // Check if mouse button has been pressed once
   IsMouseButtonPressed: { parameters: ["i32"], result: "u8" },
-  // Check if a mouse button is being pressed
+  // Check if mouse button is being pressed
   IsMouseButtonDown: { parameters: ["i32"], result: "u8" },
-  // Check if a mouse button has been released once
+  // Check if mouse button has been released once
   IsMouseButtonReleased: { parameters: ["i32"], result: "u8" },
-  // Check if a mouse button is NOT being pressed
+  // Check if mouse button is NOT being pressed
   IsMouseButtonUp: { parameters: ["i32"], result: "u8" },
   // Get mouse position X
   GetMouseX: { parameters: [], result: "i32" },
@@ -526,13 +532,13 @@ const SYMBOLS = {
   GetTouchY: { parameters: [], result: "i32" },
   // Get touch position XY for a touch point index (relative to screen size)
   GetTouchPosition: { parameters: ["i32"], result: FFI_STRUCTS.Vector2 },
-  // Get touch point identifier for given index
+  // Get touch point identifier for provided index
   GetTouchPointId: { parameters: ["i32"], result: "i32" },
   // Get number of touch points
   GetTouchPointCount: { parameters: [], result: "i32" },
   // Enable a set of gestures using flags
   SetGesturesEnabled: { parameters: ["u32"], result: "void" },
-  // Check if a gesture have been detected
+  // Check if gesture has been detected
   IsGestureDetected: { parameters: ["u32"], result: "u8" },
   // Get latest detected gesture
   GetGestureDetected: { parameters: [], result: "i32" },
@@ -615,104 +621,57 @@ const SYMBOLS = {
     ],
     result: "void",
   },
-  // Draw a color-filled circle
-  DrawCircle: {
-    parameters: ["i32", "i32", "f32", FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw a color-filled circle (Vector version)
-  DrawCircleV: {
-    parameters: [FFI_STRUCTS.Vector2, "f32", FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw a gradient-filled circle
-  DrawCircleGradient: {
+  // Draw a color-filled triangle, counter-clockwise vertex order
+  DrawTriangle: {
     parameters: [
       FFI_STRUCTS.Vector2,
-      "f32",
+      FFI_STRUCTS.Vector2,
+      FFI_STRUCTS.Vector2,
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw triangle with interpolated colors, counter-clockwise vertex/color order
+  DrawTriangleGradient: {
+    parameters: [
+      FFI_STRUCTS.Vector2,
+      FFI_STRUCTS.Vector2,
+      FFI_STRUCTS.Vector2,
+      FFI_STRUCTS.Color,
       FFI_STRUCTS.Color,
       FFI_STRUCTS.Color,
     ],
     result: "void",
   },
-  // Draw a piece of a circle
-  DrawCircleSector: {
+  // Draw triangle outline, counter-clockwise vertex order
+  DrawTriangleLines: {
     parameters: [
       FFI_STRUCTS.Vector2,
-      "f32",
-      "f32",
-      "f32",
-      "i32",
+      FFI_STRUCTS.Vector2,
+      FFI_STRUCTS.Vector2,
       FFI_STRUCTS.Color,
     ],
     result: "void",
   },
-  // Draw circle sector outline
-  DrawCircleSectorLines: {
+  // Draw triangle outline with line thickness, counter-clockwise vertex order
+  DrawTriangleLinesEx: {
     parameters: [
       FFI_STRUCTS.Vector2,
+      FFI_STRUCTS.Vector2,
+      FFI_STRUCTS.Vector2,
       "f32",
-      "f32",
-      "f32",
-      "i32",
       FFI_STRUCTS.Color,
     ],
     result: "void",
   },
-  // Draw circle outline
-  DrawCircleLines: {
-    parameters: ["i32", "i32", "f32", FFI_STRUCTS.Color],
+  // Draw a triangle fan defined by points (first vertex is the center)
+  DrawTriangleFan: {
+    parameters: ["buffer", "i32", FFI_STRUCTS.Color],
     result: "void",
   },
-  // Draw circle outline (Vector version)
-  DrawCircleLinesV: {
-    parameters: [FFI_STRUCTS.Vector2, "f32", FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw ellipse
-  DrawEllipse: {
-    parameters: ["i32", "i32", "f32", "f32", FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw ellipse (Vector version)
-  DrawEllipseV: {
-    parameters: [FFI_STRUCTS.Vector2, "f32", "f32", FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw ellipse outline
-  DrawEllipseLines: {
-    parameters: ["i32", "i32", "f32", "f32", FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw ellipse outline (Vector version)
-  DrawEllipseLinesV: {
-    parameters: [FFI_STRUCTS.Vector2, "f32", "f32", FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw ring
-  DrawRing: {
-    parameters: [
-      FFI_STRUCTS.Vector2,
-      "f32",
-      "f32",
-      "f32",
-      "f32",
-      "i32",
-      FFI_STRUCTS.Color,
-    ],
-    result: "void",
-  },
-  // Draw ring outline
-  DrawRingLines: {
-    parameters: [
-      FFI_STRUCTS.Vector2,
-      "f32",
-      "f32",
-      "f32",
-      "f32",
-      "i32",
-      FFI_STRUCTS.Color,
-    ],
+  // Draw a triangle strip defined by points
+  DrawTriangleStrip: {
+    parameters: ["buffer", "i32", FFI_STRUCTS.Color],
     result: "void",
   },
   // Draw a color-filled rectangle
@@ -764,7 +723,7 @@ const SYMBOLS = {
     ],
     result: "void",
   },
-  // Draw a gradient-filled rectangle with custom vertex colors
+  // Draw a gradient-filled rectangle with custom vertex colors, counter-clockwise color order
   DrawRectangleGradientEx: {
     parameters: [
       FFI_STRUCTS.Rectangle,
@@ -780,7 +739,7 @@ const SYMBOLS = {
     parameters: ["i32", "i32", "i32", "i32", FFI_STRUCTS.Color],
     result: "void",
   },
-  // Draw rectangle outline with extended parameters
+  // Draw rectangle outline with line thickness
   DrawRectangleLinesEx: {
     parameters: [FFI_STRUCTS.Rectangle, "f32", FFI_STRUCTS.Color],
     result: "void",
@@ -795,42 +754,12 @@ const SYMBOLS = {
     parameters: [FFI_STRUCTS.Rectangle, "f32", "i32", FFI_STRUCTS.Color],
     result: "void",
   },
-  // Draw rectangle with rounded edges outline
+  // Draw rectangle lines with rounded edges outline and line thickness
   DrawRectangleRoundedLinesEx: {
     parameters: [FFI_STRUCTS.Rectangle, "f32", "i32", "f32", FFI_STRUCTS.Color],
     result: "void",
   },
-  // Draw a color-filled triangle (vertex in counter-clockwise order!)
-  DrawTriangle: {
-    parameters: [
-      FFI_STRUCTS.Vector2,
-      FFI_STRUCTS.Vector2,
-      FFI_STRUCTS.Vector2,
-      FFI_STRUCTS.Color,
-    ],
-    result: "void",
-  },
-  // Draw triangle outline (vertex in counter-clockwise order!)
-  DrawTriangleLines: {
-    parameters: [
-      FFI_STRUCTS.Vector2,
-      FFI_STRUCTS.Vector2,
-      FFI_STRUCTS.Vector2,
-      FFI_STRUCTS.Color,
-    ],
-    result: "void",
-  },
-  // Draw a triangle fan defined by points (first vertex is the center)
-  DrawTriangleFan: {
-    parameters: ["buffer", "i32", FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw a triangle strip defined by points
-  DrawTriangleStrip: {
-    parameters: ["buffer", "i32", FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw a regular polygon (Vector version)
+  // Draw a polygon of n sides
   DrawPoly: {
     parameters: [FFI_STRUCTS.Vector2, "i32", "f32", "f32", FFI_STRUCTS.Color],
     result: "void",
@@ -840,13 +769,150 @@ const SYMBOLS = {
     parameters: [FFI_STRUCTS.Vector2, "i32", "f32", "f32", FFI_STRUCTS.Color],
     result: "void",
   },
-  // Draw a polygon outline of n sides with extended parameters
+  // Draw a polygon outline of n sides with line thickness
   DrawPolyLinesEx: {
     parameters: [
       FFI_STRUCTS.Vector2,
       "i32",
       "f32",
       "f32",
+      "f32",
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw a color-filled circle
+  DrawCircle: {
+    parameters: ["i32", "i32", "f32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw a color-filled circle (Vector version)
+  DrawCircleV: {
+    parameters: [FFI_STRUCTS.Vector2, "f32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw a gradient-filled circle
+  DrawCircleGradient: {
+    parameters: [
+      FFI_STRUCTS.Vector2,
+      "f32",
+      FFI_STRUCTS.Color,
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw a piece of a circle
+  DrawCircleSector: {
+    parameters: [
+      FFI_STRUCTS.Vector2,
+      "f32",
+      "f32",
+      "f32",
+      "i32",
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw circle sector outline
+  DrawCircleSectorLines: {
+    parameters: [
+      FFI_STRUCTS.Vector2,
+      "f32",
+      "f32",
+      "f32",
+      "i32",
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw circle sector outline with thickness
+  DrawCircleSectorLinesEx: {
+    parameters: [
+      FFI_STRUCTS.Vector2,
+      "f32",
+      "f32",
+      "f32",
+      "i32",
+      "f32",
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw circle outline
+  DrawCircleLines: {
+    parameters: ["i32", "i32", "f32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw circle outline (Vector version)
+  DrawCircleLinesV: {
+    parameters: [FFI_STRUCTS.Vector2, "f32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw circle outline with line thickness
+  DrawCircleLinesEx: {
+    parameters: [FFI_STRUCTS.Vector2, "f32", "f32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw ellipse
+  DrawEllipse: {
+    parameters: ["i32", "i32", "f32", "f32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw ellipse (Vector version)
+  DrawEllipseV: {
+    parameters: [FFI_STRUCTS.Vector2, "f32", "f32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw ellipse outline
+  DrawEllipseLines: {
+    parameters: ["i32", "i32", "f32", "f32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw ellipse outline (Vector version)
+  DrawEllipseLinesV: {
+    parameters: [FFI_STRUCTS.Vector2, "f32", "f32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw ellipse outline with line thickness
+  DrawEllipseLinesEx: {
+    parameters: [FFI_STRUCTS.Vector2, "f32", "f32", "f32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw ring
+  DrawRing: {
+    parameters: [
+      FFI_STRUCTS.Vector2,
+      "f32",
+      "f32",
+      "f32",
+      "f32",
+      "i32",
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw ring outline
+  DrawRingLines: {
+    parameters: [
+      FFI_STRUCTS.Vector2,
+      "f32",
+      "f32",
+      "f32",
+      "f32",
+      "i32",
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw ring outline with line thickness
+  DrawRingLinesEx: {
+    parameters: [
+      FFI_STRUCTS.Vector2,
+      "f32",
+      "f32",
+      "f32",
+      "f32",
+      "i32",
       "f32",
       FFI_STRUCTS.Color,
     ],
@@ -962,7 +1028,7 @@ const SYMBOLS = {
     result: FFI_STRUCTS.Vector2,
   },
   // Get (evaluate) spline point: Quadratic Bezier
-  GetSplinePointBezierQuad: {
+  GetSplinePointBezierQuadratic: {
     parameters: [
       FFI_STRUCTS.Vector2,
       FFI_STRUCTS.Vector2,
@@ -997,7 +1063,7 @@ const SYMBOLS = {
     parameters: [FFI_STRUCTS.Vector2, "f32", FFI_STRUCTS.Rectangle],
     result: "u8",
   },
-  // Check if circle collides with a line created betweeen two points [p1] and [p2]
+  // Check if circle collides with a line created between two points [p1] and [p2]
   CheckCollisionCircleLine: {
     parameters: [
       FFI_STRUCTS.Vector2,
@@ -1085,7 +1151,7 @@ const SYMBOLS = {
     parameters: [FFI_STRUCTS.Texture],
     result: FFI_STRUCTS.Image,
   },
-  // Load image from screen buffer and (screenshot)
+  // Load image from screen buffer (screenshot)
   LoadImageFromScreen: { parameters: [], result: FFI_STRUCTS.Image },
   // Check if an image is valid (data and parameters)
   IsImageValid: { parameters: [FFI_STRUCTS.Image], result: "u8" },
@@ -1234,7 +1300,7 @@ const SYMBOLS = {
   // Modify image color: grayscale
   ImageColorGrayscale: { parameters: ["buffer"], result: "void" },
   // Modify image color: contrast (-100 to 100)
-  ImageColorContrast: { parameters: ["buffer", "f32"], result: "void" },
+  ImageColorContrast: { parameters: ["buffer", "i32"], result: "void" },
   // Modify image color: brightness (-255 to 255)
   ImageColorBrightness: { parameters: ["buffer", "i32"], result: "void" },
   // Modify image color: replace color
@@ -1263,7 +1329,7 @@ const SYMBOLS = {
     parameters: [FFI_STRUCTS.Image, "i32", "i32"],
     result: FFI_STRUCTS.Color,
   },
-  // Clear image background with given color
+  // Clear image background with provided color
   ImageClearBackground: {
     parameters: ["buffer", FFI_STRUCTS.Color],
     result: "void",
@@ -1304,49 +1370,9 @@ const SYMBOLS = {
     ],
     result: "void",
   },
-  // Draw a filled circle within an image
-  ImageDrawCircle: {
-    parameters: ["buffer", "i32", "i32", "i32", FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw a filled circle within an image (Vector version)
-  ImageDrawCircleV: {
-    parameters: ["buffer", FFI_STRUCTS.Vector2, "i32", FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw circle outline within an image
-  ImageDrawCircleLines: {
-    parameters: ["buffer", "i32", "i32", "i32", FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw circle outline within an image (Vector version)
-  ImageDrawCircleLinesV: {
-    parameters: ["buffer", FFI_STRUCTS.Vector2, "i32", FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw rectangle within an image
-  ImageDrawRectangle: {
-    parameters: ["buffer", "i32", "i32", "i32", "i32", FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw rectangle within an image (Vector version)
-  ImageDrawRectangleV: {
-    parameters: [
-      "buffer",
-      FFI_STRUCTS.Vector2,
-      FFI_STRUCTS.Vector2,
-      FFI_STRUCTS.Color,
-    ],
-    result: "void",
-  },
-  // Draw rectangle within an image
-  ImageDrawRectangleRec: {
-    parameters: ["buffer", FFI_STRUCTS.Rectangle, FFI_STRUCTS.Color],
-    result: "void",
-  },
-  // Draw rectangle lines within an image
-  ImageDrawRectangleLines: {
-    parameters: ["buffer", FFI_STRUCTS.Rectangle, "i32", FFI_STRUCTS.Color],
+  // Draw a lines sequence within an image
+  ImageDrawLineStrip: {
+    parameters: ["buffer", "buffer", "i32", FFI_STRUCTS.Color],
     result: "void",
   },
   // Draw triangle within an image
@@ -1361,7 +1387,7 @@ const SYMBOLS = {
     result: "void",
   },
   // Draw triangle with interpolated colors within an image
-  ImageDrawTriangleEx: {
+  ImageDrawTriangleGradient: {
     parameters: [
       "buffer",
       FFI_STRUCTS.Vector2,
@@ -1394,13 +1420,127 @@ const SYMBOLS = {
     parameters: ["buffer", "buffer", "i32", FFI_STRUCTS.Color],
     result: "void",
   },
-  // Draw a source image within a destination image (tint applied to source)
-  ImageDraw: {
+  // Draw rectangle within an image
+  ImageDrawRectangle: {
+    parameters: ["buffer", "i32", "i32", "i32", "i32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw rectangle within an image (Vector version)
+  ImageDrawRectangleV: {
+    parameters: [
+      "buffer",
+      FFI_STRUCTS.Vector2,
+      FFI_STRUCTS.Vector2,
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw rectangle within an image
+  ImageDrawRectangleRec: {
+    parameters: ["buffer", FFI_STRUCTS.Rectangle, FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw a color-filled rectangle with pro parameters within and image
+  ImageDrawRectanglePro: {
+    parameters: [
+      "buffer",
+      FFI_STRUCTS.Rectangle,
+      FFI_STRUCTS.Vector2,
+      "f32",
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw rectangle lines within an image
+  ImageDrawRectangleLines: {
+    parameters: ["buffer", "i32", "i32", "i32", "i32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw rectangle lines within an image with line thickness
+  ImageDrawRectangleLinesEx: {
+    parameters: ["buffer", FFI_STRUCTS.Rectangle, "i32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw rectangle with gradient colors within an image, counter-clockwise color order
+  ImageDrawRectangleGradientEx: {
+    parameters: [
+      "buffer",
+      FFI_STRUCTS.Rectangle,
+      FFI_STRUCTS.Color,
+      FFI_STRUCTS.Color,
+      FFI_STRUCTS.Color,
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw a filled circle within an image
+  ImageDrawCircle: {
+    parameters: ["buffer", "i32", "i32", "i32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw a filled circle within an image (Vector version)
+  ImageDrawCircleV: {
+    parameters: ["buffer", FFI_STRUCTS.Vector2, "i32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw circle outline within an image
+  ImageDrawCircleLines: {
+    parameters: ["buffer", "i32", "i32", "i32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw circle outline within an image (Vector version)
+  ImageDrawCircleLinesV: {
+    parameters: ["buffer", FFI_STRUCTS.Vector2, "i32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw a gradient-filled circle within an image
+  ImageDrawCircleGradient: {
+    parameters: [
+      "buffer",
+      FFI_STRUCTS.Vector2,
+      "f32",
+      FFI_STRUCTS.Color,
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw an image within an image
+  ImageDrawImage: {
+    parameters: ["buffer", FFI_STRUCTS.Image, "i32", "i32", FFI_STRUCTS.Color],
+    result: "void",
+  },
+  // Draw an image with scaling and rotation within an image
+  ImageDrawImageEx: {
+    parameters: [
+      "buffer",
+      FFI_STRUCTS.Image,
+      FFI_STRUCTS.Vector2,
+      "f32",
+      "f32",
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw a part of an image defined by a rectangle within an image
+  ImageDrawImageRec: {
+    parameters: [
+      "buffer",
+      FFI_STRUCTS.Image,
+      FFI_STRUCTS.Rectangle,
+      FFI_STRUCTS.Vector2,
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw a part of an image defined by a rectangle into destination rectangle, with scaling and rotation, within an image
+  ImageDrawImagePro: {
     parameters: [
       "buffer",
       FFI_STRUCTS.Image,
       FFI_STRUCTS.Rectangle,
       FFI_STRUCTS.Rectangle,
+      FFI_STRUCTS.Vector2,
+      "f32",
       FFI_STRUCTS.Color,
     ],
     result: "void",
@@ -1417,6 +1557,21 @@ const SYMBOLS = {
       FFI_STRUCTS.Font,
       "buffer",
       FFI_STRUCTS.Vector2,
+      "f32",
+      "f32",
+      FFI_STRUCTS.Color,
+    ],
+    result: "void",
+  },
+  // Draw text using Font and pro parameters (rotation)
+  ImageDrawTextPro: {
+    parameters: [
+      "buffer",
+      FFI_STRUCTS.Font,
+      "buffer",
+      FFI_STRUCTS.Vector2,
+      FFI_STRUCTS.Vector2,
+      "f32",
       "f32",
       "f32",
       FFI_STRUCTS.Color,
@@ -1440,11 +1595,16 @@ const SYMBOLS = {
     parameters: ["i32", "i32"],
     result: FFI_STRUCTS.RenderTexture,
   },
-  // Check if a texture is valid (loaded in GPU)
+  // Load texture for rendering (framebuffer), with specific format
+  LoadRenderTextureEx: {
+    parameters: ["i32", "i32", "i32"],
+    result: FFI_STRUCTS.RenderTexture,
+  },
+  // Check if texture is valid (loaded in GPU)
   IsTextureValid: { parameters: [FFI_STRUCTS.Texture], result: "u8" },
   // Unload texture from GPU memory (VRAM)
   UnloadTexture: { parameters: [FFI_STRUCTS.Texture], result: "void" },
-  // Check if a render texture is valid (loaded in GPU)
+  // Check if render texture is valid (loaded in GPU)
   IsRenderTextureValid: {
     parameters: [FFI_STRUCTS.RenderTexture],
     result: "u8",
@@ -1483,7 +1643,7 @@ const SYMBOLS = {
     parameters: [FFI_STRUCTS.Texture, FFI_STRUCTS.Vector2, FFI_STRUCTS.Color],
     result: "void",
   },
-  // Draw a Texture2D with extended parameters
+  // Draw a Texture2D with rotation and scale
   DrawTextureEx: {
     parameters: [
       FFI_STRUCTS.Texture,
@@ -1504,7 +1664,7 @@ const SYMBOLS = {
     ],
     result: "void",
   },
-  // Draw a part of a texture defined by a rectangle with 'pro' parameters
+  // Draw a part of a texture defined by a source rectangle to destination rectangle, with scaling and rotation
   DrawTexturePro: {
     parameters: [
       FFI_STRUCTS.Texture,
@@ -1516,7 +1676,7 @@ const SYMBOLS = {
     ],
     result: "void",
   },
-  // Draws a texture (or part of it) that stretches or shrinks nicely
+  // Draw a texture (or part of it) that stretches or shrinks nicely
   DrawTextureNPatch: {
     parameters: [
       FFI_STRUCTS.Texture,
@@ -1599,7 +1759,7 @@ const SYMBOLS = {
   GetFontDefault: { parameters: [], result: FFI_STRUCTS.Font },
   // Load font from file into GPU memory (VRAM)
   LoadFont: { parameters: ["buffer"], result: FFI_STRUCTS.Font },
-  // Load font from file with extended parameters, use NULL for codepoints and 0 for codepointCount to load the default character set, font size is provided in pixels height
+  // Load font from file with defined codepoints and generation size, use NULL for codepoints and 0 for codepointCount to load the default character set, font size is provided in pixels height
   LoadFontEx: {
     parameters: ["buffer", "i32", "pointer", "i32"],
     result: FFI_STRUCTS.Font,
@@ -1614,7 +1774,7 @@ const SYMBOLS = {
     parameters: ["buffer", "buffer", "i32", "i32", "pointer", "i32"],
     result: FFI_STRUCTS.Font,
   },
-  // Check if a font is valid (font data loaded, WARNING: GPU texture not checked)
+  // Check if font is valid (font data loaded, WARNING: GPU texture not checked)
   IsFontValid: { parameters: [FFI_STRUCTS.Font], result: "u8" },
   // Load font data for further use
   LoadFontData: {
@@ -1676,7 +1836,7 @@ const SYMBOLS = {
     ],
     result: "void",
   },
-  // Draw multiple character (codepoint)
+  // Draw multiple characters (codepoint)
   DrawTextCodepoints: {
     parameters: [
       FFI_STRUCTS.Font,
@@ -1739,7 +1899,7 @@ const SYMBOLS = {
   UnloadTextLines: { parameters: ["pointer", "i32"], result: "void" },
   // Copy one string to another, returns bytes copied
   TextCopy: { parameters: ["buffer", "buffer"], result: "i32" },
-  // Check if two text string are equal
+  // Check if two text strings are equal
   TextIsEqual: { parameters: ["buffer", "buffer"], result: "u8" },
   // Get text length, checks for '\0' ending
   TextLength: { parameters: ["buffer"], result: "u32" },
@@ -1821,7 +1981,7 @@ const SYMBOLS = {
     ],
     result: "void",
   },
-  // Draw a color-filled triangle (vertex in counter-clockwise order!)
+  // Draw a color-filled triangle, counter-clockwise vertex order
   DrawTriangle3D: {
     parameters: [
       FFI_STRUCTS.Vector3,
@@ -1861,7 +2021,7 @@ const SYMBOLS = {
     parameters: [FFI_STRUCTS.Vector3, "f32", FFI_STRUCTS.Color],
     result: "void",
   },
-  // Draw sphere with extended parameters
+  // Draw sphere with defined rings and slices
   DrawSphereEx: {
     parameters: [FFI_STRUCTS.Vector3, "f32", "i32", "i32", FFI_STRUCTS.Color],
     result: "void",
@@ -1959,7 +2119,7 @@ const SYMBOLS = {
     parameters: [FFI_STRUCTS.Mesh],
     result: FFI_STRUCTS.Model,
   },
-  // Check if a model is valid (loaded in GPU, VAO/VBOs)
+  // Check if model is valid (loaded in GPU, VAO/VBOs)
   IsModelValid: { parameters: [FFI_STRUCTS.Model], result: "u8" },
   // Unload model (including meshes) from memory (RAM and/or VRAM)
   UnloadModel: { parameters: [FFI_STRUCTS.Model], result: "void" },
@@ -1978,7 +2138,7 @@ const SYMBOLS = {
     ],
     result: "void",
   },
-  // Draw a model with extended parameters
+  // Draw a model with custom transform
   DrawModelEx: {
     parameters: [
       FFI_STRUCTS.Model,
@@ -2000,7 +2160,7 @@ const SYMBOLS = {
     ],
     result: "void",
   },
-  // Draw a model wires (with texture if set) with extended parameters
+  // Draw a model wires with custom transform
   DrawModelWiresEx: {
     parameters: [
       FFI_STRUCTS.Model,
@@ -2028,7 +2188,7 @@ const SYMBOLS = {
     ],
     result: "void",
   },
-  // Draw a billboard texture defined by source
+  // Draw a billboard texture defined by rectangle
   DrawBillboardRec: {
     parameters: [
       FFI_STRUCTS.Camera3D,
@@ -2040,7 +2200,7 @@ const SYMBOLS = {
     ],
     result: "void",
   },
-  // Draw a billboard texture defined by source and rotation
+  // Draw a billboard texture defined by source rectangle with scaling and rotation
   DrawBillboardPro: {
     parameters: [
       FFI_STRUCTS.Camera3D,
@@ -2135,7 +2295,7 @@ const SYMBOLS = {
   LoadMaterials: { parameters: ["buffer", "pointer"], result: "buffer" },
   // Load default material (Supports: DIFFUSE, SPECULAR, NORMAL maps)
   LoadMaterialDefault: { parameters: [], result: FFI_STRUCTS.Material },
-  // Check if a material is valid (shader assigned, map textures loaded in GPU)
+  // Check if material is valid (shader assigned, map textures loaded in GPU)
   IsMaterialValid: { parameters: [FFI_STRUCTS.Material], result: "u8" },
   // Unload material from GPU memory (VRAM)
   UnloadMaterial: { parameters: [FFI_STRUCTS.Material], result: "void" },
@@ -2243,7 +2403,7 @@ const SYMBOLS = {
     parameters: ["buffer", "buffer", "i32"],
     result: FFI_STRUCTS.Wave,
   },
-  // Checks if wave data is valid (data loaded and parameters)
+  // Check if wave data is valid (data loaded and parameters)
   IsWaveValid: { parameters: [FFI_STRUCTS.Wave], result: "u8" },
   // Load sound from file
   LoadSound: { parameters: ["buffer"], result: FFI_STRUCTS.Sound },
@@ -2252,12 +2412,12 @@ const SYMBOLS = {
     parameters: [FFI_STRUCTS.Wave],
     result: FFI_STRUCTS.Sound,
   },
-  // Create a new sound that shares the same sample data as the source sound, does not own the sound data
+  // Load sound alias, new sound that shares the same sample data as the source sound, does not own the sound data
   LoadSoundAlias: {
     parameters: [FFI_STRUCTS.Sound],
     result: FFI_STRUCTS.Sound,
   },
-  // Checks if a sound is valid (data loaded and buffers initialized)
+  // Check if sound is valid (data loaded and buffers initialized)
   IsSoundValid: { parameters: [FFI_STRUCTS.Sound], result: "u8" },
   // Update sound buffer with new data (default data format: 32 bit float, stereo)
   UpdateSound: {
@@ -2268,7 +2428,7 @@ const SYMBOLS = {
   UnloadWave: { parameters: [FFI_STRUCTS.Wave], result: "void" },
   // Unload sound
   UnloadSound: { parameters: [FFI_STRUCTS.Sound], result: "void" },
-  // Unload a sound alias (does not deallocate sample data)
+  // Unload sound alias (does not deallocate sample data)
   UnloadSoundAlias: { parameters: [FFI_STRUCTS.Sound], result: "void" },
   // Export wave data to file, returns true on success
   ExportWave: { parameters: [FFI_STRUCTS.Wave, "buffer"], result: "u8" },
@@ -2282,7 +2442,7 @@ const SYMBOLS = {
   PauseSound: { parameters: [FFI_STRUCTS.Sound], result: "void" },
   // Resume a paused sound
   ResumeSound: { parameters: [FFI_STRUCTS.Sound], result: "void" },
-  // Check if a sound is currently playing
+  // Check if sound is currently playing
   IsSoundPlaying: { parameters: [FFI_STRUCTS.Sound], result: "u8" },
   // Set volume for a sound (1.0 is max level)
   SetSoundVolume: { parameters: [FFI_STRUCTS.Sound, "f32"], result: "void" },
@@ -2307,7 +2467,7 @@ const SYMBOLS = {
     parameters: ["buffer", "buffer", "i32"],
     result: FFI_STRUCTS.Music,
   },
-  // Checks if a music stream is valid (context and buffers initialized)
+  // Check if music stream is valid (context and buffers initialized)
   IsMusicValid: { parameters: [FFI_STRUCTS.Music], result: "u8" },
   // Unload music stream
   UnloadMusicStream: { parameters: [FFI_STRUCTS.Music], result: "void" },
@@ -2315,7 +2475,7 @@ const SYMBOLS = {
   PlayMusicStream: { parameters: [FFI_STRUCTS.Music], result: "void" },
   // Check if music is playing
   IsMusicStreamPlaying: { parameters: [FFI_STRUCTS.Music], result: "u8" },
-  // Updates buffers for music streaming
+  // Update buffers for music streaming
   UpdateMusicStream: { parameters: [FFI_STRUCTS.Music], result: "void" },
   // Stop music playing
   StopMusicStream: { parameters: [FFI_STRUCTS.Music], result: "void" },
@@ -2327,9 +2487,9 @@ const SYMBOLS = {
   SeekMusicStream: { parameters: [FFI_STRUCTS.Music, "f32"], result: "void" },
   // Set volume for music (1.0 is max level)
   SetMusicVolume: { parameters: [FFI_STRUCTS.Music, "f32"], result: "void" },
-  // Set pitch for a music (1.0 is base level)
+  // Set pitch for music (1.0 is base level)
   SetMusicPitch: { parameters: [FFI_STRUCTS.Music, "f32"], result: "void" },
-  // Set pan for a music (-1.0 left, 0.0 center, 1.0 right)
+  // Set pan for music (-1.0 left, 0.0 center, 1.0 right)
   SetMusicPan: { parameters: [FFI_STRUCTS.Music, "f32"], result: "void" },
   // Get music time length (in seconds)
   GetMusicTimeLength: { parameters: [FFI_STRUCTS.Music], result: "f32" },
@@ -2340,7 +2500,7 @@ const SYMBOLS = {
     parameters: ["u32", "u32", "u32"],
     result: FFI_STRUCTS.AudioStream,
   },
-  // Checks if an audio stream is valid (buffers initialized)
+  // Check if an audio stream is valid (buffers initialized)
   IsAudioStreamValid: { parameters: [FFI_STRUCTS.AudioStream], result: "u8" },
   // Unload audio stream and free memory
   UnloadAudioStream: { parameters: [FFI_STRUCTS.AudioStream], result: "void" },
@@ -2374,7 +2534,7 @@ const SYMBOLS = {
     parameters: [FFI_STRUCTS.AudioStream, "f32"],
     result: "void",
   },
-  // Set pan for audio stream (-1.0 to 1.0 range, 0.0 is centered)
+  // Set pan for audio stream (-1.0 left, 0.0 center, 1.0 right)
   SetAudioStreamPan: {
     parameters: [FFI_STRUCTS.AudioStream, "f32"],
     result: "void",
@@ -3524,6 +3684,14 @@ const SYMBOLS = {
   rlLoadDrawCube: { parameters: [], result: "void" },
   // Load and draw a quad
   rlLoadDrawQuad: { parameters: [], result: "void" },
+  // Process gesture event and translate it into gestures
+  ProcessGestureEvent: {
+    parameters: [FFI_STRUCTS.GestureEvent],
+    result: "void",
+    optional: true,
+  },
+  // Update gestures detected (must be called every frame)
+  UpdateGestures: { parameters: [], result: "void", optional: true },
 } as const;
 
 export const nativeSymbolDefinitions = SYMBOLS;
@@ -3534,6 +3702,16 @@ export const lib: Deno.DynamicLibrary<typeof SYMBOLS> = Deno.dlopen(
 );
 
 const AUDIO_CONTROL_SYMBOLS = {
+  AttachAudioStreamProcessor: {
+    parameters: [FFI_STRUCTS.AudioStream, "function"],
+    result: "void",
+    nonblocking: true,
+  },
+  AttachAudioMixedProcessor: {
+    parameters: ["function"],
+    result: "void",
+    nonblocking: true,
+  },
   SetAudioStreamCallback: {
     parameters: [FFI_STRUCTS.AudioStream, "function"],
     result: "void",

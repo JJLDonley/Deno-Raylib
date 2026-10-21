@@ -202,7 +202,7 @@ for (const fn of api.functions as any[]) {
   result += `\t// ${fn.description ?? ""}\n`;
   result += `\t${fn.name}: { parameters: [${parameters}], result: ${
     ffiTypeExpr(fn.returnType, fn.name)
-  } },\n`;
+  }${fn.nativeOptional ? ", optional: true" : ""} },\n`;
 }
 
 result += `} as const;
@@ -215,6 +215,16 @@ export const lib: Deno.DynamicLibrary<typeof SYMBOLS> = Deno.dlopen(
 );
 
 const AUDIO_CONTROL_SYMBOLS = {
+  AttachAudioStreamProcessor: {
+    parameters: [FFI_STRUCTS.AudioStream, "function"],
+    result: "void",
+    nonblocking: true,
+  },
+  AttachAudioMixedProcessor: {
+    parameters: ["function"],
+    result: "void",
+    nonblocking: true,
+  },
   SetAudioStreamCallback: {
     parameters: [FFI_STRUCTS.AudioStream, "function"],
     result: "void",

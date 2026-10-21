@@ -1,9 +1,10 @@
 # Deno Raylib examples
 
-These examples are TypeScript ports of the official
-[raylib 6.0 examples](https://github.com/raysan5/raylib/tree/6.0/examples). The
-directory and file names follow the upstream categories so that the C and
-TypeScript versions are easy to compare.
+These examples were ported from the official
+[raylib 6.0 examples](https://github.com/raysan5/raylib/tree/6.0/examples) and
+are maintained against the current raylib 6.2 bindings. The directory and file
+names follow the upstream categories so that the C and TypeScript versions are
+easy to compare.
 
 Run an example from the repository root after generating `Lib/`:
 

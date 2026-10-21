@@ -5,6 +5,7 @@
  */
 /** Keyboard state, queues, repetition, and exit-key control. */
 export {
+  GetCharPressed,
   GetKeyName,
   GetKeyPressed,
   IsKeyDown,

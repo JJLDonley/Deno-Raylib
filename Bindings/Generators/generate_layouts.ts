@@ -31,7 +31,7 @@ if (!web && pointerSizes.size !== 1) {
 }
 const pointerSize = web ? 4 : [...pointerSizes][0]!;
 
-// No raylib 6.0 structure contains C long, so all six supported 64-bit ABIs
+// No raylib 6.2 structure contains C long, so all six supported 64-bit ABIs
 // share one layout. Fail generation if that changes rather than stamping the
 // generator host's ABI into the package.
 const longFields = api.structs.flatMap((struct: any) =>

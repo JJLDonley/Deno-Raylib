@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "6.0",
+    [string]$Version = "6.2",
     [string]$OutDir = "Lib",
     [ValidateSet("x64", "arm64")]
     [string]$Architecture = $(if ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture -eq "Arm64") { "arm64" } else { "x64" })
@@ -8,15 +8,12 @@ param(
 $ErrorActionPreference = "Stop"
 
 $Root  = Get-Location
-$Tmp   = Join-Path $Root "_raylib_tmp"
-$Blobs = Join-Path $Root $OutDir
-
-if (Test-Path $Tmp) {
-    Remove-Item $Tmp -Recurse -Force
-}
+$Tmp   = Join-Path ([System.IO.Path]::GetTempPath()) ("deno-raylib-" + [guid]::NewGuid().ToString("N"))
+$Blobs = if ([System.IO.Path]::IsPathRooted($OutDir)) { $OutDir } else { Join-Path $Root $OutDir }
 
 New-Item -ItemType Directory -Force $Tmp, $Blobs | Out-Null
 
+try {
 $Api = "https://api.github.com/repos/raysan5/raylib/releases/tags/$Version"
 
 Write-Output "Fetching raylib $Version release metadata..."
@@ -63,13 +60,11 @@ if (-not $Dll) {
 
 $Out = Join-Path $Blobs "raylib.dll"
 
-if (Test-Path $Out) {
-    Remove-Item $Out -Force
-}
-
 Copy-Item $Dll.FullName $Out -Force
 
-Remove-Item $Tmp -Recurse -Force
+} finally {
+    Remove-Item -LiteralPath $Tmp -Recurse -Force
+}
 
 Write-Output "Done:"
 Write-Output "  $Out"

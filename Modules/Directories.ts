@@ -14,6 +14,7 @@ export {
   GetDirectoryPath,
   GetPrevDirectoryPath,
   GetWorkingDirectory,
+  IsPathDirectory,
   LoadDirectoryFiles,
   LoadDirectoryFilesEx,
   MakeDirectory,

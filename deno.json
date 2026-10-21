@@ -1,6 +1,6 @@
 {
   "name": "@jjld/raylib",
-  "version": "6.0.8",
+  "version": "6.2.0",
   "license": "MIT",
   "exports": {
     ".": "./Raylib/raylib.ts",
@@ -193,6 +193,7 @@
     "example": "deno run --allow-ffi --allow-read",
     "examples:assets": "deno run --allow-write Examples/Resources/generate_assets.ts",
     "examples:check": "deno check Examples/*/*.ts",
+    "check:headers": "deno run --allow-read Bindings/Generators/check_headers.ts",
     "generate": "deno run --allow-read --allow-write Bindings/Generators/generate_layouts.ts && deno run --allow-read --allow-write Bindings/Generators/generate_layouts.ts --web && deno run --allow-read --allow-write Bindings/Generators/generate_ffi_structs.ts && deno run --allow-read --allow-write Bindings/Generators/generate_structs.ts && deno run --allow-read --allow-write Bindings/Generators/generate_structs.ts --web && deno run --allow-read --allow-write Bindings/Generators/generator.ts && deno run --allow-read --allow-write Bindings/Generators/generate_rlgl.ts && deno run --allow-read --allow-write Bindings/Generators/generate_modules.ts && deno run --allow-read --allow-write Bindings/Generators/generate_webapp.ts && deno run --allow-read --allow-write Bindings/Generators/generate_wasm_bridge.ts && deno run --allow-read --allow-write Bindings/Generators/generate_docs.ts && deno fmt deno.json Bindings Raylib Modules Web Scripts Tools"
   },
   "compilerOptions": {

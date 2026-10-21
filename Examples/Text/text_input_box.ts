@@ -9,9 +9,10 @@ while (!raylib.WindowShouldClose()) {
   const active = raylib.CheckCollisionPointRec(raylib.GetMousePosition(), box);
   if (active) {
     let key = raylib.GetCharPressed();
-    while (key.charCodeAt(0) > 0) {
-      const code = key.charCodeAt(0);
-      if (code >= 32 && code <= 125 && name.length < 31) name += key;
+    while (key > 0) {
+      if (key >= 32 && key <= 125 && name.length < 31) {
+        name += String.fromCodePoint(key);
+      }
       key = raylib.GetCharPressed();
     }
     if (raylib.IsKeyPressed(raylib.KeyboardKey.BACKSPACE)) {

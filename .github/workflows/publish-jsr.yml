@@ -35,6 +35,9 @@ jobs:
       - name: Check examples
         run: deno task examples:check
 
+      - name: Verify bindings match the vendored headers
+        run: deno task check:headers
+
       - name: Create contained desktop and Web starter
         run: deno task init "${{ runner.temp }}/raylib-starter"
 

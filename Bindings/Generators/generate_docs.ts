@@ -24,15 +24,15 @@ for (
 ) {
   descriptions.set(
     item.name,
-    clean(item.description, `${item.name} from the raylib 6.0 API.`),
+    clean(item.description, `${item.name} from the raylib 6.2 API.`),
   );
 }
 
 const moduleDescriptions = new Map<string, string>([
-  ["Raylib/mod.ts", "Complete native raylib 6.0 direct API."],
+  ["Raylib/mod.ts", "Complete native raylib 6.2 direct API."],
   [
     "Raylib/raylib.ts",
-    "Complete native raylib 6.0 API for Deno, including raymath, rcamera, rgestures, and rlgl.",
+    "Complete native raylib 6.2 API for Deno, including raymath, rcamera, rgestures, and rlgl.",
   ],
   [
     "Raylib/raymath.ts",

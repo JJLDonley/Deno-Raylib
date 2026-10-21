@@ -7,6 +7,7 @@
 // deno-lint-ignore-file verbatim-module-syntax no-unused-vars
 
 import { lib as DLL } from "../Bindings/bindings.ts";
+import { retained } from "../Bindings/retained.ts";
 import {
   Matrix,
   rlDrawCall,
@@ -624,7 +625,7 @@ export const RL_CULL_FACE_FRONT = rlCullMode.RL_CULL_FACE_FRONT;
 /** RL_CULL_FACE_BACK exported by Deno Raylib. */
 export const RL_CULL_FACE_BACK = rlCullMode.RL_CULL_FACE_BACK;
 
-/** RL_DEFAULT_BATCH_BUFFER_ELEMENTS from the raylib 6.0 API. */
+/** RL_DEFAULT_BATCH_BUFFER_ELEMENTS from the raylib 6.2 API. */
 export const RL_DEFAULT_BATCH_BUFFER_ELEMENTS = 8192;
 /** Default number of batch buffers (multi-buffering) */
 export const RL_DEFAULT_BATCH_BUFFERS = 1;
@@ -772,25 +773,25 @@ export const RL_BLEND_COLOR = 32773;
 export const RL_READ_FRAMEBUFFER = 36008;
 /** GL_DRAW_FRAMEBUFFER */
 export const RL_DRAW_FRAMEBUFFER = 36009;
-/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION from the raylib 6.0 API. */
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION from the raylib 6.2 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION = 0;
-/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD from the raylib 6.0 API. */
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD from the raylib 6.2 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD = 1;
-/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL from the raylib 6.0 API. */
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL from the raylib 6.2 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL = 2;
-/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR from the raylib 6.0 API. */
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR from the raylib 6.2 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR = 3;
-/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT from the raylib 6.0 API. */
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT from the raylib 6.2 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT = 4;
-/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2 from the raylib 6.0 API. */
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2 from the raylib 6.2 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2 = 5;
-/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_INDICES from the raylib 6.0 API. */
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_INDICES from the raylib 6.2 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_INDICES = 6;
-/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEINDICES from the raylib 6.0 API. */
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEINDICES from the raylib 6.2 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEINDICES = 7;
-/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS from the raylib 6.0 API. */
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS from the raylib 6.2 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS = 8;
-/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_INSTANCETRANSFORM from the raylib 6.0 API. */
+/** RL_DEFAULT_SHADER_ATTRIB_LOCATION_INSTANCETRANSFORM from the raylib 6.2 API. */
 export const RL_DEFAULT_SHADER_ATTRIB_LOCATION_INSTANCETRANSFORM = 9;
 
 /** Choose the current matrix to be transformed */
@@ -838,7 +839,7 @@ export function rlMultMatrixf(matf: Deno.PointerValue): void {
   lib.rlMultMatrixf(matf);
 }
 
-/** rlFrustum from the raylib 6.0 API. */
+/** rlFrustum from the raylib 6.2 API. */
 export function rlFrustum(
   left: number,
   right: number,
@@ -850,7 +851,7 @@ export function rlFrustum(
   lib.rlFrustum(left, right, bottom, top, znear, zfar);
 }
 
-/** rlOrtho from the raylib 6.0 API. */
+/** rlOrtho from the raylib 6.2 API. */
 export function rlOrtho(
   left: number,
   right: number,
@@ -1288,6 +1289,7 @@ export function rlglInit(width: number, height: number): void {
 
 /** De-initialize rlgl (buffers, shaders, textures) */
 export function rlglClose(): void {
+  if (retained.renderBatch) rlSetRenderBatchActive(null);
   lib.rlglClose();
 }
 
@@ -1355,17 +1357,24 @@ export function rlLoadRenderBatch(
 
 /** Unload render batch system */
 export function rlUnloadRenderBatch(batch: rlRenderBatch): void {
+  if (retained.renderBatch?.vertexBufferPtr === batch.vertexBufferPtr) {
+    rlSetRenderBatchActive(null);
+  }
   lib.rlUnloadRenderBatch(batch.buffer);
 }
 
 /** Draw render batch data (Update->Draw->Reset) */
-export function rlDrawRenderBatch(batch: rlRenderBatch | null): void {
+export function rlDrawRenderBatch(batch: rlRenderBatch): void {
+  if (batch == null) {
+    throw new TypeError("rlDrawRenderBatch: batch must not be null");
+  }
   lib.rlDrawRenderBatch(batch?.buffer ?? null);
 }
 
 /** Set the active render batch for rlgl (NULL for default internal) */
 export function rlSetRenderBatchActive(batch: rlRenderBatch | null): void {
   lib.rlSetRenderBatchActive(batch?.buffer ?? null);
+  retained.renderBatch = batch;
 }
 
 /** Update and draw internal render batch */
@@ -1702,9 +1711,12 @@ export function rlSetUniformMatrix(locIndex: number, mat: Matrix): void {
 /** Set shader value matrices */
 export function rlSetUniformMatrices(
   locIndex: number,
-  mat: Matrix | null,
+  mat: Matrix,
   count: number,
 ): void {
+  if (mat == null) {
+    throw new TypeError("rlSetUniformMatrices: mat must not be null");
+  }
   lib.rlSetUniformMatrices(locIndex, mat?.buffer ?? null, count);
 }
 
